@@ -30,7 +30,8 @@ async def index(request: Request):
     })
 
 @app.get("/hello/{name}")
-async def hello(request: Request, name: str):
+async def hello(request: Request):
+    name = request.path_params["name"]
     return Response.text(f"Hello, {name}!")
 
 @app.post("/echo")

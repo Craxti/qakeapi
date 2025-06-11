@@ -1,6 +1,7 @@
 import pytest
 from qakeapi.core.application import ASGIApplication
 from qakeapi.core.router import Router
+from qakeapi.core.responses import Response
 
 @pytest.mark.asyncio
 class TestASGIApplication:
@@ -11,12 +12,8 @@ class TestASGIApplication:
         # Добавляем тестовый маршрут
         @router.route("/")
         async def test_handler(request):
-            return {
-                "status": 200,
-                "headers": [(b"content-type", b"application/json")],
-                "body": b'{"message": "Hello, World!"}'
-            }
-            
+            return Response({"message": "Hello, World!"}, status_code=200)
+        
         app.router = router
         
         # Создаем тестовый scope
@@ -25,6 +22,7 @@ class TestASGIApplication:
             "method": "GET",
             "path": "/",
             "headers": [],
+            "query_string": b"",
         }
         
         # Создаем тестовые receive и send функции

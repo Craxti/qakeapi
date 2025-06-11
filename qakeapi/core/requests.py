@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, Optional, List, Union, Tuple
 from urllib.parse import parse_qs
 import json
 from http.cookies import SimpleCookie
@@ -28,14 +28,15 @@ class Request:
         return self.scope["path"]
         
     @property
-    def query_params(self) -> Dict[str, list]:
+    def query_params(self) -> Dict[str, List[str]]:
         """Query parameters"""
-        return parse_qs(self.scope.get("query_string", b"").decode())
+        query_string = self.scope.get("query_string", b"").decode()
+        return parse_qs(query_string)
         
     @property
-    def headers(self) -> Dict[str, str]:
+    def headers(self) -> Dict[bytes, bytes]:
         """Request headers"""
-        return dict(self.scope.get("headers", []))
+        return {k: v for k, v in self.scope.get("headers", [])}
         
     @property
     def path_params(self) -> Dict[str, str]:
@@ -44,10 +45,11 @@ class Request:
         
     @property
     def cookies(self) -> SimpleCookie:
-        """Cookies of the request"""
+        """Request cookies"""
         if self._cookies is None:
             self._cookies = SimpleCookie()
-            cookie_header = self.headers.get("cookie", "")
+            headers = dict(self.scope.get("headers", []))
+            cookie_header = headers.get(b"cookie", b"").decode()
             if cookie_header:
                 self._cookies.load(cookie_header)
         return self._cookies
@@ -61,23 +63,26 @@ class Request:
                 return None
         return self._json
         
-    async def body(self) -> bytes:
+    @property
+    def body(self) -> bytes:
         """Get raw body"""
         return self._body
         
     @property
     def content_type(self) -> str:
-        """Content-Type of the request"""
-        content_type = self.headers.get("content-type", "")
+        """Content type of the request"""
+        headers = dict(self.scope.get("headers", []))
+        content_type = headers.get(b"content-type", b"").decode()
         return content_type.split(";")[0].strip()
         
     async def form(self) -> Dict[str, Any]:
-        """Get form body"""
+        """Get form data"""
         if self._form is None:
             content_type = self.content_type
             if content_type == "application/x-www-form-urlencoded":
-                self._form = parse_qs(self._body.decode())
-            elif content_type == "multipart/form-data":
+                form_data = parse_qs(self._body.decode())
+                self._form = {k: v[0] if len(v) == 1 else v for k, v in form_data.items()}
+            elif content_type.startswith("multipart/form-data"):
                 self._form, self._files = await self._parse_multipart()
             else:
                 self._form = {}
@@ -86,19 +91,19 @@ class Request:
     async def files(self) -> Dict[str, UploadFile]:
         """Get uploaded files"""
         if self._files is None:
-            if self.content_type == "multipart/form-data":
+            if self.content_type.startswith("multipart/form-data"):
                 self._form, self._files = await self._parse_multipart()
             else:
                 self._files = {}
         return self._files
         
-    async def _parse_multipart(self) -> tuple[Dict[str, Any], Dict[str, UploadFile]]:
+    async def _parse_multipart(self) -> Tuple[Dict[str, Any], Dict[str, UploadFile]]:
         """Parse multipart/form-data"""
         form_data = {}
         files = {}
         
         # Get boundary from Content-Type
-        content_type = self.headers.get("content-type", "")
+        content_type = self.headers.get(b"content-type", b"").decode()
         boundary_match = re.search(r"boundary=([^;]+)", content_type)
         if not boundary_match:
             return form_data, files
@@ -106,13 +111,19 @@ class Request:
         boundary = boundary_match.group(1)
         parts = self._body.split(f"--{boundary}".encode())
         
-        # Skip the first and last parts (empty)
+        # Skip first and last parts (empty)
         for part in parts[1:-1]:
             # Skip initial \r\n
             part = part.strip(b"\r\n")
-            
+            if not part:
+                continue
+                
             # Split headers and content
-            headers_raw, content = part.split(b"\r\n\r\n", 1)
+            try:
+                headers_raw, content = part.split(b"\r\n\r\n", 1)
+            except ValueError:
+                continue
+                
             headers = self._parse_part_headers(headers_raw.decode())
             
             # Get field name
@@ -135,19 +146,13 @@ class Request:
                     content_type=content_type,
                     headers=headers
                 )
-                await upload_file.write(content)
+                await upload_file.write(content.strip(b"\r\n"))
                 files[name] = upload_file
             else:
                 # This is a regular form field
-                value = content.decode().strip()
-                if name in form_data:
-                    if isinstance(form_data[name], list):
-                        form_data[name].append(value)
-                    else:
-                        form_data[name] = [form_data[name], value]
-                else:
-                    form_data[name] = value
-                    
+                value = content.strip(b"\r\n").decode()
+                form_data[name] = value
+                
         return form_data, files
         
     def _parse_part_headers(self, headers_raw: str) -> Dict[str, str]:

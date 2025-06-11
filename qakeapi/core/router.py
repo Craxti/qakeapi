@@ -2,10 +2,11 @@ from typing import Any, Callable, Dict, List, Optional, Pattern, Tuple, Union
 import re
 from dataclasses import dataclass
 from .requests import Request
+from .responses import Response
 
 @dataclass
 class Route:
-    """Маршрут"""
+    """Route class"""
     path: str
     handler: Callable
     methods: List[str]
@@ -13,7 +14,6 @@ class Route:
     
     def __post_init__(self):
         """Компилируем регулярное выражение для пути"""
-        # Заменяем параметры пути на именованные группы
         pattern = self.path
         pattern = re.sub(r'{([^:}]+)(?::([^}]+))?}', lambda m: f'(?P<{m.group(1)}>[^/]+)', pattern)
         self.pattern = re.compile(f'^{pattern}$')
@@ -32,25 +32,24 @@ class Router:
         self.routes: List[Route] = []
         self._middleware: List[Callable] = []
         
-    def add_route(
-        self,
-        path: str,
-        handler: Callable,
-        methods: List[str] = None,
-        name: Optional[str] = None
-    ) -> None:
-        """Добавить маршрут"""
+    def add_route(self, path: str, handler: Callable, methods: List[str] = None) -> None:
+        """Add route to router"""
         if methods is None:
             methods = ["GET"]
-        methods = [method.upper() for method in methods]
-        route = Route(path, handler, methods, name)
-        self.routes.append(route)
-        print(f"Added route: {path} {methods}")  # Debug log
+        methods = [m.upper() for m in methods]
         
-    def route(self, path: str, methods: List[str] = None, name: str = None):
-        """Декоратор для добавления маршрута"""
+        route = Route(
+            path=path,
+            handler=handler,
+            methods=methods
+        )
+        print(f"Added route: {path} {methods}")  # Debug log
+        self.routes.append(route)
+        
+    def route(self, path: str, methods: List[str] = None):
+        """Route decorator"""
         def decorator(handler: Callable) -> Callable:
-            self.add_route(path, handler, methods, name)
+            self.add_route(path, handler, methods)
             return handler
         return decorator
         
@@ -61,12 +60,12 @@ class Router:
     def middleware(self) -> Callable:
         """Декоратор для добавления middleware"""
         def decorator(middleware: Callable) -> Callable:
-            self.add_middleware(middleware)
+            self._middleware.append(middleware)
             return middleware
         return decorator
         
     def find_route(self, path: str, method: str) -> Tuple[Optional[Route], Optional[Dict[str, str]]]:
-        """Найти маршрут для пути и метода"""
+        """Find route for path and method"""
         print(f"Looking for route: {path} {method}")  # Debug log
         print(f"Available routes: {[(r.path, r.methods) for r in self.routes]}")  # Debug log
         
@@ -78,43 +77,41 @@ class Router:
         print(f"No matching route found for {path} {method}")  # Debug log
         return None, None
         
-    async def handle_request(self, raw_request: Dict[str, Any]) -> Dict[str, Any]:
-        """Обработать запрос"""
-        path = raw_request["path"]
-        method = raw_request["method"].upper()
-        
-        # Ищем маршрут
-        route, params = self.find_route(path, method)
-        if route is None:
-            return {
-                "status": 404,
-                "headers": [(b"content-type", b"application/json")],
-                "body": b'{"detail": "Not Found"}'
-            }
-            
-        # Создаем объект Request
-        raw_request["path_params"] = params
-        request = Request(raw_request, raw_request.get("body", b""))
-        
-        # Выполняем цепочку middleware
-        handler = route.handler
-        for middleware in reversed(self._middleware):
-            handler = middleware(handler)
-            
-        # Вызываем обработчик с параметрами пути
+    async def handle_request(self, request: Request) -> Response:
+        """Handle incoming request"""
         try:
-            if params:
-                response = await handler(request, **params)
-            else:
-                response = await handler(request)
+            route, params = self.find_route(request.path, request.method)
+            if route is None:
+                return Response.json({"detail": "Not Found"}, status_code=404)
+                
+            # Extract path parameters
+            request.scope["path_params"] = params or {}
+            
+            # Apply middleware
+            handler = route.handler
+            for middleware in reversed(self._middleware):
+                handler = middleware(handler)
+                
+            # Call handler
+            response = await handler(request)
             return response
+            
         except Exception as e:
-            print(f"Error handling request: {e}")  # Debug log
-            return {
-                "status": 500,
-                "headers": [(b"content-type", b"application/json")],
-                "body": b'{"detail": "Internal Server Error"}'
-            }
+            print(f"Error handling request: {str(e)}")
+            return Response.json({"detail": "Internal Server Error"}, status_code=500)
+            
+    def _extract_path_params(self, pattern: str, path: str) -> dict:
+        """Extract path parameters from URL"""
+        pattern_parts = pattern.split("/")
+        path_parts = path.split("/")
+        
+        params = {}
+        for pattern_part, path_part in zip(pattern_parts, path_parts):
+            if pattern_part.startswith("{") and pattern_part.endswith("}"):
+                param_name = pattern_part[1:-1]
+                params[param_name] = path_part
+                
+        return params
         
     def url_for(self, name: str, **params: Any) -> str:
         """Generate URL for named route"""
@@ -124,4 +121,22 @@ class Router:
                 for key, value in params.items():
                     path = path.replace(f"{{{key}}}", str(value))
                 return path
-        raise ValueError(f"No route found with name '{name}'") 
+        raise ValueError(f"No route found with name '{name}'")
+
+    def _match_route(self, pattern: str, path: str) -> Optional[Dict[str, str]]:
+        """Match route pattern against path and extract parameters"""
+        pattern_parts = pattern.split("/")
+        path_parts = path.split("/")
+        
+        if len(pattern_parts) != len(path_parts):
+            return None
+            
+        params = {}
+        for pattern_part, path_part in zip(pattern_parts, path_parts):
+            if pattern_part.startswith("{") and pattern_part.endswith("}"):
+                param_name = pattern_part[1:-1]
+                params[param_name] = path_part
+            elif pattern_part != path_part:
+                return None
+                
+        return params 

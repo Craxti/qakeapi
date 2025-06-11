@@ -5,7 +5,9 @@ from .background import BackgroundTask, BackgroundTaskManager
 from .dependencies import DependencyContainer
 from .router import Router
 from .openapi import OpenAPIInfo, OpenAPIGenerator, OpenAPIPath, get_swagger_ui_html
+from .requests import Request
 import json
+from .responses import Response
 
 class ASGIApplication:
     """Базовый класс ASGI-приложения"""
@@ -21,6 +23,15 @@ class ASGIApplication:
         self.openapi_generator = OpenAPIGenerator(self.openapi_info)
         self.router = Router()
         
+        # Добавляем специальные маршруты для OpenAPI
+        @self.router.route("/docs")
+        async def docs(request: Request):
+            return Response.html(get_swagger_ui_html("/openapi.json", self.openapi_info.title))
+            
+        @self.router.route("/openapi.json")
+        async def openapi(request: Request):
+            return Response.json(self.openapi_generator.generate())
+        
     async def __call__(
         self,
         scope: Dict[str, Any],
@@ -35,16 +46,31 @@ class ASGIApplication:
         elif scope["type"] == "lifespan":
             await self.handle_lifespan(scope, receive, send)
             
-    async def handle_http(
-        self,
-        scope: Dict[str, Any],
-        receive: Callable[[], Awaitable[Dict[str, Any]]],
-        send: Callable[[Dict[str, Any]], Awaitable[None]]
-    ) -> None:
-        """Обработка HTTP запросов"""
-        request = await self.build_request(scope, receive)
-        response = await self.handle_request(request)
-        await self.send_response(send, response)
+    async def handle_http(self, scope: Dict[str, Any], receive: Callable, send: Callable) -> None:
+        """Handle HTTP request"""
+        # Получаем тело запроса
+        body = b""
+        more_body = True
+        
+        while more_body:
+            message = await receive()
+            body += message.get("body", b"")
+            more_body = message.get("more_body", False)
+            
+        # Создаем объект Request
+        request = Request(scope, body)
+        
+        # Проверяем специальные маршруты для OpenAPI
+        if request.path == "/docs":
+            response = Response.html(get_swagger_ui_html("/openapi.json", self.openapi_info.title))
+        elif request.path == "/openapi.json":
+            response = Response.json(self.openapi_generator.generate())
+        else:
+            # Обрабатываем запрос через роутер
+            response = await self.router.handle_request(request)
+        
+        # Отправляем ответ
+        await response(send)
         
     async def handle_websocket(
         self,
@@ -108,17 +134,9 @@ class ASGIApplication:
 
         # Проверяем специальные маршруты для OpenAPI
         if path == "/docs":
-            return {
-                "status": 200,
-                "headers": [(b"content-type", b"text/html")],
-                "body": get_swagger_ui_html("/openapi.json", self.openapi_info.title).encode()
-            }
+            return Response.html(get_swagger_ui_html("/openapi.json", self.openapi_info.title))
         elif path == "/openapi.json":
-            return {
-                "status": 200,
-                "headers": [(b"content-type", b"application/json")],
-                "body": json.dumps(self.openapi_generator.generate()).encode()
-            }
+            return Response.json(self.openapi_generator.generate())
 
         return await self.router.handle_request(request)
         
@@ -226,50 +244,82 @@ class Application(ASGIApplication):
 
     def get(self, path: str, **kwargs):
         """GET route decorator"""
-        return self.api_route(path, methods=["GET"], **kwargs)
+        def decorator(handler: Callable):
+            self.router.add_route(path, handler, ["GET"])
+            path_info = OpenAPIPath(
+                path=path,
+                method="GET",
+                **kwargs
+            )
+            self.openapi_generator.add_path(path_info)
+            return handler
+        return decorator
 
     def post(self, path: str, **kwargs):
         """POST route decorator"""
-        return self.api_route(path, methods=["POST"], **kwargs)
+        def decorator(handler: Callable):
+            self.router.add_route(path, handler, ["POST"])
+            path_info = OpenAPIPath(
+                path=path,
+                method="POST",
+                **kwargs
+            )
+            self.openapi_generator.add_path(path_info)
+            return handler
+        return decorator
 
     def put(self, path: str, **kwargs):
         """PUT route decorator"""
-        return self.api_route(path, methods=["PUT"], **kwargs)
+        def decorator(handler: Callable):
+            self.router.add_route(path, handler, ["PUT"])
+            path_info = OpenAPIPath(
+                path=path,
+                method="PUT",
+                **kwargs
+            )
+            self.openapi_generator.add_path(path_info)
+            return handler
+        return decorator
 
     def delete(self, path: str, **kwargs):
         """DELETE route decorator"""
-        return self.api_route(path, methods=["DELETE"], **kwargs)
+        def decorator(handler: Callable):
+            self.router.add_route(path, handler, ["DELETE"])
+            path_info = OpenAPIPath(
+                path=path,
+                method="DELETE",
+                **kwargs
+            )
+            self.openapi_generator.add_path(path_info)
+            return handler
+        return decorator
 
     def patch(self, path: str, **kwargs):
         """PATCH route decorator"""
-        return self.api_route(path, methods=["PATCH"], **kwargs)
+        def decorator(handler: Callable):
+            self.router.add_route(path, handler, ["PATCH"])
+            path_info = OpenAPIPath(
+                path=path,
+                method="PATCH",
+                **kwargs
+            )
+            self.openapi_generator.add_path(path_info)
+            return handler
+        return decorator
 
-    def api_route(
-        self,
-        path: str,
-        methods: List[str] = None,
-        summary: str = "",
-        description: str = "",
-        tags: List[str] = None,
-        deprecated: bool = False,
-        request_model: Optional[Any] = None,
-        response_model: Optional[Any] = None
-    ) -> Callable:
-        """Декоратор для добавления маршрута с документацией OpenAPI"""
-        def decorator(handler: Callable) -> Callable:
+    def api_route(self, path: str, methods: List[str] = None, **kwargs):
+        """API route decorator"""
+        if methods is None:
+            methods = ["GET"]
+        methods = [m.upper() for m in methods]
+
+        def decorator(handler: Callable):
             self.router.add_route(path, handler, methods)
-            
-            # Добавляем информацию о маршруте в OpenAPI
-            for method in methods or ["GET"]:
+            for method in methods:
                 path_info = OpenAPIPath(
                     path=path,
                     method=method,
-                    summary=summary,
-                    description=description,
-                    request_model=request_model,
-                    response_model=response_model,
-                    tags=tags,
-                    deprecated=deprecated
+                    **kwargs
                 )
                 self.openapi_generator.add_path(path_info)
             return handler

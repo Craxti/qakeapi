@@ -1,5 +1,7 @@
 from qakeapi.core.application import Application
-from qakeapi.core.dependencies import Dependency, Inject
+from qakeapi.core.dependencies import Dependency, inject
+from qakeapi.core.responses import Response
+from qakeapi.core.requests import Request
 from typing import Dict, Any, List
 from pydantic import BaseModel
 import json
@@ -31,6 +33,7 @@ class ErrorDetail(BaseModel):
 # Зависимость для хранения данных
 class DataStore(Dependency):
     def __init__(self):
+        super().__init__(scope="singleton")
         self.data = {}
         
     async def resolve(self) -> Dict[str, Any]:
@@ -48,83 +51,73 @@ data_store = DataStore()
 
 @app.on_startup
 async def register_dependencies():
-    await app.dependency_container.register(Dict[str, Any], data_store, scope="singleton")
+    app.dependency_container.register(data_store)
 
 # Добавляем middleware для логирования
-@app.route.middleware()
+@app.router.middleware()
 def logging_middleware(handler):
     async def wrapper(request):
-        print(f"Request: {request['method']} {request['path']}")
+        print(f"Request: {request.method} {request.path}")
         response = await handler(request)
-        print(f"Response: {response['status']}")
+        print(f"Response: {response.status_code}")
         return response
     return wrapper
 
 # Добавляем маршруты
-@app.api_route(
+@app.get(
     "/",
     summary="Root endpoint",
     description="Returns a welcome message",
     response_model=Message,
     tags=["general"]
 )
-@Inject(app.dependency_container)
-async def index(request, data: Dict[str, Any]):
-    return {
-        "status": 200,
-        "headers": [(b"content-type", b"application/json")],
-        "body": json.dumps({"message": "Hello, World!"}).encode()
-    }
+@inject(DataStore)
+async def index(request: Request, data_store: DataStore):
+    return Response.json({"message": "Hello, World!"})
 
-@app.api_route(
+@app.get(
     "/items",
-    methods=["GET", "POST"],
-    summary="Manage items",
-    description="Get all items or create a new item",
-    tags=["items"],
-    request_model=Item,
-    response_model=ItemList
+    summary="Get all items",
+    description="Get all items",
+    response_model=ItemList,
+    tags=["items"]
 )
-@Inject(app.dependency_container)
-async def items(request, data: Dict[str, Any]):
-    if request["method"] == "GET":
-        items_list = [{"id": k, **v} for k, v in data.items()]
-        return {
-            "status": 200,
-            "headers": [(b"content-type", b"application/json")],
-            "body": json.dumps({"items": items_list}).encode()
-        }
-    else:  # POST
-        item = json.loads(request["body"].decode())
-        item_id = str(len(data) + 1)
-        data[item_id] = item
-        return {
-            "status": 201,
-            "headers": [(b"content-type", b"application/json")],
-            "body": json.dumps({"id": item_id, **item}).encode()
-        }
+@inject(DataStore)
+async def get_items(request: Request, data_store: DataStore):
+    data = await data_store.resolve()
+    items_list = [{"id": k, **v} for k, v in data.items()]
+    return Response.json({"items": items_list})
 
-@app.api_route(
+@app.post(
+    "/items",
+    summary="Create new item",
+    description="Create a new item",
+    request_model=Item,
+    response_model=ItemResponse,
+    tags=["items"]
+)
+@inject(DataStore)
+async def create_item(request: Request, data_store: DataStore):
+    data = await data_store.resolve()
+    item = await request.json()
+    item_id = str(len(data) + 1)
+    data[item_id] = item
+    return Response.json({"id": item_id, **item}, status_code=201)
+
+@app.get(
     "/items/{item_id}",
     summary="Get item by ID",
     description="Get a specific item by its ID",
-    tags=["items"],
-    response_model=ItemResponse
+    response_model=ItemResponse,
+    tags=["items"]
 )
-@Inject(app.dependency_container)
-async def get_item(request, data: Dict[str, Any]):
-    item_id = request["path_params"]["item_id"]
+@inject(DataStore)
+async def get_item(request: Request, data_store: DataStore):
+    data = await data_store.resolve()
+    item_id = request.path_params["item_id"]
     if item_id not in data:
-        return {
-            "status": 404,
-            "headers": [(b"content-type", b"application/json")],
-            "body": json.dumps({"detail": "Item not found"}).encode()
-        }
-    return {
-        "status": 200,
-        "headers": [(b"content-type", b"application/json")],
-        "body": json.dumps({"id": item_id, **data[item_id]}).encode()
-    }
+        return Response.json({"detail": "Item not found"}, status_code=404)
+    return Response.json({"id": item_id, **data[item_id]})
 
 # Добавляем фоновую задачу
 async def cleanup_task():

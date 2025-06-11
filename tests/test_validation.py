@@ -1,83 +1,47 @@
 import pytest
-from typing import Any, Dict
-from qakeapi.validation.interfaces import (
+from pydantic import BaseModel, Field
+from qakeapi.core.responses import Response
+from qakeapi.core.validation import (
     DataValidator,
-    RequestValidator,
-    ResponseValidator,
+    PydanticValidator,
     ValidationFactory
 )
 
-class SimpleValidator(DataValidator):
-    """Простой валидатор для тестирования"""
-    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        if not isinstance(data, dict):
-            raise ValueError("Data must be a dictionary")
-        return data
-
 class TestDataValidator:
     def test_simple_validator(self):
-        validator = SimpleValidator()
-        data = {"key": "value"}
-        assert validator.validate(data) == data
+        validator = DataValidator()
+        data = {"name": "John", "age": 30}
+        result = validator.validate(data)
+        assert result == data
         
     def test_invalid_data(self):
-        validator = SimpleValidator()
+        validator = DataValidator()
         with pytest.raises(ValueError):
-            validator.validate("not a dict")
+            validator.validate(None)
 
-@pytest.mark.asyncio
+class UserModel(BaseModel):
+    name: str = Field(..., min_length=3)
+    age: int = Field(..., ge=0, le=120)
+
 class TestPydanticValidator:
-    async def test_pydantic_validator_creation(self):
-        try:
-            from pydantic import BaseModel
-            
-            class TestModel(BaseModel):
-                name: str
-                age: int
-                
-            validator = ValidationFactory.create_validator(
-                "pydantic",
-                model_class=TestModel
-            )
-            
-            data = {"name": "Test", "age": 25}
-            validated = validator.validate(data)
-            assert validated.name == "Test"
-            assert validated.age == 25
-            
-        except ImportError:
-            pytest.skip("Pydantic not installed")
-            
-    async def test_invalid_pydantic_data(self):
-        try:
-            from pydantic import BaseModel
-            
-            class TestModel(BaseModel):
-                name: str
-                age: int
-                
-            validator = ValidationFactory.create_validator(
-                "pydantic",
-                model_class=TestModel
-            )
-            
-            with pytest.raises(Exception):
-                validator.validate({"name": "Test", "age": "not an int"})
-                
-        except ImportError:
-            pytest.skip("Pydantic not installed")
+    def test_pydantic_validator_creation(self):
+        validator = PydanticValidator(UserModel)
+        data = {"name": "John", "age": 30}
+        result = validator.validate(data)
+        assert isinstance(result, UserModel)
+        assert result.name == "John"
+        assert result.age == 30
+        
+    def test_invalid_pydantic_data(self):
+        validator = PydanticValidator(UserModel)
+        with pytest.raises(ValueError):
+            validator.validate({"name": "Jo", "age": -1})
 
 class TestValidationFactory:
     def test_unknown_validator_type(self):
         with pytest.raises(ValueError):
-            ValidationFactory.create_validator("unknown")
+            ValidationFactory.create("unknown", UserModel)
             
     def test_invalid_pydantic_model(self):
-        class NotAPydanticModel:
-            pass
-            
-        with pytest.raises(ValueError):
-            ValidationFactory.create_validator(
-                "pydantic",
-                model_class=NotAPydanticModel
-            ) 
+        with pytest.raises(TypeError):
+            ValidationFactory.create("pydantic", dict) 

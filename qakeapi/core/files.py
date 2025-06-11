@@ -1,95 +1,87 @@
-from typing import BinaryIO, Optional
+from typing import BinaryIO, Optional, Dict, AsyncIterator
 import os
 import tempfile
 import shutil
 from pathlib import Path
 
 class UploadFile:
-    """Класс для работы с загруженными файлами"""
+    """Uploaded file handler"""
     
     def __init__(
         self,
         filename: str,
-        file: BinaryIO = None,
-        content_type: str = "",
-        headers: Optional[dict] = None
+        content_type: str = "application/octet-stream",
+        headers: Optional[Dict[str, str]] = None
     ):
         self.filename = filename
         self.content_type = content_type
         self.headers = headers or {}
-        self._file = file if file else tempfile.SpooledTemporaryFile(max_size=1024 * 1024)
-        self._chunk_size = 8192  # 8KB chunks for iteration
+        self._file: Optional[BinaryIO] = None
+        self._temp_file = tempfile.NamedTemporaryFile(delete=False)
         
     async def write(self, data: bytes) -> None:
-        """Записать данные в файл"""
-        self._file.write(data)
-        self._file.flush()  # Ensure data is written
+        """Write data to file"""
+        self._temp_file.write(data)
+        self._temp_file.flush()
         
     async def read(self, size: int = -1) -> bytes:
-        """Прочитать данные из файла"""
-        # Сохраняем текущую позицию
-        current_pos = self._file.tell()
-        
-        # Перемещаемся в начало файла
-        self._file.seek(0)
-        
-        try:
-            # Читаем данные
-            data = self._file.read(size)
-            return data
-        finally:
-            # Восстанавливаем позицию
-            self._file.seek(current_pos)
+        """Read data from file"""
+        if self._file is None:
+            self._temp_file.seek(0)
+            self._file = self._temp_file
+        return self._file.read(size)
         
     async def seek(self, offset: int) -> None:
-        """Переместить указатель в файле"""
+        """Seek to position in file"""
+        if self._file is None:
+            self._temp_file.seek(0)
+            self._file = self._temp_file
         self._file.seek(offset)
         
     async def close(self) -> None:
-        """Закрыть файл"""
-        self._file.close()
-        
-    async def save(self, path: str) -> None:
-        """Сохранить файл на диск"""
-        path = Path(path)
-        
-        # Создаем директорию, если она не существует
-        if not path.parent.exists():
-            path.parent.mkdir(parents=True)
-            
-        # Сохраняем текущую позицию
-        current_pos = self._file.tell()
-        
-        # Копируем файл
-        self._file.seek(0)
-        with open(path, "wb") as f:
-            shutil.copyfileobj(self._file, f)
-            
-        # Восстанавливаем позицию
-        self._file.seek(current_pos)
-            
-    async def __aiter__(self):
-        """Итератор для чтения файла по частям"""
-        # Сохраняем текущую позицию
-        current_pos = self._file.tell()
-        
-        # Перемещаемся в начало файла
-        self._file.seek(0)
-        
+        """Close and cleanup file"""
+        if self._file is not None:
+            self._file.close()
+        self._temp_file.close()
         try:
+            os.unlink(self._temp_file.name)
+        except OSError:
+            pass
+            
+    async def __aiter__(self) -> AsyncIterator[bytes]:
+        """Iterate over file contents"""
+        chunk_size = 8192  # 8KB chunks
+        await self.seek(0)
+        while True:
+            chunk = await self.read(chunk_size)
+            if not chunk:
+                break
+            yield chunk
+            
+    async def save(self, path: str) -> None:
+        """Save file to disk"""
+        await self.seek(0)
+        with open(path, "wb") as f:
             while True:
-                chunk = self._file.read(self._chunk_size)
+                chunk = await self.read(8192)
                 if not chunk:
                     break
-                yield chunk
-        finally:
-            # Восстанавливаем позицию
-            self._file.seek(current_pos)
-        
-    async def __aenter__(self) -> "UploadFile":
-        """Контекстный менеджер для работы с файлом"""
+                f.write(chunk)
+                
+    async def __aenter__(self):
+        """Async context manager enter"""
         return self
         
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        """Закрыть файл при выходе из контекстного менеджера"""
-        await self.close() 
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit"""
+        await self.close()
+        
+    def __enter__(self):
+        return self
+        
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._temp_file.close()
+        try:
+            os.unlink(self._temp_file.name)
+        except OSError:
+            pass 

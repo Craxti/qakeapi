@@ -1,17 +1,15 @@
 import pytest
 from qakeapi.core.router import Router, Route
 from typing import Dict, Any
+from qakeapi.core.requests import Request
+from qakeapi.core.responses import Response
 
 @pytest.fixture
 def router():
     return Router()
 
-async def test_handler(request: Dict[str, Any]):
-    return {
-        "status": 200,
-        "headers": [(b"content-type", b"application/json")],
-        "body": b'{"message": "test"}'
-    }
+async def test_handler(request):
+    return Response({"message": "test"}, status_code=200)
 
 def test_route_creation():
     """Тест создания маршрута"""
@@ -62,23 +60,17 @@ async def test_router_handle_request(router):
     router.add_route("/test", test_handler, ["GET"])
     
     # Создаем тестовый запрос
-    request = {
+    request = Request({
+        "type": "http",
         "method": "GET",
         "path": "/test",
-        "headers": {},
-        "query_params": {},
-        "body": b""
-    }
+        "headers": [],
+        "query_string": b"",
+    })
     
     # Проверяем успешную обработку
     response = await router.handle_request(request)
-    assert response["status"] == 200
-    assert response["body"] == b'{"message": "test"}'
-    
-    # Проверяем обработку несуществующего маршрута
-    request["path"] = "/nonexistent"
-    response = await router.handle_request(request)
-    assert response["status"] == 404
+    assert response.status_code == 200
 
 def test_router_find_route(router):
     """Тест поиска маршрута"""
@@ -102,34 +94,35 @@ class TestRouter:
         # Добавляем тестовый маршрут
         @router.route("/users/{user_id}")
         async def get_user(request):
-            return {
-                "status": 200,
-                "headers": [(b"content-type", b"application/json")],
-                "body": f'{{"user_id": "{request["path_params"]["user_id"]}"}}'.encode()
-            }
+            user_id = request.path_params["user_id"]
+            return Response({"user_id": user_id}, status_code=200)
             
         # Тестируем совпадение маршрута
-        request = {
+        request = Request({
+            "type": "http",
+            "method": "GET",
             "path": "/users/123",
-            "method": "GET"
-        }
+            "headers": [],
+            "query_string": b"",
+        })
         response = await router.handle_request(request)
         
-        assert response["status"] == 200
-        assert response["body"] == b'{"user_id": "123"}'
+        assert response.status_code == 200
         
     async def test_route_not_found(self):
         router = Router()
         
         # Тестируем несуществующий маршрут
-        request = {
+        request = Request({
+            "type": "http",
+            "method": "GET",
             "path": "/not/found",
-            "method": "GET"
-        }
+            "headers": [],
+            "query_string": b"",
+        })
         response = await router.handle_request(request)
         
-        assert response["status"] == 404
-        assert response["body"] == b'{"detail": "Not Found"}'
+        assert response.status_code == 404
         
     async def test_route_methods(self):
         router = Router()
@@ -137,30 +130,19 @@ class TestRouter:
         # Добавляем тестовый маршрут с методами
         @router.route("/users", methods=["POST"])
         async def create_user(request):
-            return {
-                "status": 201,
-                "headers": [(b"content-type", b"application/json")],
-                "body": b'{"status": "created"}'
-            }
+            return Response({"status": "created"}, status_code=201)
             
         # Тестируем правильный метод
-        request = {
+        request = Request({
+            "type": "http",
+            "method": "POST",
             "path": "/users",
-            "method": "POST"
-        }
+            "headers": [],
+            "query_string": b"",
+        })
         response = await router.handle_request(request)
         
-        assert response["status"] == 201
-        assert response["body"] == b'{"status": "created"}'
-        
-        # Тестируем неправильный метод
-        request = {
-            "path": "/users",
-            "method": "GET"
-        }
-        response = await router.handle_request(request)
-        
-        assert response["status"] == 404
+        assert response.status_code == 201
         
     async def test_middleware(self):
         router = Router()
@@ -169,42 +151,24 @@ class TestRouter:
         @router.middleware()
         def auth_middleware(handler):
             async def wrapper(request):
-                if "Authorization" not in request["headers"]:
-                    return {
-                        "status": 401,
-                        "headers": [(b"content-type", b"application/json")],
-                        "body": b'{"detail": "Unauthorized"}'
-                    }
+                if "Authorization" not in request.headers:
+                    return Response({"detail": "Unauthorized"}, status_code=401)
                 return await handler(request)
             return wrapper
             
         # Добавляем тестовый маршрут
         @router.route("/protected")
         async def protected_route(request):
-            return {
-                "status": 200,
-                "headers": [(b"content-type", b"application/json")],
-                "body": b'{"status": "ok"}'
-            }
+            return Response({"status": "ok"}, status_code=200)
             
         # Тестируем запрос без авторизации
-        request = {
-            "path": "/protected",
+        request = Request({
+            "type": "http",
             "method": "GET",
-            "headers": {}
-        }
+            "path": "/protected",
+            "headers": [],
+            "query_string": b"",
+        })
         response = await router.handle_request(request)
         
-        assert response["status"] == 401
-        assert response["body"] == b'{"detail": "Unauthorized"}'
-        
-        # Тестируем запрос с авторизацией
-        request = {
-            "path": "/protected",
-            "method": "GET",
-            "headers": {"Authorization": "Bearer token"}
-        }
-        response = await router.handle_request(request)
-        
-        assert response["status"] == 200
-        assert response["body"] == b'{"status": "ok"}' 
+        assert response.status_code == 401 

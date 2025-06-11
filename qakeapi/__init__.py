@@ -1,58 +1,26 @@
 """
-QakeAPI - A modern ASGI web framework
+QakeAPI - A lightweight ASGI web framework for building fast web APIs with Python
 """
 
 __version__ = "0.1.0"
 
+# Core components
 from .core.application import Application
-from .core.responses import (
-    Response,
-    JSONResponse,
-    HTMLResponse,
-    PlainTextResponse,
-    RedirectResponse
-)
+from .core.responses import Response
 from .core.requests import Request
-from .core.websockets import WebSocket, WebSocketState
-from .core.middleware import (
-    Middleware,
-    CORSMiddleware,
-    RequestLoggingMiddleware,
-    ErrorHandlingMiddleware,
-    AuthenticationMiddleware,
-    RateLimitMiddleware
-)
-from .validation.models import (
-    RequestModel,
-    ResponseModel,
-    validate_request_body,
-    validate_response_model,
-    validate_path_params,
-    validate_query_params,
-    create_model_validator
-)
+from .core.router import Router
+from .core.dependencies import Dependency, inject
+from .core.background import BackgroundTask
+from .core.files import UploadFile
 
+# Make commonly used classes available at package level
 __all__ = [
     "Application",
     "Response",
-    "JSONResponse",
-    "HTMLResponse",
-    "PlainTextResponse",
-    "RedirectResponse",
     "Request",
-    "WebSocket",
-    "WebSocketState",
-    "Middleware",
-    "CORSMiddleware",
-    "RequestLoggingMiddleware",
-    "ErrorHandlingMiddleware",
-    "AuthenticationMiddleware",
-    "RateLimitMiddleware",
-    "RequestModel",
-    "ResponseModel",
-    "validate_request_body",
-    "validate_response_model",
-    "validate_path_params",
-    "validate_query_params",
-    "create_model_validator"
+    "Router",
+    "Dependency",
+    "inject",
+    "BackgroundTask",
+    "UploadFile"
 ] 
