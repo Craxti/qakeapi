@@ -1,17 +1,57 @@
 import asyncio
 import uvicorn
 from qakeapi.core.application import Application
-from qakeapi.core.responses import JSONResponse
+from qakeapi.core.responses import Response
+from qakeapi.core.requests import Request
+from qakeapi.core.dependencies import Dependency
+from pydantic import BaseModel
 
-app = Application()
+# Создаем модели для документации
+class TaskRequest(BaseModel):
+    sleep_time: float = 5.0
+
+class TaskResponse(BaseModel):
+    task_id: str
+    message: str
+
+class TaskStatus(BaseModel):
+    status: str
+    error: str = None
+
+# Создаем приложение
+app = Application(
+    title="Background Tasks Example",
+    version="1.0.0",
+    description="An example of background tasks in QakeAPI"
+)
+
+# Создаем зависимость для хранения задач
+class TaskStore(Dependency):
+    def __init__(self):
+        super().__init__(scope="singleton")
+        self.tasks = {}
+        
+    async def resolve(self):
+        return self.tasks
+
+task_store = TaskStore()
+
+@app.on_startup
+async def register_dependencies():
+    app.dependency_container.register(task_store)
 
 async def long_running_task(sleep_time: float) -> None:
     """Пример длительной задачи"""
     await asyncio.sleep(sleep_time)
     print(f"Задача выполнена после {sleep_time} секунд")
 
-@app.route("/tasks", methods=["POST"])
-async def create_task(request):
+@app.post("/tasks",
+    summary="Create a new task",
+    description="Creates a new background task that sleeps for the specified time",
+    request_model=TaskRequest,
+    response_model=TaskResponse
+)
+async def create_task(request: Request):
     """Создание новой фоновой задачи"""
     try:
         data = await request.json()
@@ -23,35 +63,44 @@ async def create_task(request):
             task_id=f"task_{sleep_time}"
         )
         
-        return JSONResponse({
+        return Response.json({
             "task_id": task_id,
             "message": "Task created successfully"
         })
     except Exception as e:
-        return JSONResponse(
+        return Response.json(
             {"error": str(e)},
             status_code=400
         )
 
-@app.route("/tasks/{task_id}", methods=["GET"])
-async def get_task_status(request):
+@app.get("/tasks/{task_id}",
+    summary="Get task status",
+    description="Returns the status of a background task",
+    response_model=TaskStatus
+)
+async def get_task_status(request: Request):
     """Получение статуса задачи"""
     task_id = request.path_params["task_id"]
     status = app.get_task_status(task_id)
-    return JSONResponse(status)
+    return Response.json(status)
 
-@app.route("/tasks/{task_id}", methods=["DELETE"])
-async def cancel_task(request):
+@app.delete("/tasks/{task_id}",
+    summary="Cancel task",
+    description="Cancels a running background task",
+    response_model=TaskResponse
+)
+async def cancel_task(request: Request):
     """Отмена задачи"""
     task_id = request.path_params["task_id"]
     cancelled = await app.cancel_background_task(task_id)
     
     if cancelled:
-        return JSONResponse({
+        return Response.json({
+            "task_id": task_id,
             "message": "Task cancelled successfully"
         })
-    return JSONResponse(
-        {"message": "Task not found or already completed"},
+    return Response.json(
+        {"task_id": task_id, "message": "Task not found or already completed"},
         status_code=404
     )
 
@@ -60,15 +109,19 @@ async def failing_task() -> None:
     await asyncio.sleep(1)
     raise ValueError("Произошла ошибка в задаче")
 
-@app.route("/failing-task", methods=["POST"])
-async def create_failing_task(request):
+@app.post("/failing-task",
+    summary="Create a failing task",
+    description="Creates a task that will fail after 1 second",
+    response_model=TaskResponse
+)
+async def create_failing_task(request: Request):
     """Создание задачи, которая завершится с ошибкой"""
     task_id = await app.add_background_task(
         failing_task,
         retry_count=2  # Попробуем выполнить задачу 3 раза
     )
     
-    return JSONResponse({
+    return Response.json({
         "task_id": task_id,
         "message": "Failing task created"
     })
@@ -78,15 +131,19 @@ async def timeout_task() -> None:
     await asyncio.sleep(10)
     print("Эта строка не должна быть напечатана")
 
-@app.route("/timeout-task", methods=["POST"])
-async def create_timeout_task(request):
+@app.post("/timeout-task",
+    summary="Create a timeout task",
+    description="Creates a task that will timeout after 2 seconds",
+    response_model=TaskResponse
+)
+async def create_timeout_task(request: Request):
     """Создание задачи с таймаутом"""
     task_id = await app.add_background_task(
         timeout_task,
         timeout=2.0  # Задача будет отменена через 2 секунды
     )
     
-    return JSONResponse({
+    return Response.json({
         "task_id": task_id,
         "message": "Timeout task created"
     })

@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Type
 from pydantic import BaseModel, create_model
 import json
+import re
 
 class OpenAPIInfo:
     def __init__(
@@ -48,8 +49,12 @@ class OpenAPIGenerator:
         return model.model_json_schema()
         
     def _path_to_openapi(self, path: str) -> str:
-        """Convert path parameters from {param} to {param}"""
+        """Convert path parameters from {param} to OpenAPI format"""
         return path
+        
+    def _extract_path_params(self, path: str) -> List[str]:
+        """Extract path parameters from the path"""
+        return re.findall(r"{([^}]+)}", path)
         
     def generate(self) -> Dict[str, Any]:
         openapi = {
@@ -67,6 +72,9 @@ class OpenAPIGenerator:
             openapi_path = self._path_to_openapi(path)
             openapi["paths"][openapi_path] = {}
             
+            # Извлекаем параметры пути
+            path_params = self._extract_path_params(path)
+            
             for method, path_info in methods.items():
                 method_info = {
                     "summary": path_info.summary,
@@ -82,6 +90,18 @@ class OpenAPIGenerator:
                         }
                     }
                 }
+                
+                # Добавляем параметры пути
+                if path_params:
+                    method_info["parameters"] = [
+                        {
+                            "name": param,
+                            "in": "path",
+                            "required": True,
+                            "schema": {"type": "string"}
+                        }
+                        for param in path_params
+                    ]
                 
                 # Добавляем схему запроса
                 if path_info.request_model:

@@ -2,6 +2,7 @@ from qakeapi.core.application import Application
 from qakeapi.core.dependencies import Dependency, inject
 from qakeapi.core.responses import Response
 from qakeapi.core.requests import Request
+from qakeapi.core.validation import RequestValidator, ResponseValidator
 from typing import Dict, Any, List
 from pydantic import BaseModel
 import json
@@ -73,7 +74,8 @@ def logging_middleware(handler):
 )
 @inject(DataStore)
 async def index(request: Request, data_store: DataStore):
-    return Response.json({"message": "Hello, World!"})
+    message = Message(message="Hello, World!")
+    return ResponseValidator.validate_response(message.dict(), Message)
 
 @app.get(
     "/items",
@@ -86,7 +88,8 @@ async def index(request: Request, data_store: DataStore):
 async def get_items(request: Request, data_store: DataStore):
     data = await data_store.resolve()
     items_list = [{"id": k, **v} for k, v in data.items()]
-    return Response.json({"items": items_list})
+    response_data = {"items": items_list}
+    return ResponseValidator.validate_response(response_data, ItemList)
 
 @app.post(
     "/items",
@@ -99,10 +102,21 @@ async def get_items(request: Request, data_store: DataStore):
 @inject(DataStore)
 async def create_item(request: Request, data_store: DataStore):
     data = await data_store.resolve()
-    item = await request.json()
+    request_data = await request.json()
+    
+    # Валидируем данные запроса
+    validated_item = await RequestValidator.validate_request_body(request_data, Item)
+    if validated_item is None:
+        return Response.json({"detail": "Invalid request data"}, status_code=400)
+    
+    # Создаем новый элемент
     item_id = str(len(data) + 1)
-    data[item_id] = item
-    return Response.json({"id": item_id, **item}, status_code=201)
+    item_data = validated_item.dict()
+    data[item_id] = item_data
+    
+    # Валидируем ответ
+    response_data = {"id": item_id, **item_data}
+    return ResponseValidator.validate_response(response_data, ItemResponse)
 
 @app.get(
     "/items/{item_id}",
@@ -115,9 +129,12 @@ async def create_item(request: Request, data_store: DataStore):
 async def get_item(request: Request, data_store: DataStore):
     data = await data_store.resolve()
     item_id = request.path_params["item_id"]
+    
     if item_id not in data:
         return Response.json({"detail": "Item not found"}, status_code=404)
-    return Response.json({"id": item_id, **data[item_id]})
+    
+    response_data = {"id": item_id, **data[item_id]}
+    return ResponseValidator.validate_response(response_data, ItemResponse)
 
 # Добавляем фоновую задачу
 async def cleanup_task():

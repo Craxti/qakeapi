@@ -6,6 +6,7 @@ from .dependencies import DependencyContainer
 from .router import Router
 from .openapi import OpenAPIInfo, OpenAPIGenerator, OpenAPIPath, get_swagger_ui_html
 from .requests import Request
+from .websockets import WebSocket
 import json
 from .responses import Response
 
@@ -79,8 +80,24 @@ class ASGIApplication:
         send: Callable[[Dict[str, Any]], Awaitable[None]]
     ) -> None:
         """Обработка WebSocket соединений"""
-        # Пока просто закрываем соединение
-        await send({"type": "websocket.close"})
+        websocket = WebSocket(scope, receive, send)
+        path = scope["path"]
+        
+        # Ищем обработчик для WebSocket
+        handler = None
+        for route_path, handlers in self.routes.items():
+            if "websocket" in handlers and route_path == path:
+                handler = handlers["websocket"]
+                break
+        
+        if handler:
+            try:
+                await handler(websocket)
+            except Exception as e:
+                if websocket.state == WebSocket.State.CONNECTED:
+                    await websocket.close(1011)  # Internal error
+        else:
+            await send({"type": "websocket.close", "code": 403})
         
     async def handle_lifespan(
         self,

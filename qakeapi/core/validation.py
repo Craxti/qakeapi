@@ -1,7 +1,8 @@
 from typing import Any, Dict, Type, TypeVar, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
+from .responses import Response
 
-T = TypeVar("T")
+T = TypeVar("T", bound=BaseModel)
 
 class DataValidator:
     """Base validator class"""
@@ -45,4 +46,51 @@ class ValidationFactory:
                 raise ValueError("model_class is required for pydantic validator")
             return validator_class(model_class)
             
-        return validator_class() 
+        return validator_class()
+
+class RequestValidator:
+    """Валидатор запросов с использованием Pydantic"""
+    
+    @staticmethod
+    async def validate_request_body(request_body: Dict[str, Any], model: Type[T]) -> Optional[T]:
+        """Валидация тела запроса"""
+        try:
+            return model(**request_body)
+        except ValidationError as e:
+            return None
+            
+    @staticmethod
+    def validate_path_params(path_params: Dict[str, str], model: Type[T]) -> Optional[T]:
+        """Валидация параметров пути"""
+        try:
+            return model(**path_params)
+        except ValidationError:
+            return None
+            
+    @staticmethod
+    def validate_query_params(query_params: Dict[str, Any], model: Type[T]) -> Optional[T]:
+        """Валидация параметров запроса"""
+        try:
+            # Преобразуем списки с одним элементом в скалярные значения
+            cleaned_params = {
+                k: v[0] if isinstance(v, list) and len(v) == 1 else v
+                for k, v in query_params.items()
+            }
+            return model(**cleaned_params)
+        except ValidationError:
+            return None
+
+class ResponseValidator:
+    """Валидатор ответов с использованием Pydantic"""
+    
+    @staticmethod
+    def validate_response(response_data: Dict[str, Any], model: Type[T]) -> Optional[Response]:
+        """Валидация данных ответа"""
+        try:
+            validated_data = model(**response_data)
+            return Response.json(validated_data.dict())
+        except ValidationError as e:
+            return Response.json(
+                {"detail": "Response validation failed", "errors": e.errors()},
+                status_code=500
+            ) 

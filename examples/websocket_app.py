@@ -4,16 +4,46 @@ from typing import Dict, Set
 import uvicorn
 from qakeapi.core.application import Application
 from qakeapi.core.websockets import WebSocket, WebSocketState
+from qakeapi.core.dependencies import Dependency
+from pydantic import BaseModel
 
-app = Application()
+# Создаем модели для документации
+class MessageRequest(BaseModel):
+    message: str
+    type: str = "message"
 
-# Store connected clients
-connected_clients: Set[WebSocket] = set()
-# Store chat rooms and their members
-chat_rooms: Dict[str, Set[WebSocket]] = {}
+class MessageResponse(BaseModel):
+    message: str
+    type: str
+    sender: str = None
+
+# Создаем приложение
+app = Application(
+    title="WebSocket Example",
+    version="1.0.0",
+    description="An example of WebSocket usage in QakeAPI"
+)
+
+# Создаем зависимость для хранения подключений
+class ConnectionStore(Dependency):
+    def __init__(self):
+        super().__init__(scope="singleton")
+        self.connected_clients: Set[WebSocket] = set()
+        self.chat_rooms: Dict[str, Set[WebSocket]] = {}
+        
+    async def resolve(self):
+        return self
+
+connection_store = ConnectionStore()
+
+@app.on_startup
+async def register_dependencies():
+    app.dependency_container.register(connection_store)
 
 @app.websocket("/ws/chat/{room_id}")
 async def chat_websocket(websocket: WebSocket):
+    """WebSocket endpoint for chat functionality"""
+    store = await connection_store.resolve()
     try:
         # Accept the connection
         await websocket.accept()
@@ -22,12 +52,12 @@ async def chat_websocket(websocket: WebSocket):
         room_id = websocket.scope["path_params"]["room_id"]
         
         # Create room if it doesn't exist
-        if room_id not in chat_rooms:
-            chat_rooms[room_id] = set()
+        if room_id not in store.chat_rooms:
+            store.chat_rooms[room_id] = set()
             
         # Add client to room
-        chat_rooms[room_id].add(websocket)
-        connected_clients.add(websocket)
+        store.chat_rooms[room_id].add(websocket)
+        store.connected_clients.add(websocket)
         
         # Send welcome message
         await websocket.send_json({
@@ -63,18 +93,19 @@ async def chat_websocket(websocket: WebSocket):
             })
             
     finally:
+        store = await connection_store.resolve()
         # Remove client from room and connected clients
-        if room_id in chat_rooms:
-            chat_rooms[room_id].discard(websocket)
-            if not chat_rooms[room_id]:
-                del chat_rooms[room_id]
-        connected_clients.discard(websocket)
+        if room_id in store.chat_rooms:
+            store.chat_rooms[room_id].discard(websocket)
+            if not store.chat_rooms[room_id]:
+                del store.chat_rooms[room_id]
+        store.connected_clients.discard(websocket)
         
         if websocket.state == WebSocketState.CONNECTED:
             await websocket.close()
             
         # Broadcast leave message
-        if room_id in chat_rooms:
+        if room_id in store.chat_rooms:
             await broadcast_to_room(room_id, {
                 "type": "system",
                 "message": "A user has left the chat"
@@ -86,8 +117,9 @@ async def broadcast_to_room(
     exclude: WebSocket = None
 ) -> None:
     """Broadcast message to all clients in a room"""
-    if room_id in chat_rooms:
-        for client in chat_rooms[room_id]:
+    store = await connection_store.resolve()
+    if room_id in store.chat_rooms:
+        for client in store.chat_rooms[room_id]:
             if client != exclude and client.state == WebSocketState.CONNECTED:
                 try:
                     await client.send_json(message)
@@ -97,16 +129,17 @@ async def broadcast_to_room(
 @app.websocket("/ws/echo")
 async def echo_websocket(websocket: WebSocket):
     """Simple echo WebSocket endpoint"""
-    await websocket.accept()
-    
     try:
+        await websocket.accept()
+        
         async for message in websocket:
             await websocket.send_text(f"Echo: {message}")
     except Exception as e:
-        await websocket.send_json({
-            "type": "error",
-            "message": str(e)
-        })
+        if websocket.state == WebSocketState.CONNECTED:
+            await websocket.send_json({
+                "type": "error",
+                "message": str(e)
+            })
     finally:
         if websocket.state == WebSocketState.CONNECTED:
             await websocket.close()
