@@ -11,8 +11,8 @@ import base64
 @pytest.fixture
 def auth_backend():
     backend = BasicAuthBackend()
-    backend.add_user("testuser", "password123", ["user"])
-    backend.add_user("admin", "admin123", ["admin", "user"])
+    backend.add_user("test_user", "test_pass", ["user"])
+    backend.add_user("admin", "admin_pass", ["admin", "user"])
     return backend
 
 @pytest.fixture
@@ -30,64 +30,72 @@ def mock_request():
     return create_request
 
 @pytest.mark.asyncio
-async def test_basic_auth_success(auth_backend, mock_request):
-    auth_header = f"Basic {base64.b64encode(b'testuser:password123').decode()}"
-    request = await mock_request(auth_header)
-    
-    user = await auth_backend.authenticate(request)
+async def test_basic_auth_success(auth_backend):
+    credentials = {"username": "test_user", "password": "test_pass"}
+    user = await auth_backend.authenticate(credentials)
     assert user is not None
-    assert user.username == "testuser"
-    assert "user" in user.roles
+    assert user.username == "test_user"
+    assert user.roles == ["user"]
 
 @pytest.mark.asyncio
-async def test_basic_auth_failure(auth_backend, mock_request):
-    auth_header = f"Basic {base64.b64encode(b'testuser:wrongpass').decode()}"
-    request = await mock_request(auth_header)
-    
-    user = await auth_backend.authenticate(request)
+async def test_basic_auth_wrong_password(auth_backend):
+    credentials = {"username": "test_user", "password": "wrong_pass"}
+    user = await auth_backend.authenticate(credentials)
+    assert user is None
+
+@pytest.mark.asyncio
+async def test_basic_auth_nonexistent_user(auth_backend):
+    credentials = {"username": "nonexistent", "password": "test_pass"}
+    user = await auth_backend.authenticate(credentials)
+    assert user is None
+
+@pytest.mark.asyncio
+async def test_get_user_success(auth_backend):
+    user = await auth_backend.get_user("admin")
+    assert user is not None
+    assert user.username == "admin"
+    assert set(user.roles) == {"admin", "user"}
+
+@pytest.mark.asyncio
+async def test_get_user_nonexistent(auth_backend):
+    user = await auth_backend.get_user("nonexistent")
     assert user is None
 
 @pytest.mark.asyncio
 async def test_is_authenticated_permission():
     permission = IsAuthenticated()
-    user = User(id="1", username="test", is_active=True)
-    request = Request(scope={"type": "http", "method": "GET", "path": "/test"})
-    
-    assert await permission.has_permission(request, user)
-    assert not await permission.has_permission(request, None)
+    user = User(username="test", roles=["user"])
+    assert await permission.has_permission(user)
+    assert not await permission.has_permission(None)
 
 @pytest.mark.asyncio
 async def test_is_admin_permission():
     permission = IsAdmin()
-    admin = User(id="1", username="admin", roles=["admin"])
-    user = User(id="2", username="user", roles=["user"])
-    request = Request(scope={"type": "http", "method": "GET", "path": "/test"})
-    
-    assert await permission.has_permission(request, admin)
-    assert not await permission.has_permission(request, user)
+    admin = User(username="admin", roles=["admin"])
+    user = User(username="user", roles=["user"])
+    assert await permission.has_permission(admin)
+    assert not await permission.has_permission(user)
 
 @pytest.mark.asyncio
 async def test_role_permission():
     permission = RolePermission(["editor"])
-    editor = User(id="1", username="editor", roles=["editor"])
-    user = User(id="2", username="user", roles=["user"])
-    request = Request(scope={"type": "http", "method": "GET", "path": "/test"})
-    
-    assert await permission.has_permission(request, editor)
-    assert not await permission.has_permission(request, user)
+    editor = User(username="editor", roles=["editor"])
+    user = User(username="user", roles=["user"])
+    assert await permission.has_permission(editor)
+    assert not await permission.has_permission(user)
 
 @pytest.mark.asyncio
 async def test_requires_auth_decorator():
     @requires_auth(IsAuthenticated())
     async def protected_handler(request: Request) -> Response:
         return Response.text("Success")
-    
+
     request = Request(scope={"type": "http", "method": "GET", "path": "/test"})
-    request.user = User(id="1", username="test", is_active=True)
-    
+    request.user = User(username="test", roles=["user"])
     response = await protected_handler(request)
+    assert response.status_code == 200
     assert await response.body == b"Success"
-    
+
     request.user = None
-    with pytest.raises(AuthorizationError):
-        await protected_handler(request) 
+    response = await protected_handler(request)
+    assert response.status_code == 401 

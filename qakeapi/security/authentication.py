@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, List, Any
 from qakeapi.core.requests import Request
 from qakeapi.core.responses import Response
 from pydantic import BaseModel
+from dataclasses import dataclass
 
 class AuthenticationError(Exception):
     """Base authentication error"""
@@ -13,24 +14,23 @@ class Credentials(BaseModel):
     username: str
     password: str
 
-class User(BaseModel):
-    """Base user model"""
-    id: str
+@dataclass
+class User:
     username: str
-    is_active: bool = True
-    roles: list[str] = []
+    roles: List[str]
+    metadata: Dict[str, Any] = None
 
 class AuthenticationBackend(ABC):
     """Abstract base class for authentication backends"""
     
     @abstractmethod
-    async def authenticate(self, request: Request) -> Optional[User]:
-        """Authenticate a request and return a User object if successful"""
+    async def authenticate(self, credentials: Dict[str, str]) -> Optional[User]:
+        """Authenticate user with given credentials"""
         pass
-    
+
     @abstractmethod
     async def get_user(self, user_id: str) -> Optional[User]:
-        """Get a user by ID"""
+        """Get user by ID"""
         pass
 
 class BasicAuthBackend(AuthenticationBackend):
@@ -39,45 +39,40 @@ class BasicAuthBackend(AuthenticationBackend):
     def __init__(self):
         self.users: Dict[str, Dict[str, Any]] = {}
         
-    async def authenticate(self, request: Request) -> Optional[User]:
-        auth = request.headers.get(b"authorization")
-        if not auth or not auth.startswith(b"Basic "):
-            return None
-            
-        import base64
-        try:
-            decoded = base64.b64decode(auth[6:]).decode()
-            username, password = decoded.split(":")
-            user_data = self.users.get(username)
-            
-            if user_data and user_data["password"] == password:
-                return User(
-                    id=str(user_data["id"]),
-                    username=username,
-                    is_active=user_data.get("is_active", True),
-                    roles=user_data.get("roles", [])
-                )
-        except Exception:
-            return None
+    def add_user(self, username: str, password: str, roles: List[str] = None):
+        """Add a user to the backend"""
+        self.users[username] = {
+            "password": password,
+            "roles": roles or [],
+            "metadata": {}
+        }
+    
+    async def authenticate(self, credentials: Dict[str, str]) -> Optional[User]:
+        """Authenticate user with basic auth credentials"""
+        username = credentials.get("username")
+        password = credentials.get("password")
         
-        return None
+        if not username or not password:
+            return None
+            
+        user_data = self.users.get(username)
+        if not user_data or user_data["password"] != password:
+            return None
+            
+        return User(
+            username=username,
+            roles=user_data["roles"],
+            metadata=user_data["metadata"]
+        )
     
     async def get_user(self, user_id: str) -> Optional[User]:
-        for username, user_data in self.users.items():
-            if str(user_data["id"]) == user_id:
-                return User(
-                    id=user_id,
-                    username=username,
-                    is_active=user_data.get("is_active", True),
-                    roles=user_data.get("roles", [])
-                )
-        return None
-    
-    def add_user(self, username: str, password: str, roles: list[str] = None):
-        """Add a user to the backend"""
-        import uuid
-        self.users[username] = {
-            "id": str(uuid.uuid4()),
-            "password": password,
-            "roles": roles or []
-        } 
+        """Get user by username"""
+        user_data = self.users.get(user_id)
+        if not user_data:
+            return None
+            
+        return User(
+            username=user_id,
+            roles=user_data["roles"],
+            metadata=user_data["metadata"]
+        ) 

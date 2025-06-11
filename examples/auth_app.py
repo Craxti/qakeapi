@@ -1,9 +1,15 @@
 from qakeapi import Application
 from qakeapi.core.requests import Request
 from qakeapi.core.responses import Response
-from qakeapi.security.authentication import BasicAuthBackend
+from qakeapi.security.authentication import BasicAuthBackend, User
 from qakeapi.security.authorization import IsAuthenticated, IsAdmin, requires_auth
 from pydantic import BaseModel
+import base64
+import logging
+
+# Setup logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Create application
 app = Application(
@@ -22,9 +28,45 @@ class UserResponse(BaseModel):
 
 async def auth_middleware(request: Request, handler):
     """Middleware to handle authentication"""
-    user = await auth_backend.authenticate(request)
-    request.user = user
-    return await handler(request)
+    logger.debug(f"Processing request: {request.method} {request.path}")
+    logger.debug(f"Headers: {request.headers}")
+    
+    auth = None
+    for header in request.scope["headers"]:
+        if header[0].lower() == b"authorization":
+            auth = header[1].decode()
+            break
+    
+    logger.debug(f"Auth header: {auth}")
+    
+    if auth and auth.startswith("Basic "):
+        try:
+            decoded = base64.b64decode(auth[6:]).decode()
+            username, password = decoded.split(":")
+            logger.debug(f"Attempting to authenticate user: {username}")
+            
+            credentials = {"username": username, "password": password}
+            user = await auth_backend.authenticate(credentials)
+            
+            if user:
+                logger.debug(f"User authenticated: {user.username}")
+                request.user = user
+                return await handler(request)
+        except Exception as e:
+            logger.error(f"Authentication error: {e}")
+    
+    if request.path == "/":
+        logger.debug("Allowing access to public endpoint")
+        request.user = None
+        return await handler(request)
+        
+    logger.debug("Authentication required")
+    response = Response(
+        content={"detail": "Unauthorized"},
+        status_code=401,
+        headers=[(b"WWW-Authenticate", b"Basic")]
+    )
+    return response
 
 app.add_middleware(auth_middleware)
 
@@ -50,4 +92,4 @@ async def admin(request: Request) -> Response:
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="debug") 
