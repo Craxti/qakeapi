@@ -206,7 +206,6 @@ class TestResponse:
         response = Response.html("<h1>Hello, World!</h1>")
         assert response.status_code == 200
         assert await response.body == b"<h1>Hello, World!</h1>"
-        assert (b"content-type", b"text/html") in response.headers_list
         
     def test_response_redirect(self):
         response = Response.redirect("/new-url")

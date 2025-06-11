@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 from qakeapi.core.application import Application
 from qakeapi.core.responses import Response
 from qakeapi.core.requests import Request
 from qakeapi.core.dependencies import Dependency
 from pydantic import BaseModel
 
-# Создаем модели для документации
+# Create models for documentation
 class HelloResponse(BaseModel):
     message: str
 
@@ -14,14 +15,14 @@ class EchoRequest(BaseModel):
 class EchoResponse(BaseModel):
     message: str
 
-# Создаем приложение
+# Create application
 app = Application(
     title="Basic Example",
     version="1.0.0",
     description="A basic example of QakeAPI application"
 )
 
-# Создаем зависимость
+# Create dependency
 class Config(Dependency):
     async def resolve(self):
         return {
@@ -29,10 +30,10 @@ class Config(Dependency):
             "version": "1.0.0"
         }
 
-# Регистрируем зависимость
+# Register dependency
 config = Config()
 
-# Определяем маршруты
+# Define routes
 @app.get("/", 
     summary="Get index",
     description="Returns welcome message and config"
@@ -60,4 +61,10 @@ async def hello(request: Request):
 )
 async def echo(request: Request):
     data = await request.json()
-    return Response.json({"message": data.get("message", "")}) 
+    return Response.json({"message": data.get("message", "")})
+
+if __name__ == "__main__":
+    import uvicorn
+    print("Starting server...")
+    print("Available routes:", [(r.path, r.type, r.methods) for r in app.router.routes])
+    uvicorn.run(app, host="0.0.0.0", port=8000) 

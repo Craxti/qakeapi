@@ -135,7 +135,11 @@ class Response:
     @classmethod
     def html(cls, content: str, status_code: int = 200) -> "Response":
         """Create HTML response"""
-        return cls(content, status_code=status_code, media_type="text/html")
+        return cls(
+            content=content,
+            status_code=status_code,
+            headers=[(b"content-type", b"text/html; charset=utf-8")]
+        )
         
     @classmethod
     def redirect(cls, url: str, status_code: int = 302) -> "Response":

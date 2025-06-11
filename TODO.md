@@ -64,12 +64,12 @@ qakeapi/
 - [x] Implement content negotiation
 
 ### 4. WebSocket Support
-- [ ] Implement WebSocket connection handling
-- [ ] Add message sending/receiving
-- [ ] Implement connection lifecycle events
-- [ ] Add WebSocket route registration
-- [ ] Implement WebSocket middleware
-- [ ] Add ping/pong frame support
+- [x] Implement WebSocket connection handling
+- [x] Add message sending/receiving
+- [x] Implement connection lifecycle events
+- [x] Add WebSocket route registration
+- [x] Implement WebSocket middleware
+- [x] Add ping/pong frame support
 
 ### 5. Pydantic Integration
 - [x] Implement request body validation
@@ -105,7 +105,7 @@ qakeapi/
 ### 9. Testing
 - [x] Create test client
 - [x] Implement test utilities
-- [ ] Add WebSocket testing support
+- [x] Add WebSocket testing support
 - [ ] Create authentication testing helpers
 - [ ] Implement performance tests
 

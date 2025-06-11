@@ -1,61 +1,53 @@
 # QakeAPI
 
-QakeAPI is a lightweight ASGI web framework for building fast web APIs with Python, inspired by FastAPI.
+A lightweight Python web framework for building REST APIs with modern features like OpenAPI/Swagger documentation.
 
 ## Features
 
-- FastAPI-like route decorators
-- ASGI compatibility
+- Simple and intuitive routing system
 - Automatic OpenAPI/Swagger documentation
-- Path parameters support
-- JSON request/response handling
-- Form data and file upload support
-- Cookie handling
-- Middleware support
-- Type hints
+- Request/Response model validation using Pydantic
+- Built-in Swagger UI interface
+- ASGI-compatible
 
 ## Installation
 
 ```bash
-pip install qakeapi
+pip install -r requirements.txt
 ```
 
 ## Quick Start
 
+1. Create a new file `app.py`:
+
 ```python
-from qakeapi.core.application import Application
-from qakeapi.core.responses import Response
-from qakeapi.core.requests import Request
+from qakeapi import Application, Request, Response
+from pydantic import BaseModel
 
-app = Application(
-    title="Basic Example",
-    version="1.0.0",
-    description="A basic example of QakeAPI application"
-)
+app = Application()
 
-@app.get("/")
-async def index(request: Request):
-    return Response.json({
-        "message": "Welcome to QakeAPI!"
-    })
+class EchoRequest(BaseModel):
+    message: str
 
-@app.get("/hello/{name}")
-async def hello(request: Request, name: str):
-    return Response.text(f"Hello, {name}!")
+class EchoResponse(BaseModel):
+    message: str
 
 @app.post("/echo")
-async def echo(request: Request):
+async def echo(request: Request) -> Response:
     data = await request.json()
-    return Response.json(data)
+    return Response(json={"message": data["message"]})
+
+if __name__ == "__main__":
+    app.run()
 ```
 
-Run the application:
+2. Run the application:
 
 ```bash
-uvicorn your_app:app --reload
+python app.py
 ```
 
-Visit http://localhost:8000/docs to see the automatic API documentation.
+3. Open http://localhost:8000/docs in your browser to see the Swagger UI documentation.
 
 ## License
 

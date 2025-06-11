@@ -11,7 +11,8 @@ setup(
     url="https://github.com/Craxti/qakeapi",
     packages=find_packages(),
     install_requires=[
-        "uvicorn>=0.15.0",
+        "uvicorn",
+        "pydantic"
     ],
     python_requires=">=3.7",
     classifiers=[

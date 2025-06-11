@@ -1,0 +1,127 @@
+import pytest
+from qakeapi.core.websockets import WebSocket, WebSocketState
+from qakeapi.core.application import Application
+import json
+
+@pytest.fixture
+async def app():
+    return Application()
+
+@pytest.fixture
+async def websocket_client():
+    async def mock_receive():
+        return {"type": "websocket.connect"}
+    
+    async def mock_send(message):
+        pass
+    
+    scope = {
+        "type": "websocket",
+        "path": "/ws",
+        "headers": [],
+        "query_string": b"",
+        "client": ("127.0.0.1", 8000),
+        "path_params": {}
+    }
+    
+    return WebSocket(scope, mock_receive, mock_send)
+
+class TestWebSocket:
+    @pytest.mark.asyncio
+    async def test_websocket_connection(self, websocket_client):
+        assert websocket_client.state == WebSocketState.CONNECTING
+        await websocket_client.accept()
+        assert websocket_client.state == WebSocketState.CONNECTED
+        
+    @pytest.mark.asyncio
+    async def test_websocket_send_receive(self, websocket_client):
+        await websocket_client.accept()
+        
+        # Test sending text
+        await websocket_client.send_text("Hello")
+        assert websocket_client.state == WebSocketState.CONNECTED
+        
+        # Test sending JSON
+        data = {"message": "Hello"}
+        await websocket_client.send_json(data)
+        assert websocket_client.state == WebSocketState.CONNECTED
+        
+    @pytest.mark.asyncio
+    async def test_websocket_close(self, websocket_client):
+        await websocket_client.accept()
+        await websocket_client.close(code=1000)
+        assert websocket_client.state == WebSocketState.DISCONNECTED
+        
+    @pytest.mark.asyncio
+    async def test_websocket_ping_pong(self, websocket_client):
+        await websocket_client.accept()
+        await websocket_client.send_ping(b"ping")
+        # В реальном приложении здесь мы бы получили pong
+        assert websocket_client.state == WebSocketState.CONNECTED
+
+class TestWebSocketRouting:
+    @pytest.mark.asyncio
+    async def test_websocket_route(self, app):
+        received_messages = []
+        
+        @app.websocket("/ws/test")
+        async def websocket_handler(websocket: WebSocket):
+            await websocket.accept()
+            async for message in websocket:
+                received_messages.append(message)
+                await websocket.send_text(f"Echo: {message}")
+                
+        # Создаем тестовый клиент
+        async def mock_receive():
+            return {"type": "websocket.connect"}
+            
+        async def mock_send(message):
+            pass
+            
+        scope = {
+            "type": "websocket",
+            "path": "/ws/test",
+            "headers": [],
+            "query_string": b"",
+            "client": ("127.0.0.1", 8000),
+            "path_params": {}
+        }
+        
+        websocket = WebSocket(scope, mock_receive, mock_send)
+        
+        # Проверяем маршрутизацию
+        route_info = app.router.find_route("/ws/test", "websocket")
+        assert route_info is not None
+        route, params = route_info
+        assert route.handler == websocket_handler
+
+class TestWebSocketMiddleware:
+    @pytest.mark.asyncio
+    async def test_websocket_middleware(self, app):
+        middleware_called = False
+        
+            
+        @app.websocket("/ws/test")
+        async def websocket_handler(websocket: WebSocket):
+            await websocket.accept()
+            
+        # Создаем тестовый клиент
+        async def mock_receive():
+            return {"type": "websocket.connect"}
+            
+        async def mock_send(message):
+            pass
+            
+        scope = {
+            "type": "websocket",
+            "path": "/ws/test",
+            "headers": [],
+            "query_string": b"",
+            "client": ("127.0.0.1", 8000),
+            "path_params": {}
+        }
+        
+        websocket = WebSocket(scope, mock_receive, mock_send)
+        
+        # Проверяем выполнение middleware
+        await app.handle_websocket(scope, mock_receive, mock_send)

@@ -11,11 +11,14 @@ class Route:
     handler: Callable
     methods: List[str]
     name: Optional[str] = None
+    type: str = "http"  # "http" или "websocket"
     
     def __post_init__(self):
         """Компилируем регулярное выражение для пути"""
         pattern = self.path
-        pattern = re.sub(r'{([^:}]+)(?::([^}]+))?}', lambda m: f'(?P<{m.group(1)}>[^/]+)', pattern)
+        pattern = re.sub(r'{([^:}]+)(?::([^}]+))?}', 
+                        lambda m: f'(?P<{m.group(1)}>[^/]+)', 
+                        pattern)
         self.pattern = re.compile(f'^{pattern}$')
         
     def match(self, path: str) -> Optional[Dict[str, str]]:
@@ -33,18 +36,29 @@ class Router:
         self._middleware: List[Callable] = []
         
     def add_route(self, path: str, handler: Callable, methods: List[str] = None) -> None:
-        """Add route to router"""
+        """Add HTTP route"""
         if methods is None:
             methods = ["GET"]
         methods = [m.upper() for m in methods]
         
-        route = Route(
-            path=path,
-            handler=handler,
-            methods=methods
-        )
-        print(f"Added route: {path} {methods}")  # Debug log
+        # Check if route already exists
+        for existing_route in self.routes:
+            if existing_route.path == path and existing_route.type == "http":
+                # Update existing route instead of adding a new one
+                existing_route.handler = handler
+                existing_route.methods = methods
+                print(f"Updated route: {path} {methods}")
+                return
+                
+        route = Route(path=path, handler=handler, methods=methods)
         self.routes.append(route)
+        print(f"Added route: {path} {methods}")
+        
+    def add_websocket_route(self, path: str, handler: Callable) -> None:
+        """Add WebSocket route"""
+        route = Route(path=path, handler=handler, methods=["GET"], type="websocket")
+        self.routes.append(route)
+        print(f"Added WebSocket route: {path}")
         
     def route(self, path: str, methods: List[str] = None):
         """Route decorator"""
@@ -64,28 +78,48 @@ class Router:
             return middleware
         return decorator
         
-    def find_route(self, path: str, method: str) -> Tuple[Optional[Route], Optional[Dict[str, str]]]:
-        """Find route for path and method"""
-        print(f"Looking for route: {path} {method}")  # Debug log
-        print(f"Available routes: {[(r.path, r.methods) for r in self.routes]}")  # Debug log
+    def find_route(self, path: str, type: str = "http") -> Optional[Tuple[Route, Dict[str, str]]]:
+        """Find matching route"""
+        print(f"Looking for route: {path} {type}")
+        print(f"Available routes: {[(r.path, r.type, r.methods) for r in self.routes]}")
         
         for route in self.routes:
-            params = route.match(path)
-            if params is not None and method in route.methods:
-                print(f"Found matching route: {route.path}")  # Debug log
-                return route, params
-        print(f"No matching route found for {path} {method}")  # Debug log
-        return None, None
+            if route.type == type:
+                params = route.match(path)
+                if params is not None:
+                    print(f"Found matching route: {route.path} {route.type} {route.methods}")
+                    return route, params
+        print(f"No matching route found for {path} {type}")
+        return None
         
     async def handle_request(self, request: Request) -> Response:
         """Handle incoming request"""
         try:
-            route, params = self.find_route(request.path, request.method)
-            if route is None:
-                return Response.json({"detail": "Not Found"}, status_code=404)
+            print(f"Handling request: {request.method} {request.path}")
+            print(f"Available routes: {[(r.path, r.type, r.methods) for r in self.routes]}")
+            
+            route_info = self.find_route(request.path)
+            if route_info is None:
+                print(f"No route found for {request.path}")
+                response = Response.json({"detail": "Not Found"}, status_code=404)
+                print(f"Response: {response.to_dict()}")
+                return response
+                
+            route, params = route_info
+            print(f"Found route: {route.path} {route.type} {route.methods}")
+            
+            # Check if method is allowed
+            if request.method not in route.methods:
+                print(f"Method {request.method} not allowed for {request.path}")
+                response = Response.json(
+                    {"detail": f"Method {request.method} not allowed"},
+                    status_code=405
+                )
+                print(f"Response: {response.to_dict()}")
+                return response
                 
             # Extract path parameters
-            request.scope["path_params"] = params or {}
+            request.scope["path_params"] = params
             
             # Apply middleware
             handler = route.handler
@@ -93,25 +127,26 @@ class Router:
                 handler = middleware(handler)
                 
             # Call handler
+            print(f"Calling handler for {request.path}")
             response = await handler(request)
+            print(f"Handler response: {response.to_dict()}")
             return response
             
         except Exception as e:
             print(f"Error handling request: {str(e)}")
-            return Response.json({"detail": "Internal Server Error"}, status_code=500)
+            import traceback
+            traceback.print_exc()
+            response = Response.json({"detail": "Internal Server Error"}, status_code=500)
+            print(f"Error response: {response.to_dict()}")
+            return response
             
-    def _extract_path_params(self, pattern: str, path: str) -> dict:
-        """Extract path parameters from URL"""
-        pattern_parts = pattern.split("/")
-        path_parts = path.split("/")
-        
-        params = {}
-        for pattern_part, path_part in zip(pattern_parts, path_parts):
-            if pattern_part.startswith("{") and pattern_part.endswith("}"):
-                param_name = pattern_part[1:-1]
-                params[param_name] = path_part
-                
-        return params
+    def _compile_pattern(self, path: str) -> Pattern:
+        """Compile path pattern to regex"""
+        # Replace path parameters with named capture groups
+        pattern = re.sub(r'{([^:}]+)(?::([^}]+))?}', 
+                        lambda m: f'(?P<{m.group(1)}>[^/]+)', 
+                        path)
+        return re.compile(f'^{pattern}$')
         
     def url_for(self, name: str, **params: Any) -> str:
         """Generate URL for named route"""

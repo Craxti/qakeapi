@@ -10,22 +10,33 @@ class Request:
     """HTTP Request"""
     
     def __init__(self, scope: Dict[str, Any], body: bytes = b""):
+        print(f"Creating Request with scope: {scope}")
         self.scope = scope
         self._body = body
         self._json = None
         self._form: Optional[Dict[str, Any]] = None
         self._files: Optional[Dict[str, UploadFile]] = None
         self._cookies: Optional[SimpleCookie] = None
+        print(f"Request created: {self.method} {self.path}")
+        
+    @property
+    def type(self) -> str:
+        """Get request type"""
+        return self.scope.get("type", "http")
         
     @property
     def method(self) -> str:
         """Request method"""
-        return self.scope["method"]
+        method = self.scope.get("method", "GET")
+        print(f"Request method: {method}")
+        return method
         
     @property
     def path(self) -> str:
         """Request path"""
-        return self.scope["path"]
+        path = self.scope.get("path", "/")
+        print(f"Request path: {path}")
+        return path
         
     @property
     def query_params(self) -> Dict[str, List[str]]:

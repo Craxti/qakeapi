@@ -6,9 +6,10 @@ from .dependencies import DependencyContainer
 from .router import Router
 from .openapi import OpenAPIInfo, OpenAPIGenerator, OpenAPIPath, get_swagger_ui_html
 from .requests import Request
-from .websockets import WebSocket
+from .websockets import WebSocket, WebSocketState
 import json
 from .responses import Response
+from functools import partial
 
 class ASGIApplication:
     """Базовый класс ASGI-приложения"""
@@ -25,13 +26,14 @@ class ASGIApplication:
         self.router = Router()
         
         # Добавляем специальные маршруты для OpenAPI
-        @self.router.route("/docs")
         async def docs(request: Request):
             return Response.html(get_swagger_ui_html("/openapi.json", self.openapi_info.title))
             
-        @self.router.route("/openapi.json")
         async def openapi(request: Request):
             return Response.json(self.openapi_generator.generate())
+            
+        self.router.add_route("/docs", docs, ["GET"])
+        self.router.add_route("/openapi.json", openapi, ["GET"])
         
     async def __call__(
         self,
@@ -59,19 +61,19 @@ class ASGIApplication:
             more_body = message.get("more_body", False)
             
         # Создаем объект Request
+        print(f"Creating request with scope: {scope}")
         request = Request(scope, body)
+        print(f"Request created: {request.method} {request.path}")
         
-        # Проверяем специальные маршруты для OpenAPI
-        if request.path == "/docs":
-            response = Response.html(get_swagger_ui_html("/openapi.json", self.openapi_info.title))
-        elif request.path == "/openapi.json":
-            response = Response.json(self.openapi_generator.generate())
-        else:
-            # Обрабатываем запрос через роутер
-            response = await self.router.handle_request(request)
+        # Обрабатываем запрос через роутер
+        response = await self.router.handle_request(request)
+        print(f"Response: {response}")
         
         # Отправляем ответ
-        await response(send)
+        if isinstance(response, Response):
+            await response(send)
+        else:
+            await Response.json(response)(send)
         
     async def handle_websocket(
         self,
@@ -251,37 +253,33 @@ class ASGIApplication:
         """Отменить фоновую задачу"""
         return await self.background_tasks.cancel_task(task_id)
 
-class Application(ASGIApplication):
-    """Основной класс приложения"""
-    
-    def __init__(self, title: str = "API Documentation", version: str = "1.0.0", description: str = ""):
-        super().__init__()
-        self.openapi_info = OpenAPIInfo(title, version, description)
-        self.openapi_generator = OpenAPIGenerator(self.openapi_info)
-
     def get(self, path: str, **kwargs):
         """GET route decorator"""
         def decorator(handler: Callable):
+            print(f"Registering GET route: {path}")
+            # Store OpenAPI metadata in handler
+            handler.openapi_metadata = {
+                "summary": kwargs.get("summary", ""),
+                "description": kwargs.get("description", ""),
+                "response_model": kwargs.get("response_model"),
+                "tags": kwargs.get("tags", [])
+            }
             self.router.add_route(path, handler, ["GET"])
-            path_info = OpenAPIPath(
-                path=path,
-                method="GET",
-                **kwargs
-            )
-            self.openapi_generator.add_path(path_info)
             return handler
         return decorator
 
     def post(self, path: str, **kwargs):
         """POST route decorator"""
         def decorator(handler: Callable):
+            # Store OpenAPI metadata in handler
+            handler.openapi_metadata = {
+                "summary": kwargs.get("summary", ""),
+                "description": kwargs.get("description", ""),
+                "request_model": kwargs.get("request_model"),
+                "response_model": kwargs.get("response_model"),
+                "tags": kwargs.get("tags", [])
+            }
             self.router.add_route(path, handler, ["POST"])
-            path_info = OpenAPIPath(
-                path=path,
-                method="POST",
-                **kwargs
-            )
-            self.openapi_generator.add_path(path_info)
             return handler
         return decorator
 
@@ -340,4 +338,324 @@ class Application(ASGIApplication):
                 )
                 self.openapi_generator.add_path(path_info)
             return handler
-        return decorator 
+        return decorator
+
+    def websocket(self, path: str):
+        """Decorator for WebSocket routes"""
+        def decorator(handler):
+            self.router.add_websocket_route(path, handler)
+            return handler
+        return decorator
+
+
+class Application(ASGIApplication):
+    """Основной класс приложения"""
+    
+    def __init__(self, title: str = None, version: str = None, description: str = None):
+        self.title = title or "QakeAPI Application"
+        self.version = version or "1.0.0"
+        self.description = description or ""
+        self.router = Router()
+        
+        # Register OpenAPI routes
+        async def swagger_ui(request: Request):
+            return Response(
+                content=get_swagger_ui_html("/openapi.json", self.title),
+                status_code=200,
+                headers=[
+                    (b"content-type", b"text/html; charset=utf-8"),
+                    (b"cache-control", b"no-cache")
+                ]
+            )
+            
+        async def openapi_schema(request: Request):
+            """Generate and return OpenAPI schema"""
+            print("Generating OpenAPI schema...")
+            schema = {
+                "openapi": "3.0.0",
+                "info": {
+                    "title": self.title,
+                    "version": self.version,
+                    "description": self.description
+                },
+                "paths": {}
+            }
+            
+            # Add paths from router
+            print(f"Available routes: {[(r.path, r.type, r.methods) for r in self.router.routes]}")
+            for route in self.router.routes:
+                if route.type != "http":
+                    continue
+                    
+                print(f"Processing route: {route.path} {route.methods}")
+                print(f"Handler metadata: {getattr(route.handler, 'openapi_metadata', None)}")
+                    
+                if route.path not in schema["paths"]:
+                    schema["paths"][route.path] = {}
+                    
+                for method in route.methods:
+                    method = method.lower()
+                    metadata = getattr(route.handler, "openapi_metadata", {}) or {}
+                    
+                    path_data = {
+                        "summary": metadata.get("summary", ""),
+                        "description": metadata.get("description", ""),
+                        "tags": metadata.get("tags", []),
+                        "parameters": [],
+                        "responses": {
+                            "200": {
+                                "description": "Successful response"
+                            }
+                        }
+                    }
+                    
+                    # Add path parameters
+                    if "{" in route.path:
+                        param_names = [p[1:-1] for p in route.path.split("/") if p.startswith("{") and p.endswith("}")]
+                        for param_name in param_names:
+                            path_data["parameters"].append({
+                                "name": param_name,
+                                "in": "path",
+                                "required": True,
+                                "schema": {"type": "string"}
+                            })
+                    
+                    # Add request body schema if present
+                    if metadata.get("request_model"):
+                        path_data["requestBody"] = {
+                            "content": {
+                                "application/json": {
+                                    "schema": metadata["request_model"].model_json_schema()
+                                }
+                            },
+                            "required": True
+                        }
+                        
+                    # Add response schema if present
+                    if metadata.get("response_model"):
+                        path_data["responses"]["200"]["content"] = {
+                            "application/json": {
+                                "schema": metadata["response_model"].model_json_schema()
+                            }
+                        }
+                        
+                    schema["paths"][route.path][method] = path_data
+            
+            print("Generated schema:", schema)
+            return Response(
+                content=json.dumps(schema, indent=2),
+                status_code=200,
+                headers=[
+                    (b"content-type", b"application/json"),
+                    (b"access-control-allow-origin", b"*"),
+                    (b"cache-control", b"no-cache")
+                ]
+            )
+            
+        self.router.add_route("/docs", swagger_ui, ["GET"])
+        self.router.add_route("/openapi.json", openapi_schema, ["GET"])
+        
+    def get(self, path: str, **kwargs):
+        """GET route decorator"""
+        def decorator(handler: Callable):
+            print(f"Registering GET route: {path}")
+            # Store OpenAPI metadata in handler
+            handler.openapi_metadata = {
+                "summary": kwargs.get("summary", ""),
+                "description": kwargs.get("description", ""),
+                "response_model": kwargs.get("response_model"),
+                "tags": kwargs.get("tags", [])
+            }
+            self.router.add_route(path, handler, ["GET"])
+            return handler
+        return decorator
+        
+    def post(self, path: str, **kwargs):
+        """POST route decorator"""
+        def decorator(handler: Callable):
+            # Store OpenAPI metadata in handler
+            handler.openapi_metadata = {
+                "summary": kwargs.get("summary", ""),
+                "description": kwargs.get("description", ""),
+                "request_model": kwargs.get("request_model"),
+                "response_model": kwargs.get("response_model"),
+                "tags": kwargs.get("tags", [])
+            }
+            self.router.add_route(path, handler, ["POST"])
+            return handler
+        return decorator
+        
+    async def __call__(self, scope: Dict, receive: Any, send: Any) -> None:
+        """ASGI application interface"""
+        if scope["type"] == "lifespan":
+            await self.handle_lifespan(scope, receive, send)
+        elif scope["type"] == "http":
+            await self.handle_http(scope, receive, send)
+        elif scope["type"] == "websocket":
+            await self.handle_websocket(scope, receive, send)
+            
+    async def handle_http(self, scope: Dict[str, Any], receive: Callable, send: Callable) -> None:
+        """Handle HTTP request"""
+        # Получаем тело запроса
+        body = b""
+        more_body = True
+        
+        while more_body:
+            message = await receive()
+            body += message.get("body", b"")
+            more_body = message.get("more_body", False)
+            
+        # Создаем объект Request
+        print(f"Creating request with scope: {scope}")
+        request = Request(scope, body)
+        print(f"Request created: {request.method} {request.path}")
+        
+        # Обрабатываем запрос через роутер
+        response = await self.router.handle_request(request)
+        print(f"Response: {response}")
+        
+        # Отправляем ответ
+        if isinstance(response, Response):
+            await response(send)
+        else:
+            await Response.json(response)(send)
+        
+    async def handle_websocket(self, scope: Dict, receive: Any, send: Any) -> None:
+        """Handle WebSocket connections"""
+        websocket = WebSocket(scope, receive, send)
+        path = scope["path"]
+        
+        # Find route
+        route_info = self.router.find_route(path, "websocket")
+        if not route_info:
+            await websocket.close(1008)  # Policy violation
+            return
+            
+        route, params = route_info
+        websocket.scope["path_params"] = params
+            
+        # Apply middleware
+        handler = route.handler
+        
+        try:
+            await handler(websocket)
+        except Exception as e:
+            if websocket.state == WebSocketState.CONNECTED:
+                await websocket.close(1011)  # Internal error
+            raise
+
+    async def handle_lifespan(
+        self,
+        scope: Dict[str, Any],
+        receive: Callable[[], Awaitable[Dict[str, Any]]],
+        send: Callable[[Dict[str, Any]], Awaitable[None]]
+    ) -> None:
+        """Обработка событий жизненного цикла"""
+        while True:
+            message = await receive()
+            
+            if message["type"] == "lifespan.startup":
+                await self.startup()
+                await send({"type": "lifespan.startup.complete"})
+            elif message["type"] == "lifespan.shutdown":
+                await self.shutdown()
+                await send({"type": "lifespan.shutdown.complete"})
+                break
+                
+    async def startup(self) -> None:
+        """Действия при запуске приложения"""
+        for handler in self.startup_handlers:
+            await handler()
+        
+    async def shutdown(self) -> None:
+        """Действия при остановке приложения"""
+        for handler in self.shutdown_handlers:
+            await handler()
+        await self.dependency_container.cleanup_all()
+        
+    async def swagger_ui(self, request: Request):
+        return Response.html(get_swagger_ui_html("/openapi.json", self.title))
+        
+    async def openapi_schema(self, request: Request):
+        """Generate and return OpenAPI schema"""
+        print("Generating OpenAPI schema...")
+        schema = {
+            "openapi": "3.0.0",
+            "info": {
+                "title": self.title,
+                "version": self.version,
+                "description": self.description
+            },
+            "paths": {}
+        }
+        
+        # Add paths from router
+        print(f"Available routes: {[(r.path, r.type, r.methods) for r in self.router.routes]}")
+        for route in self.router.routes:
+            if route.type != "http":
+                continue
+            
+            print(f"Processing route: {route.path} {route.methods}")
+            print(f"Handler metadata: {getattr(route.handler, 'openapi_metadata', None)}")
+            
+            if route.path not in schema["paths"]:
+                schema["paths"][route.path] = {}
+            
+            for method in route.methods:
+                method = method.lower()
+                metadata = getattr(route.handler, "openapi_metadata", {}) or {}
+                
+                path_data = {
+                    "summary": metadata.get("summary", ""),
+                    "description": metadata.get("description", ""),
+                    "tags": metadata.get("tags", []),
+                    "parameters": [],
+                    "responses": {
+                        "200": {
+                            "description": "Successful response"
+                        }
+                    }
+                }
+                
+                # Add path parameters
+                if "{" in route.path:
+                    param_names = [p[1:-1] for p in route.path.split("/") if p.startswith("{") and p.endswith("}")]
+                    for param_name in param_names:
+                        path_data["parameters"].append({
+                            "name": param_name,
+                            "in": "path",
+                            "required": True,
+                            "schema": {"type": "string"}
+                        })
+                
+                # Add request body schema if present
+                if metadata.get("request_model"):
+                    path_data["requestBody"] = {
+                        "content": {
+                            "application/json": {
+                                "schema": metadata["request_model"].model_json_schema()
+                            }
+                        },
+                        "required": True
+                    }
+                    
+                # Add response schema if present
+                if metadata.get("response_model"):
+                    path_data["responses"]["200"]["content"] = {
+                        "application/json": {
+                            "schema": metadata["response_model"].model_json_schema()
+                        }
+                    }
+                    
+                schema["paths"][route.path][method] = path_data
+        
+        print("Generated schema:", schema)
+        return Response(
+            content=json.dumps(schema, indent=2),
+            status_code=200,
+            headers=[
+                (b"content-type", b"application/json"),
+                (b"access-control-allow-origin", b"*"),
+                (b"cache-control", b"no-cache")
+            ]
+        ) 

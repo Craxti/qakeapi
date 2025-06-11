@@ -1,18 +1,19 @@
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union, AsyncIterator
 import json
 from enum import Enum
 
 class WebSocketState(Enum):
-    CONNECTING = 0
-    CONNECTED = 1
-    DISCONNECTED = 2
+    CONNECTING = "CONNECTING"
+    CONNECTED = "CONNECTED"
+    DISCONNECTED = "DISCONNECTED"
 
 class WebSocket:
-    def __init__(self, scope: Dict[str, Any], receive: Callable, send: Callable):
+    def __init__(self, scope: Dict, receive: Any, send: Any):
         self.scope = scope
         self.receive = receive
         self.send = send
         self.state = WebSocketState.CONNECTING
+        self._iter = None
         self.client = scope.get("client", None)
         
     async def accept(self, subprotocol: Optional[str] = None) -> None:
@@ -26,21 +27,22 @@ class WebSocket:
         })
         self.state = WebSocketState.CONNECTED
         
-    async def close(self, code: int = 1000) -> None:
+    async def close(self, code: int = 1000, reason: Optional[str] = None) -> None:
         """Close the WebSocket connection"""
-        if self.state != WebSocketState.CONNECTED:
-            raise RuntimeError("WebSocket is not in CONNECTED state")
+        if self.state == WebSocketState.DISCONNECTED:
+            raise RuntimeError("WebSocket is already disconnected")
             
         await self.send({
             "type": "websocket.close",
-            "code": code
+            "code": code,
+            "reason": reason
         })
         self.state = WebSocketState.DISCONNECTED
         
     async def send_text(self, data: str) -> None:
         """Send text data"""
         if self.state != WebSocketState.CONNECTED:
-            raise RuntimeError("WebSocket is not in CONNECTED state")
+            raise RuntimeError("WebSocket is not connected")
             
         await self.send({
             "type": "websocket.send",
@@ -54,24 +56,41 @@ class WebSocket:
     async def send_bytes(self, data: bytes) -> None:
         """Send binary data"""
         if self.state != WebSocketState.CONNECTED:
-            raise RuntimeError("WebSocket is not in CONNECTED state")
+            raise RuntimeError("WebSocket is not connected")
             
         await self.send({
             "type": "websocket.send",
             "bytes": data
         })
         
+    async def send_ping(self, data: bytes = b"") -> None:
+        """Send a ping frame"""
+        if self.state != WebSocketState.CONNECTED:
+            raise RuntimeError("WebSocket is not connected")
+            
+        await self.send({
+            "type": "websocket.send",
+            "bytes": data,
+            "ping": True
+        })
+        
+    async def send_pong(self, data: bytes = b"") -> None:
+        """Send a pong frame"""
+        if self.state != WebSocketState.CONNECTED:
+            raise RuntimeError("WebSocket is not connected")
+            
+        await self.send({
+            "type": "websocket.send",
+            "bytes": data,
+            "pong": True
+        })
+        
     async def receive_text(self) -> str:
         """Receive text data"""
-        if self.state != WebSocketState.CONNECTED:
-            raise RuntimeError("WebSocket is not in CONNECTED state")
-            
         message = await self.receive()
-        
         if message["type"] == "websocket.disconnect":
             self.state = WebSocketState.DISCONNECTED
-            raise ConnectionError(message.get("code", 1000))
-            
+            raise RuntimeError("WebSocket disconnected")
         return message.get("text", "")
         
     async def receive_json(self) -> Any:
@@ -81,33 +100,23 @@ class WebSocket:
         
     async def receive_bytes(self) -> bytes:
         """Receive binary data"""
-        if self.state != WebSocketState.CONNECTED:
-            raise RuntimeError("WebSocket is not in CONNECTED state")
-            
         message = await self.receive()
-        
         if message["type"] == "websocket.disconnect":
             self.state = WebSocketState.DISCONNECTED
-            raise ConnectionError(message.get("code", 1000))
-            
+            raise RuntimeError("WebSocket disconnected")
         return message.get("bytes", b"")
         
-    async def __aiter__(self):
+    async def __aiter__(self) -> AsyncIterator[Any]:
         """Iterate over incoming messages"""
-        try:
-            while True:
-                message = await self.receive()
-                
-                if message["type"] == "websocket.disconnect":
-                    self.state = WebSocketState.DISCONNECTED
-                    break
-                    
-                if "text" in message:
-                    yield message["text"]
-                elif "bytes" in message:
-                    yield message["bytes"]
-        except ConnectionError:
-            pass
+        while self.state == WebSocketState.CONNECTED:
+            message = await self.receive()
+            if message["type"] == "websocket.disconnect":
+                self.state = WebSocketState.DISCONNECTED
+                break
+            if "text" in message:
+                yield message["text"]
+            elif "bytes" in message:
+                yield message["bytes"]
             
 class WebSocketMiddleware:
     def __init__(self, app: Any, handler: Callable):

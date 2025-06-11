@@ -144,4 +144,8 @@ async def cleanup_task():
 
 @app.on_startup
 async def startup():
-    await app.add_background_task(cleanup_task) 
+    await app.add_background_task(cleanup_task)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000) 

@@ -2,10 +2,15 @@ import asyncio
 import json
 from typing import Dict, Set
 import uvicorn
+import logging
 from qakeapi.core.application import Application
 from qakeapi.core.websockets import WebSocket, WebSocketState
 from qakeapi.core.dependencies import Dependency
 from pydantic import BaseModel
+
+# Настраиваем логирование
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Создаем модели для документации
 class MessageRequest(BaseModel):
@@ -47,51 +52,73 @@ async def chat_websocket(websocket: WebSocket):
     try:
         # Accept the connection
         await websocket.accept()
+        logger.debug("WebSocket connection accepted")
         
         # Get room ID from path parameters
         room_id = websocket.scope["path_params"]["room_id"]
+        logger.debug(f"Client joined room: {room_id}")
         
         # Create room if it doesn't exist
         if room_id not in store.chat_rooms:
             store.chat_rooms[room_id] = set()
+            logger.debug(f"Created new room: {room_id}")
             
         # Add client to room
         store.chat_rooms[room_id].add(websocket)
         store.connected_clients.add(websocket)
+        logger.debug(f"Added client to room {room_id}. Total clients in room: {len(store.chat_rooms[room_id])}")
         
         # Send welcome message
-        await websocket.send_json({
+        welcome_msg = {
             "type": "system",
             "message": f"Welcome to chat room {room_id}!"
-        })
+        }
+        await websocket.send_json(welcome_msg)
+        logger.debug(f"Sent welcome message: {welcome_msg}")
         
         # Broadcast join message
-        await broadcast_to_room(room_id, {
+        join_msg = {
             "type": "system",
             "message": "A new user has joined the chat"
-        }, exclude=websocket)
+        }
+        await broadcast_to_room(room_id, join_msg, exclude=websocket)
+        logger.debug("Broadcasted join message")
         
         try:
             # Handle messages
             async for message in websocket:
                 try:
-                    data = json.loads(message)
+                    logger.debug(f"Received message: {message}")
+                    if isinstance(message, str):
+                        data = json.loads(message)
+                    else:
+                        data = message
+                        
+                    logger.debug(f"Parsed message data: {data}")
+                    
                     # Add sender information
                     data["sender"] = str(id(websocket))
                     # Broadcast message to room
                     await broadcast_to_room(room_id, data)
-                except json.JSONDecodeError:
+                    logger.debug(f"Broadcasted message to room {room_id}")
+                except json.JSONDecodeError as e:
+                    logger.error(f"JSON decode error: {e}")
                     await websocket.send_json({
                         "type": "error",
                         "message": "Invalid JSON format"
                     })
                     
         except Exception as e:
+            logger.error(f"Error handling message: {e}")
             await websocket.send_json({
                 "type": "error",
                 "message": str(e)
             })
             
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
+        if websocket.state == WebSocketState.CONNECTED:
+            await websocket.close(1011)
     finally:
         store = await connection_store.resolve()
         # Remove client from room and connected clients
@@ -99,17 +126,22 @@ async def chat_websocket(websocket: WebSocket):
             store.chat_rooms[room_id].discard(websocket)
             if not store.chat_rooms[room_id]:
                 del store.chat_rooms[room_id]
+            logger.debug(f"Removed client from room {room_id}")
         store.connected_clients.discard(websocket)
+        logger.debug("Removed client from connected clients")
         
         if websocket.state == WebSocketState.CONNECTED:
             await websocket.close()
+            logger.debug("Closed WebSocket connection")
             
         # Broadcast leave message
         if room_id in store.chat_rooms:
-            await broadcast_to_room(room_id, {
+            leave_msg = {
                 "type": "system",
                 "message": "A user has left the chat"
-            })
+            }
+            await broadcast_to_room(room_id, leave_msg)
+            logger.debug("Broadcasted leave message")
 
 async def broadcast_to_room(
     room_id: str,
@@ -123,18 +155,23 @@ async def broadcast_to_room(
             if client != exclude and client.state == WebSocketState.CONNECTED:
                 try:
                     await client.send_json(message)
-                except Exception:
-                    pass
+                    logger.debug(f"Sent message to client in room {room_id}")
+                except Exception as e:
+                    logger.error(f"Error sending message to client: {e}")
 
 @app.websocket("/ws/echo")
 async def echo_websocket(websocket: WebSocket):
     """Simple echo WebSocket endpoint"""
     try:
         await websocket.accept()
+        logger.debug("Echo WebSocket connection accepted")
         
         async for message in websocket:
+            logger.debug(f"Echo received message: {message}")
             await websocket.send_text(f"Echo: {message}")
+            logger.debug("Echo sent response")
     except Exception as e:
+        logger.error(f"Echo WebSocket error: {e}")
         if websocket.state == WebSocketState.CONNECTED:
             await websocket.send_json({
                 "type": "error",
@@ -143,6 +180,7 @@ async def echo_websocket(websocket: WebSocket):
     finally:
         if websocket.state == WebSocketState.CONNECTED:
             await websocket.close()
+            logger.debug("Echo closed WebSocket connection")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000) 

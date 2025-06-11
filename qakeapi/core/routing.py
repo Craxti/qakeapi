@@ -11,6 +11,7 @@ class Route:
     handler: Callable
     methods: List[str]
     name: Optional[str] = None
+    type: str = "http"  # "http" или "websocket"
     
     def __post_init__(self):
         """Компилируем регулярное выражение для пути"""
@@ -70,13 +71,18 @@ class Router:
             return middleware
         return decorator
         
-    def find_route(self, path: str, method: str) -> Tuple[Optional[Route], Optional[Dict[str, str]]]:
+    def find_route(self, path: str, type: str = "http") -> Optional[Route]:
         """Найти маршрут для пути и метода"""
+        print(f"Looking for route: {path} {type}")
+        print(f"Available routes: {[(r.path, r.methods) for r in self.routes]}")
+        
         for route in self.routes:
-            params = route.match(path)
-            if params is not None and method in route.methods:
-                return route, params
-        return None, None
+            if route.type == type:
+                match = route.pattern.match(path)
+                if match:
+                    return route
+        print(f"No matching route found for {path} {type}")
+        return None
         
     async def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """Обработать запрос"""
@@ -84,7 +90,7 @@ class Router:
         method = request["method"].upper()
         
         # Ищем маршрут
-        route, params = self.find_route(path, method)
+        route = self.find_route(path)
         if route is None:
             return {
                 "status": 404,
@@ -93,7 +99,7 @@ class Router:
             }
             
         # Добавляем параметры пути в запрос
-        request["path_params"] = params
+        request["path_params"] = route.match(path)
         
         # Выполняем цепочку middleware
         handler = route.handler
@@ -111,4 +117,19 @@ class Router:
                 for key, value in params.items():
                     path = path.replace(f"{{{key}}}", str(value))
                 return path
-        raise ValueError(f"No route found with name '{name}'") 
+        raise ValueError(f"No route found with name '{name}'")
+
+    def add_websocket_route(self, path: str, handler: Callable) -> None:
+        """Add WebSocket route"""
+        pattern = self._compile_pattern(path)
+        route = Route(pattern, ["GET"], handler, path, "websocket")
+        self.routes.append(route)
+        print(f"Added WebSocket route: {path}")
+
+    def _compile_pattern(self, path: str) -> Pattern:
+        """Compile path pattern to regex"""
+        # Replace path parameters with named capture groups
+        pattern = re.sub(r'{([^:}]+)(?::([^}]+))?}', 
+                        lambda m: f'(?P<{m.group(1)}>[^/]+)', 
+                        path)
+        return re.compile(f'^{pattern}$') 

@@ -77,14 +77,14 @@ def test_router_find_route(router):
     router.add_route("/users/{user_id}", test_handler, ["GET"])
     
     # Проверяем успешный поиск
-    route, params = router.find_route("/users/123", "GET")
-    assert route is not None
-    assert params == {"user_id": "123"}
+    route_info = router.find_route("/users/123", "http")
+    assert route_info is not None
+    route, params = route_info
+    assert route.handler == test_handler
+    assert params["user_id"] == "123"
     
-    # Проверяем неуспешный поиск
-    route, params = router.find_route("/posts/123", "GET")
-    assert route is None
-    assert params is None
+    # Проверяем отсутствие маршрута
+    assert router.find_route("/not/found", "http") is None
 
 @pytest.mark.asyncio
 class TestRouter:
