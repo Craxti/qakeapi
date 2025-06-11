@@ -78,18 +78,16 @@ class Router:
             return middleware
         return decorator
         
-    def find_route(self, path: str, type: str = "http") -> Optional[Tuple[Route, Dict[str, str]]]:
-        """Find matching route"""
-        print(f"Looking for route: {path} {type}")
-        print(f"Available routes: {[(r.path, r.type, r.methods) for r in self.routes]}")
-        
+    def find_route(self, path: str, request_type: str = "http") -> Optional[Tuple[Route, Dict[str, str]]]:
+        """Find matching route for path and type"""
         for route in self.routes:
-            if route.type == type:
-                params = route.match(path)
-                if params is not None:
-                    print(f"Found matching route: {route.path} {route.type} {route.methods}")
-                    return route, params
-        print(f"No matching route found for {path} {type}")
+            if route.type != request_type:
+                continue
+                
+            params = route.match(path)
+            if params is not None:
+                return route, params
+                
         return None
         
     async def handle_request(self, request: Request) -> Response:
@@ -98,7 +96,7 @@ class Router:
             print(f"Handling request: {request.method} {request.path}")
             print(f"Available routes: {[(r.path, r.type, r.methods) for r in self.routes]}")
             
-            route_info = self.find_route(request.path)
+            route_info = self.find_route(request.path, request.type)
             if route_info is None:
                 print(f"No route found for {request.path}")
                 response = Response.json({"detail": "Not Found"}, status_code=404)
