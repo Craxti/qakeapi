@@ -1,117 +1,68 @@
-# QakeAPI 🚀
+# QakeAPI
 
-[![Python](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+A modern, lightweight, and fast ASGI web framework for building APIs in Python.
 
-QakeAPI is a modern, fast, and easy-to-use ASGI web framework for building APIs with Python. It's designed to be simple yet powerful, with built-in support for WebSockets, background tasks, authentication, and more.
+[![Tests](https://github.com/Craxti/qakeapi/actions/workflows/tests.yml/badge.svg)](https://github.com/Craxti/qakeapi/actions/workflows/tests.yml)
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-## ✨ Features
+## 🌟 Features
 
-- 🌟 **Modern Python** - Type hints, async/await support
-- 🔒 **Built-in Authentication** - Basic auth and custom auth backends
-- 🛡️ **Role-based Authorization** - Flexible permission system
-- 📝 **Automatic API Documentation** - Swagger/OpenAPI integration
-- 🔌 **WebSocket Support** - Full duplex communication
-- 🎯 **Background Tasks** - Async task management
-- 🧩 **Dependency Injection** - Clean and maintainable code
-- 📊 **Validation** - Request/response validation with Pydantic
+- 🚀 High-performance ASGI framework
+- 📝 Built-in OpenAPI/Swagger documentation
+- 🔒 CORS middleware support
+- 🔐 Authentication middleware
+- 🎯 Type hints and modern Python features
+- 📦 Easy to use and extend
+
+## 📋 Categories
+
+- #web-framework
+- #api-framework
+- #python
+- #asgi
+- #openapi
+- #swagger
+- #middleware
+- #cors
+- #authentication
 
 ## 🚀 Quick Start
 
 ```bash
-# Install the package
-pip install qakeapi
-
-# Create a basic app
-from qakeapi.core.application import Application
-from qakeapi.core.responses import Response
-
-app = Application(
-    title="Hello World",
-    version="1.0.0"
-)
-
-@app.get("/")
-async def hello(request):
-    return Response.json({"message": "Hello, World!"})
-
-# Run the server
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-```
-
-## 📚 Examples
-
-Check out the [examples](examples/) directory for more detailed examples:
-
-- [Basic App](examples/basic_app.py) - Simple REST API
-- [Auth App](examples/auth_app.py) - Authentication and authorization
-- [WebSocket App](examples/websocket_app.py) - WebSocket communication
-- [Background Tasks](examples/background_tasks_app.py) - Async task handling
-
-## 🔧 Installation
-
-```bash
 pip install qakeapi
 ```
 
-## 📖 Documentation
-
-### Basic Usage
+Basic example:
 
 ```python
-from qakeapi.core.application import Application
-from qakeapi.core.responses import Response
-from pydantic import BaseModel
-
-class Item(BaseModel):
-    name: str
-    price: float
+from qakeapi import Application
 
 app = Application()
 
-@app.post("/items")
-async def create_item(request):
-    data = await request.json()
-    return Response.json({"item": data})
+@app.get("/")
+async def hello():
+    return {"message": "Hello, World!"}
+
+if __name__ == "__main__":
+    app.run()
 ```
 
-### WebSocket Support
+## 📚 Documentation
 
-```python
-@app.websocket("/ws")
-async def websocket_endpoint(websocket):
-    await websocket.accept()
-    while True:
-        data = await websocket.receive_text()
-        await websocket.send_text(f"Message received: {data}")
-```
+Visit our [documentation](https://github.com/Craxti/qakeapi/wiki) for detailed guides and API reference.
 
-### Authentication
+## 🛠️ Examples
 
-```python
-from qakeapi.security.authentication import BasicAuthBackend
-from qakeapi.security.authorization import requires_auth, IsAuthenticated
+Check out our [examples](examples/) directory for more usage examples:
 
-auth_backend = BasicAuthBackend()
-auth_backend.add_user("admin", "password", ["admin"])
-
-@app.get("/protected")
-@requires_auth(IsAuthenticated())
-async def protected_route(request):
-    return Response.json({"message": "Access granted!"})
-```
+- [Basic API](examples/basic_app.py)
+- [CORS Support](examples/cors_app.py)
+- [Authentication](examples/auth_app.py)
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📝 License
 
@@ -119,9 +70,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- [FastAPI](https://fastapi.tiangolo.com/) - For inspiration
-- [Starlette](https://www.starlette.io/) - For ASGI implementation ideas
-- [Pydantic](https://pydantic-docs.helpmanual.io/) - For data validation
+- Inspired by FastAPI and Starlette
+- Built with modern Python features
+- Community-driven development
 
 ## 📬 Contact
 
