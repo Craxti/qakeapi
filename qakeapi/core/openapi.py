@@ -1,19 +1,24 @@
-from typing import Any, Dict, List, Optional, Type
-from pydantic import BaseModel, create_model
 import json
 import re
 from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Type
+
+from pydantic import BaseModel, create_model
+
 
 @dataclass
 class OpenAPIInfo:
     """OpenAPI information"""
+
     title: str = "QakeAPI"
     version: str = "1.0.0"
     description: str = ""
-    
+
+
 @dataclass
 class OpenAPIPath:
     """OpenAPI path information"""
+
     path: str
     method: str
     summary: str = ""
@@ -22,20 +27,21 @@ class OpenAPIPath:
     response_model: Optional[BaseModel] = None
     tags: list = field(default_factory=list)
 
+
 class OpenAPIGenerator:
     """OpenAPI schema generator"""
-    
+
     def __init__(self, info: OpenAPIInfo):
         self.info = info
         self.paths: Dict[str, Dict[str, Any]] = {}
-        
+
     def add_path(self, path_info: OpenAPIPath):
         """Add path to OpenAPI schema"""
         if path_info.path not in self.paths:
             self.paths[path_info.path] = {}
-            
+
         method = path_info.method.lower()
-        
+
         path_data = {
             "summary": path_info.summary,
             "description": path_info.description,
@@ -44,9 +50,9 @@ class OpenAPIGenerator:
                 "200": {
                     "description": "Successful response",
                 }
-            }
+            },
         }
-        
+
         # Add request body schema if present
         if path_info.request_model:
             path_data["requestBody"] = {
@@ -56,7 +62,7 @@ class OpenAPIGenerator:
                     }
                 }
             }
-            
+
         # Add response schema if present
         if path_info.response_model:
             path_data["responses"]["200"]["content"] = {
@@ -64,9 +70,9 @@ class OpenAPIGenerator:
                     "schema": path_info.response_model.model_json_schema()
                 }
             }
-            
+
         self.paths[path_info.path][method] = path_data
-        
+
     def generate(self) -> Dict[str, Any]:
         """Generate OpenAPI schema"""
         return {
@@ -74,10 +80,11 @@ class OpenAPIGenerator:
             "info": {
                 "title": self.info.title,
                 "version": self.info.version,
-                "description": self.info.description
+                "description": self.info.description,
             },
-            "paths": self.paths
+            "paths": self.paths,
         }
+
 
 def get_swagger_ui_html(openapi_url: str, title: str) -> str:
     """Generate Swagger UI HTML"""
@@ -142,4 +149,4 @@ def get_swagger_ui_html(openapi_url: str, title: str) -> str:
     </script>
 </body>
 </html>
-""" 
+"""

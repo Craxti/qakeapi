@@ -1,4 +1,3 @@
-import base64
 import logging
 
 from pydantic import BaseModel
@@ -6,8 +5,8 @@ from pydantic import BaseModel
 from qakeapi import Application
 from qakeapi.core.requests import Request
 from qakeapi.core.responses import Response
-from qakeapi.security.authentication import BasicAuthBackend, User
 from qakeapi.security.authorization import IsAdmin, IsAuthenticated, requires_auth
+from qakeapi.security.jwt_auth import JWTAuthBackend, JWTConfig
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
@@ -15,13 +14,29 @@ logger = logging.getLogger(__name__)
 
 # Create application
 app = Application(
-    title="Auth Example", description="Example application with authentication"
+    title="JWT Auth Example", description="Example application with JWT authentication"
 )
 
-# Setup authentication
-auth_backend = BasicAuthBackend()
+# Setup JWT authentication
+jwt_config = JWTConfig(
+    secret_key="your-secret-key-here",  # In production, use a secure secret key
+    access_token_expire_minutes=30,
+)
+auth_backend = JWTAuthBackend(jwt_config)
+
+# Add some test users
 auth_backend.add_user("user", "password123", ["user"])
 auth_backend.add_user("admin", "admin123", ["admin", "user"])
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 
 class UserResponse(BaseModel):
@@ -30,7 +45,7 @@ class UserResponse(BaseModel):
 
 
 async def auth_middleware(request: Request, handler):
-    """Middleware to handle authentication"""
+    """Middleware to handle JWT authentication"""
     logger.debug(f"Processing request: {request.method} {request.path}")
     logger.debug(f"Headers: {request.headers}")
 
@@ -42,15 +57,9 @@ async def auth_middleware(request: Request, handler):
 
     logger.debug(f"Auth header: {auth}")
 
-    if auth and auth.startswith("Basic "):
+    if auth and auth.startswith("Bearer "):
         try:
-            decoded = base64.b64decode(auth[6:]).decode()
-            username, password = decoded.split(":")
-            logger.debug(f"Attempting to authenticate user: {username}")
-
-            credentials = {"username": username, "password": password}
-            user = await auth_backend.authenticate(credentials)
-
+            user = await auth_backend.authenticate({"token": auth[7:]})
             if user:
                 logger.debug(f"User authenticated: {user.username}")
                 request.user = user
@@ -58,14 +67,14 @@ async def auth_middleware(request: Request, handler):
         except Exception as e:
             logger.error(f"Authentication error: {e}")
 
-    if request.path == "/":
+    if request.path == "/" or request.path == "/login":
         logger.debug("Allowing access to public endpoint")
         request.user = None
         return await handler(request)
 
     logger.debug("Authentication required")
     response = Response(content={"detail": "Unauthorized"}, status_code=401)
-    response.headers.extend([(b"WWW-Authenticate", b"Basic")])
+    response.headers.extend([(b"WWW-Authenticate", b"Bearer")])
     return response
 
 
@@ -76,6 +85,25 @@ app.add_middleware(auth_middleware)
 async def index(request: Request) -> Response:
     """Public endpoint"""
     return Response.json({"message": "Welcome to the API!"})
+
+
+@app.post("/login")
+async def login(request: Request) -> Response:
+    """Login endpoint - returns JWT token"""
+    data = await request.json()
+    login_data = LoginRequest(**data)
+
+    user = await auth_backend.authenticate(
+        {"username": login_data.username, "password": login_data.password}
+    )
+
+    if not user:
+        return Response.json({"detail": "Invalid credentials"}, status_code=401)
+
+    token = auth_backend.create_access_token({"sub": user.username})
+    return Response.json(
+        TokenResponse(access_token=token, token_type="Bearer").model_dump()
+    )
 
 
 @app.get("/profile")
@@ -99,4 +127,4 @@ async def admin(request: Request) -> Response:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="debug")
+    uvicorn.run(app, host="0.0.0.0", port=8001, log_level="debug")

@@ -1,6 +1,7 @@
 import pytest
-from qakeapi.core.websockets import WebSocket, WebSocketState
+
 from qakeapi.core.application import Application
+from qakeapi.core.websockets import WebSocket, WebSocketState
 
 
 @pytest.fixture

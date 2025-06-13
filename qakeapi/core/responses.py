@@ -1,17 +1,18 @@
-from typing import Any, Dict, List, Optional, Union, Tuple, AsyncIterable
 import json
 from http.cookies import SimpleCookie
+from typing import Any, AsyncIterable, Dict, List, Optional, Tuple, Union
+
 
 class Response:
     """HTTP Response"""
-    
+
     def __init__(
         self,
         content: Union[str, bytes, dict, AsyncIterable[bytes]],
         status_code: int = 200,
         headers: Optional[List[Tuple[bytes, bytes]]] = None,
         media_type: Optional[str] = None,
-        is_stream: bool = False
+        is_stream: bool = False,
     ):
         self.content = content
         self.status_code = status_code
@@ -19,12 +20,12 @@ class Response:
         self.media_type = media_type
         self.is_stream = is_stream
         self._cookies = SimpleCookie()
-        
+
     @property
     def status(self) -> int:
         """Для совместимости с ASGI"""
         return self.status_code
-        
+
     @property
     async def body(self) -> bytes:
         """Get response body as bytes"""
@@ -38,7 +39,7 @@ class Response:
             return json.dumps(self.content).encode()
         else:
             return b""
-        
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to ASGI response dict"""
         if isinstance(self.content, dict):
@@ -51,33 +52,29 @@ class Response:
                 self.headers.append((b"content-type", b"text/plain"))
         else:
             body = self.content
-            
-        return {
-            "status": self.status_code,
-            "headers": self.headers_list,
-            "body": body
-        }
-        
+
+        return {"status": self.status_code, "headers": self.headers_list, "body": body}
+
     @property
     def headers_list(self) -> List[Tuple[bytes, bytes]]:
         """Get response headers"""
         headers = list(self.headers)
-        
+
         # Add Content-Type if not set
         if not any(h[0] == b"content-type" for h in headers):
             media_type = self.media_type or self._get_media_type()
             headers.append((b"content-type", media_type.encode()))
-            
+
         # Add cookie headers
         for cookie in self._cookies.values():
             headers.append((b"set-cookie", cookie.OutputString().encode()))
-            
+
         # Add transfer-encoding for streaming responses
         if self.is_stream:
             headers.append((b"transfer-encoding", b"chunked"))
-            
+
         return headers
-        
+
     def _get_media_type(self) -> str:
         """Get content type based on content"""
         if self.is_stream:
@@ -88,7 +85,7 @@ class Response:
             return "text/plain"
         else:
             return "application/json"
-            
+
     def set_cookie(
         self,
         key: str,
@@ -99,7 +96,7 @@ class Response:
         domain: Optional[str] = None,
         secure: bool = False,
         httponly: bool = False,
-        samesite: str = "lax"
+        samesite: str = "lax",
     ) -> None:
         """Set response cookie"""
         self._cookies[key] = value
@@ -117,49 +114,57 @@ class Response:
             self._cookies[key]["httponly"] = httponly
         if samesite is not None:
             self._cookies[key]["samesite"] = samesite
-            
-    def delete_cookie(self, key: str, path: str = "/", domain: Optional[str] = None) -> None:
+
+    def delete_cookie(
+        self, key: str, path: str = "/", domain: Optional[str] = None
+    ) -> None:
         """Delete response cookie"""
         self.set_cookie(key, "", max_age=0, path=path, domain=domain)
-        
+
     @classmethod
     def json(cls, content: dict, status_code: int = 200) -> "Response":
         """Create JSON response"""
         return cls(content, status_code=status_code, media_type="application/json")
-        
+
     @classmethod
     def text(cls, content: str, status_code: int = 200) -> "Response":
         """Create text response"""
         return cls(content, status_code=status_code, media_type="text/plain")
-        
+
     @classmethod
     def html(cls, content: str, status_code: int = 200) -> "Response":
         """Create HTML response"""
         return cls(
             content=content,
             status_code=status_code,
-            headers=[(b"content-type", b"text/html; charset=utf-8")]
+            headers=[(b"content-type", b"text/html; charset=utf-8")],
         )
-        
+
     @classmethod
     def redirect(cls, url: str, status_code: int = 302) -> "Response":
         """Create redirect response"""
         return cls(b"", status_code=status_code, headers=[(b"location", url.encode())])
-        
+
     @classmethod
     def stream(
         cls,
         content: AsyncIterable[bytes],
         status_code: int = 200,
         media_type: Optional[str] = None,
-        headers: Optional[Dict[str, str]] = None
+        headers: Optional[Dict[str, str]] = None,
     ) -> "Response":
         """Create streaming response"""
         headers_list = []
         if headers:
             headers_list.extend((k.encode(), v.encode()) for k, v in headers.items())
-        return cls(content, status_code=status_code, headers=headers_list, media_type=media_type, is_stream=True)
-        
+        return cls(
+            content,
+            status_code=status_code,
+            headers=headers_list,
+            media_type=media_type,
+            is_stream=True,
+        )
+
     @property
     def headers_dict(self) -> Dict[str, str]:
         """Get response headers as dictionary"""
@@ -167,35 +172,29 @@ class Response:
         for k, v in self.headers_list:
             headers[k.decode()] = v.decode()
         return headers
-        
+
     async def __call__(self, send) -> None:
         """Send response through ASGI protocol"""
         if not self.is_stream:
-            await send({
-                "type": "http.response.start",
-                "status": self.status_code,
-                "headers": self.headers_list
-            })
+            await send(
+                {
+                    "type": "http.response.start",
+                    "status": self.status_code,
+                    "headers": self.headers_list,
+                }
+            )
             body = await self.body
-            await send({
-                "type": "http.response.body",
-                "body": body,
-                "more_body": False
-            })
+            await send({"type": "http.response.body", "body": body, "more_body": False})
         else:
-            await send({
-                "type": "http.response.start",
-                "status": self.status_code,
-                "headers": self.headers_list
-            })
+            await send(
+                {
+                    "type": "http.response.start",
+                    "status": self.status_code,
+                    "headers": self.headers_list,
+                }
+            )
             async for chunk in self.content:
-                await send({
-                    "type": "http.response.body",
-                    "body": chunk,
-                    "more_body": True
-                })
-            await send({
-                "type": "http.response.body",
-                "body": b"",
-                "more_body": False
-            }) 
+                await send(
+                    {"type": "http.response.body", "body": chunk, "more_body": True}
+                )
+            await send({"type": "http.response.body", "body": b"", "more_body": False})

@@ -1,1 +1,1 @@
-"""Middleware package for qakeapi""" 
+"""Middleware package for qakeapi"""

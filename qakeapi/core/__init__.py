@@ -3,12 +3,12 @@ Core components of QakeAPI framework
 """
 
 from .application import Application
-from .responses import Response
-from .requests import Request
-from .router import Router
-from .dependencies import Dependency, DependencyContainer, inject
 from .background import BackgroundTask
+from .dependencies import Dependency, DependencyContainer, inject
 from .files import UploadFile
+from .requests import Request
+from .responses import Response
+from .router import Router
 
 __all__ = [
     "Application",
@@ -19,5 +19,5 @@ __all__ = [
     "DependencyContainer",
     "inject",
     "BackgroundTask",
-    "UploadFile"
-] 
+    "UploadFile",
+]

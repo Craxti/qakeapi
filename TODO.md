@@ -80,11 +80,11 @@ qakeapi/
 
 ### 6. Security Features
 - [x] Implement basic authentication
-- [ ] Add JWT authentication
+- [x] Add JWT authentication
 - [x] Create role-based authorization
 - [x] Implement permission system
 - [x] Add security middleware
-- [ ] Implement CORS support
+- [x] Implement CORS support
 
 ### 7. Middleware System
 - [x] Create middleware base class
