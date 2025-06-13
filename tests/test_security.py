@@ -1,8 +1,11 @@
 import pytest
 from qakeapi.security.authentication import BasicAuthBackend, User
 from qakeapi.security.authorization import (
-    IsAuthenticated, IsAdmin, RolePermission, 
-    AuthorizationError, requires_auth
+    IsAuthenticated,
+    IsAdmin,
+    RolePermission,
+    AuthorizationError,
+    requires_auth,
 )
 from qakeapi.core.requests import Request
 from qakeapi.core.responses import Response
@@ -24,7 +27,7 @@ def mock_request():
                 "type": "http",
                 "method": "GET",
                 "path": "/test",
-                "headers": [(k.lower().encode(), v.encode()) for k, v in headers.items()]
+                "headers": [(k.lower().encode(), v.encode()) for k, v in headers.items()],
             }
         )
     return create_request

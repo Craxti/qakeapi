@@ -6,7 +6,7 @@ from qakeapi.core.validation import (
     PydanticValidator,
     ValidationFactory,
     RequestValidator,
-    ResponseValidator
+    ResponseValidator,
 )
 
 class TestDataValidator:
