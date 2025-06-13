@@ -1,17 +1,15 @@
-import base64
-
 import pytest
-
-from qakeapi.core.requests import Request
-from qakeapi.core.responses import Response
 from qakeapi.security.authentication import BasicAuthBackend, User
 from qakeapi.security.authorization import (
-    AuthorizationError,
-    IsAdmin,
     IsAuthenticated,
+    IsAdmin,
     RolePermission,
     requires_auth,
 )
+from qakeapi.core.requests import Request
+from qakeapi.core.responses import Response
+
+import base64
 
 
 @pytest.fixture
