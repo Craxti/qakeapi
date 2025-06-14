@@ -6,13 +6,13 @@ from pydantic import BaseModel
 from qakeapi.core.openapi import OpenAPIGenerator, OpenAPIInfo, OpenAPIPath
 
 
-class TestRequestModel(BaseModel):
+class SampleRequestModel(BaseModel):
     name: str
     age: int
     email: Optional[str] = None
 
 
-class TestResponseModel(BaseModel):
+class SampleResponseModel(BaseModel):
     id: int
     name: str
     status: str
@@ -35,8 +35,8 @@ def test_openapi_path():
         method="GET",
         summary="Test endpoint",
         description="Test endpoint description",
-        request_model=TestRequestModel,
-        response_model=TestResponseModel,
+        request_model=SampleRequestModel,
+        response_model=SampleResponseModel,
         tags=["test"],
     )
 
@@ -44,8 +44,8 @@ def test_openapi_path():
     assert path.method == "GET"
     assert path.summary == "Test endpoint"
     assert path.description == "Test endpoint description"
-    assert path.request_model == TestRequestModel
-    assert path.response_model == TestResponseModel
+    assert path.request_model == SampleRequestModel
+    assert path.response_model == SampleResponseModel
     assert path.tags == ["test"]
 
 
@@ -62,8 +62,8 @@ def test_openapi_generator():
         method="POST",
         summary="Create user",
         description="Create a new user",
-        request_model=TestRequestModel,
-        response_model=TestResponseModel,
+        request_model=SampleRequestModel,
+        response_model=SampleResponseModel,
         tags=["users"],
     )
     generator.add_path(path)

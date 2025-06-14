@@ -48,7 +48,7 @@ class TestValidationFactory:
         with pytest.raises(TypeError):
             ValidationFactory.create("pydantic", dict)
 
-class TestModel(BaseModel):
+class SampleModel(BaseModel):
     name: str
     age: int
     email: str = None
@@ -61,7 +61,7 @@ async def test_request_body_validation():
         "age": 30,
         "email": "john@example.com"
     }
-    result = await RequestValidator.validate_request_body(valid_data, TestModel)
+    result = await RequestValidator.validate_request_body(valid_data, SampleModel)
     assert result is not None
     assert result.name == "John"
     assert result.age == 30
@@ -73,7 +73,7 @@ async def test_request_body_validation():
         "age": "not_a_number",
         "email": "invalid_email"
     }
-    result = await RequestValidator.validate_request_body(invalid_data, TestModel)
+    result = await RequestValidator.validate_request_body(invalid_data, SampleModel)
     assert result is None
 
 def test_path_params_validation():
@@ -83,7 +83,7 @@ def test_path_params_validation():
         "age": "30",
         "email": "john@example.com"
     }
-    result = RequestValidator.validate_path_params(valid_params, TestModel)
+    result = RequestValidator.validate_path_params(valid_params, SampleModel)
     assert result is not None
     assert result.name == "John"
     assert result.age == 30
@@ -95,7 +95,7 @@ def test_path_params_validation():
         "age": "not_a_number",
         "email": "invalid_email"
     }
-    result = RequestValidator.validate_path_params(invalid_params, TestModel)
+    result = RequestValidator.validate_path_params(invalid_params, SampleModel)
     assert result is None
 
 def test_query_params_validation():
@@ -105,7 +105,7 @@ def test_query_params_validation():
         "age": ["30"],
         "email": ["john@example.com"]
     }
-    result = RequestValidator.validate_query_params(valid_params, TestModel)
+    result = RequestValidator.validate_query_params(valid_params, SampleModel)
     assert result is not None
     assert result.name == "John"
     assert result.age == 30
@@ -117,7 +117,7 @@ def test_query_params_validation():
         "age": ["not_a_number"],
         "email": ["invalid_email"]
     }
-    result = RequestValidator.validate_query_params(invalid_params, TestModel)
+    result = RequestValidator.validate_query_params(invalid_params, SampleModel)
     assert result is None
 
 def test_response_validation():
@@ -127,7 +127,7 @@ def test_response_validation():
         "age": 30,
         "email": "john@example.com"
     }
-    result = ResponseValidator.validate_response(valid_data, TestModel)
+    result = ResponseValidator.validate_response(valid_data, SampleModel)
     assert isinstance(result, Response)
     assert result.status_code == 200
     
@@ -137,6 +137,6 @@ def test_response_validation():
         "age": "not_a_number",
         "email": "invalid_email"
     }
-    result = ResponseValidator.validate_response(invalid_data, TestModel)
+    result = ResponseValidator.validate_response(invalid_data, SampleModel)
     assert isinstance(result, Response)
     assert result.status_code == 500 

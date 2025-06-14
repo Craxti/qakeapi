@@ -102,7 +102,7 @@ class ResponseValidator:
         """Валидация данных ответа"""
         try:
             validated_data = model(**response_data)
-            return Response.json(validated_data.dict())
+            return Response.json(validated_data.model_dump())
         except ValidationError as e:
             return Response.json(
                 {"detail": "Response validation failed", "errors": e.errors()},

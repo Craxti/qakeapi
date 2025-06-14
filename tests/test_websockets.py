@@ -1,14 +1,15 @@
 import pytest
+import pytest_asyncio
 from qakeapi.core.websockets import WebSocket, WebSocketState
 from qakeapi.core.application import Application
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def app():
     return Application()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def websocket_client():
     async def mock_receive():
         return {"type": "websocket.connect"}

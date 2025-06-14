@@ -2,21 +2,25 @@ from setuptools import setup, find_packages
 
 setup(
     name="qakeapi",
-    version="0.1.0",
+    version="0.2.0",
     description="A lightweight ASGI web framework for building fast web APIs with Python",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="Aleksandr",
-    author_email="your.email@example.com",
+    author_email="fetis.dev@gmail.com",
     url="https://github.com/Craxti/qakeapi",
     packages=find_packages(),
     install_requires=[
-        "uvicorn",
-        "pydantic"
+        "uvicorn>=0.15.0",
+        "pydantic>=2.0.0",
+        "python-jose[cryptography]>=3.3.0",
+        "passlib[bcrypt]>=1.7.4",
+        "python-multipart>=0.0.5",
+        "aiofiles>=0.8.0",
     ],
     python_requires=">=3.7",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
@@ -25,7 +29,17 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Software Development :: Libraries :: Python Modules",
+        "Framework :: AsyncIO",
+        "Intended Audience :: Developers",
+        "Natural Language :: English",
     ],
+    keywords="web framework api rest async asgi",
+    project_urls={
+        "Documentation": "https://github.com/Craxti/qakeapi/wiki",
+        "Source": "https://github.com/Craxti/qakeapi",
+        "Tracker": "https://github.com/Craxti/qakeapi/issues",
+    },
 ) 

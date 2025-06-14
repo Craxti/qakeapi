@@ -1,149 +1,137 @@
 # Contributing to QakeAPI
 
-Thank you for your interest in contributing to QakeAPI! This document provides guidelines and instructions for contributing.
+First off, thanks for taking the time to contribute! 🎉👍
+
+## Table of Contents
+
+- [Code of Conduct](#code-of-conduct)
+- [How Can I Contribute?](#how-can-i-contribute)
+  - [Reporting Bugs](#reporting-bugs)
+  - [Suggesting Enhancements](#suggesting-enhancements)
+  - [Pull Requests](#pull-requests)
+- [Development Setup](#development-setup)
+- [Styleguides](#styleguides)
+  - [Git Commit Messages](#git-commit-messages)
+  - [Python Styleguide](#python-styleguide)
+  - [Documentation Styleguide](#documentation-styleguide)
 
 ## Code of Conduct
 
-By participating in this project, you agree to abide by our Code of Conduct. Please read it before contributing.
+This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code.
 
-## How to Contribute
+## How Can I Contribute?
 
-### 1. Fork the Repository
+### Reporting Bugs
 
-1. Go to [QakeAPI on GitHub](https://github.com/Craxti/qakeapi)
-2. Click the "Fork" button in the top-right corner
-3. Clone your fork:
+Before creating bug reports, please check the issue list as you might find out that you don't need to create one. When you are creating a bug report, please include as many details as possible:
+
+* Use a clear and descriptive title
+* Describe the exact steps which reproduce the problem
+* Provide specific examples to demonstrate the steps
+* Describe the behavior you observed after following the steps
+* Explain which behavior you expected to see instead and why
+* Include screenshots if possible
+
+### Suggesting Enhancements
+
+Enhancement suggestions are tracked as GitHub issues. When creating an enhancement suggestion, please include:
+
+* Use a clear and descriptive title
+* Provide a step-by-step description of the suggested enhancement
+* Provide specific examples to demonstrate the steps
+* Describe the current behavior and explain which behavior you expected to see instead
+* Explain why this enhancement would be useful
+
+### Pull Requests
+
+* Fill in the required template
+* Do not include issue numbers in the PR title
+* Include screenshots and animated GIFs in your pull request whenever possible
+* Follow the Python styleguide
+* Include tests
+* Document new code
+* End all files with a newline
+
+## Development Setup
+
+1. Fork the repo
+2. Clone your fork
 ```bash
-git clone https://github.com/craxti/qakeapi.git
+git clone https://github.com/your-username/qakeapi.git
 cd qakeapi
 ```
 
-### 2. Set Up Development Environment
-
-1. Create a virtual environment:
+3. Create a virtual environment and activate it
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-2. Install development dependencies:
+4. Install development dependencies
 ```bash
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
+pip install -e ".[dev]"
 ```
 
-### 3. Create a Branch
-
-Create a new branch for your feature or bugfix:
+5. Create a branch for your changes
 ```bash
-git checkout -b feature/your-feature-name
-# or
-git checkout -b fix/your-bugfix-name
+git checkout -b feature-or-fix-name
 ```
 
-### 4. Make Changes
-
-1. Write your code
-2. Add tests for your changes
-3. Run the test suite:
+6. Make your changes and run tests
 ```bash
 pytest
 ```
 
-4. Check code style:
-```bash
-flake8
-black .
-isort .
-```
+## Styleguides
 
-### 5. Commit Your Changes
+### Git Commit Messages
 
-Follow our commit message format:
-```
-type(scope): description
+* Use the present tense ("Add feature" not "Added feature")
+* Use the imperative mood ("Move cursor to..." not "Moves cursor to...")
+* Limit the first line to 72 characters or less
+* Reference issues and pull requests liberally after the first line
+* Consider starting the commit message with an applicable emoji:
+    * 🎨 `:art:` when improving the format/structure of the code
+    * 🐎 `:racehorse:` when improving performance
+    * 🚱 `:non-potable_water:` when plugging memory leaks
+    * 📝 `:memo:` when writing docs
+    * 🐛 `:bug:` when fixing a bug
+    * 🔥 `:fire:` when removing code or files
+    * 💚 `:green_heart:` when fixing the CI build
+    * ✅ `:white_check_mark:` when adding tests
+    * 🔒 `:lock:` when dealing with security
+    * ⬆️ `:arrow_up:` when upgrading dependencies
+    * ⬇️ `:arrow_down:` when downgrading dependencies
 
-[optional body]
+### Python Styleguide
 
-[optional footer]
-```
+* Follow [PEP 8](https://www.python.org/dev/peps/pep-0008/)
+* Use [Black](https://github.com/psf/black) for code formatting
+* Use [isort](https://pycqa.github.io/isort/) for import sorting
+* Use type hints whenever possible
+* Write docstrings for all public methods and classes
 
-Types:
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes
-- `refactor`: Code refactoring
-- `test`: Adding or modifying tests
-- `chore`: Maintenance tasks
+### Documentation Styleguide
 
-Example:
-```
-feat(auth): add JWT authentication support
+* Use [Markdown](https://guides.github.com/features/mastering-markdown/) for documentation
+* Reference functions and classes with backticks: \`myfunction()\`
+* Include code examples when possible
+* Keep line length to 80 characters or less
+* Include a table of contents for long documents
 
-- Add JWT token generation
-- Add token validation middleware
-- Add refresh token endpoint
+## Additional Notes
 
-Closes #123
-```
+### Issue and Pull Request Labels
 
-### 6. Push and Create Pull Request
+| Label name | Description |
+| --- | --- |
+| `bug` | Confirmed bugs or reports that are very likely to be bugs |
+| `enhancement` | Feature requests |
+| `documentation` | Documentation improvements |
+| `good first issue` | Good for newcomers |
+| `help wanted` | Extra attention is needed |
+| `question` | Questions more than bug reports or feature requests |
 
-1. Push your changes:
-```bash
-git push origin feature/your-feature-name
-```
+---
 
-2. Create a Pull Request on GitHub
-3. Fill out the PR template
-4. Wait for review
-
-## Development Guidelines
-
-### Code Style
-
-- Follow PEP 8
-- Use type hints
-- Write docstrings for all public functions
-- Keep functions small and focused
-- Write meaningful variable names
-
-### Testing
-
-- Write unit tests for new features
-- Maintain test coverage
-- Test edge cases
-- Use pytest fixtures
-
-### Documentation
-
-- Update README.md if needed
-- Add docstrings to new functions
-- Update API documentation
-- Add examples for new features
-
-## Review Process
-
-1. All PRs require at least one review
-2. CI must pass
-3. Code coverage must not decrease
-4. Documentation must be updated
-5. Tests must be added
-
-## Release Process
-
-1. Update version in `pyproject.toml`
-2. Update CHANGELOG.md
-3. Create release tag
-4. Build and publish to PyPI
-
-## Need Help?
-
-- Open an issue
-- Join our [Discussions](https://github.com/Craxti/qakeapi/discussions)
-- Check the [FAQ](FAQ)
-
-## License
-
-By contributing to QakeAPI, you agree that your contributions will be licensed under the project's MIT License. 
+Thank you for contributing to QakeAPI! 🚀 

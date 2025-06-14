@@ -12,22 +12,22 @@ def router():
     return Router()
 
 
-async def test_handler(request):
+async def mock_handler(request):
     return Response({"message": "test"}, status_code=200)
 
 
 def test_route_creation():
     """Тест создания маршрута"""
-    route = Route(path="/test", handler=test_handler, methods=["GET"])
+    route = Route(path="/test", handler=mock_handler, methods=["GET"])
     assert route.path == "/test"
     assert route.methods == ["GET"]
-    assert route.handler == test_handler
+    assert route.handler == mock_handler
 
 
 def test_route_pattern_compilation():
     """Тест компиляции паттерна маршрута"""
     route = Route(
-        path="/users/{user_id}/posts/{post_id}", handler=test_handler, methods=["GET"]
+        path="/users/{user_id}/posts/{post_id}", handler=mock_handler, methods=["GET"]
     )
     assert (
         route.pattern.pattern == "^/users/(?P<user_id>[^/]+)/posts/(?P<post_id>[^/]+)$"
@@ -36,7 +36,7 @@ def test_route_pattern_compilation():
 
 def test_route_matching():
     """Тест сопоставления маршрута"""
-    route = Route(path="/users/{user_id}", handler=test_handler, methods=["GET"])
+    route = Route(path="/users/{user_id}", handler=mock_handler, methods=["GET"])
 
     # Проверяем успешное сопоставление
     match = route.match("/users/123")
@@ -48,7 +48,7 @@ def test_route_matching():
 
 def test_router_add_route(router):
     """Тест добавления маршрута в роутер"""
-    router.add_route("/test", test_handler, ["GET"])
+    router.add_route("/test", mock_handler, ["GET"])
     assert len(router.routes) == 1
     assert router.routes[0].path == "/test"
     assert router.routes[0].methods == ["GET"]
@@ -58,7 +58,7 @@ def test_router_add_route(router):
 async def test_router_handle_request(router):
     """Тест обработки запроса роутером"""
     # Добавляем тестовый маршрут
-    router.add_route("/test", test_handler, ["GET"])
+    router.add_route("/test", mock_handler, ["GET"])
 
     # Создаем тестовый запрос
     request = Request(
@@ -78,13 +78,13 @@ async def test_router_handle_request(router):
 
 def test_router_find_route(router):
     """Тест поиска маршрута"""
-    router.add_route("/users/{user_id}", test_handler, ["GET"])
+    router.add_route("/users/{user_id}", mock_handler, ["GET"])
 
     # Проверяем успешный поиск
     route_info = router.find_route("/users/123", "http")
     assert route_info is not None
     route, params = route_info
-    assert route.handler == test_handler
+    assert route.handler == mock_handler
     assert params["user_id"] == "123"
 
     # Проверяем отсутствие маршрута
