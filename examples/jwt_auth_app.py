@@ -127,4 +127,4 @@ async def admin(request: Request) -> Response:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8001, log_level="debug")
+    uvicorn.run(app, host="0.0.0.0", port=8003, log_level="debug")

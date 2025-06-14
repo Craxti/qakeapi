@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import asyncio
 import json
 from typing import Any, Dict, List
@@ -167,5 +169,5 @@ async def startup():
 
 if __name__ == "__main__":
     import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    from config import PORTS
+    uvicorn.run(app, host="0.0.0.0", port=PORTS['simple_app'])

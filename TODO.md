@@ -98,7 +98,7 @@ qakeapi/
 - [x] Implement dependency injection
 - [x] Add background tasks
 - [x] Create lifecycle events
-- [ ] Implement rate limiting
+- [x] Implement rate limiting
 - [ ] Add caching support
 - [x] Create API documentation generation
 

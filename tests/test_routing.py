@@ -1,7 +1,10 @@
+from typing import Any, Dict
+
 import pytest
-from qakeapi.core.routing import Route, Router
+
 from qakeapi.core.requests import Request
 from qakeapi.core.responses import Response
+from qakeapi.core.router import Route, Router
 
 
 @pytest.fixture

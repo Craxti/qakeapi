@@ -122,28 +122,70 @@ class Response:
         self.set_cookie(key, "", max_age=0, path=path, domain=domain)
 
     @classmethod
-    def json(cls, content: dict, status_code: int = 200) -> "Response":
+    def json(
+        cls,
+        content: dict,
+        status_code: int = 200,
+        headers: Optional[Dict[str, str]] = None
+    ) -> "Response":
         """Create JSON response"""
-        return cls(content, status_code=status_code, media_type="application/json")
-
-    @classmethod
-    def text(cls, content: str, status_code: int = 200) -> "Response":
-        """Create text response"""
-        return cls(content, status_code=status_code, media_type="text/plain")
-
-    @classmethod
-    def html(cls, content: str, status_code: int = 200) -> "Response":
-        """Create HTML response"""
+        headers_list = []
+        if headers:
+            headers_list.extend((k.encode(), v.encode()) for k, v in headers.items())
         return cls(
-            content=content,
+            content,
             status_code=status_code,
-            headers=[(b"content-type", b"text/html; charset=utf-8")],
+            headers=headers_list,
+            media_type="application/json"
         )
 
     @classmethod
-    def redirect(cls, url: str, status_code: int = 302) -> "Response":
+    def text(
+        cls,
+        content: str,
+        status_code: int = 200,
+        headers: Optional[Dict[str, str]] = None
+    ) -> "Response":
+        """Create text response"""
+        headers_list = []
+        if headers:
+            headers_list.extend((k.encode(), v.encode()) for k, v in headers.items())
+        return cls(
+            content,
+            status_code=status_code,
+            headers=headers_list,
+            media_type="text/plain"
+        )
+
+    @classmethod
+    def html(
+        cls,
+        content: str,
+        status_code: int = 200,
+        headers: Optional[Dict[str, str]] = None
+    ) -> "Response":
+        """Create HTML response"""
+        headers_list = [(b"content-type", b"text/html; charset=utf-8")]
+        if headers:
+            headers_list.extend((k.encode(), v.encode()) for k, v in headers.items())
+        return cls(
+            content=content,
+            status_code=status_code,
+            headers=headers_list
+        )
+
+    @classmethod
+    def redirect(
+        cls,
+        url: str,
+        status_code: int = 302,
+        headers: Optional[Dict[str, str]] = None
+    ) -> "Response":
         """Create redirect response"""
-        return cls(b"", status_code=status_code, headers=[(b"location", url.encode())])
+        headers_list = [(b"location", url.encode())]
+        if headers:
+            headers_list.extend((k.encode(), v.encode()) for k, v in headers.items())
+        return cls(b"", status_code=status_code, headers=headers_list)
 
     @classmethod
     def stream(

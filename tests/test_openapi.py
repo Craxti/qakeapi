@@ -1,6 +1,8 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
+import pytest
+from pydantic import BaseModel
+
 from qakeapi.core.openapi import OpenAPIGenerator, OpenAPIInfo, OpenAPIPath
 
 

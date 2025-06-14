@@ -1,7 +1,6 @@
 import pytest
-
-from qakeapi.core.application import Application
 from qakeapi.core.websockets import WebSocket, WebSocketState
+from qakeapi.core.application import Application
 
 
 @pytest.fixture
@@ -74,6 +73,22 @@ class TestWebSocketRouting:
             async for message in websocket:
                 received_messages.append(message)
                 await websocket.send_text(f"Echo: {message}")
+
+        # Создаем тестовый клиент
+        async def mock_receive():
+            return {"type": "websocket.connect"}
+
+        async def mock_send(message):
+            pass
+
+        scope = {
+            "type": "websocket",
+            "path": "/ws/test",
+            "headers": [],
+            "query_string": b"",
+            "client": ("127.0.0.1", 8000),
+            "path_params": {},
+        }
 
         # Проверяем маршрутизацию
         route_info = app.router.find_route("/ws/test", "websocket")

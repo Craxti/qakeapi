@@ -34,6 +34,18 @@ app = Application(
     description="An example of WebSocket usage in QakeAPI",
 )
 
+# Добавляем middleware для аутентификации WebSocket
+@app.router.middleware()
+async def websocket_auth_middleware(handler):
+    async def wrapper(request):
+        if request.type == "websocket":
+            # Проверяем наличие токена в заголовках
+            token = request.headers.get("authorization")
+            if not token:
+                return Response.json({"detail": "Unauthorized"}, status_code=403)
+        return await handler(request)
+    return wrapper
+
 
 # Создаем зависимость для хранения подключений
 class ConnectionStore(Dependency):
@@ -179,4 +191,4 @@ async def echo_websocket(websocket: WebSocket):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8004, log_level="debug")
