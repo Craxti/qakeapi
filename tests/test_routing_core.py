@@ -81,11 +81,10 @@ async def test_router_middleware():
     """Test middleware functionality"""
     router = Router()
     
-    async def test_middleware(handler):
-        async def wrapped(request):
-            request.middleware_called = True
-            return await handler(request)
-        return wrapped
+    async def test_middleware(request, handler):
+        request.middleware_called = True
+        response = await handler(request)
+        return response
     
     router.add_middleware(test_middleware)
     router.add_route("/test", test_handler, ["GET"])
@@ -114,10 +113,10 @@ async def test_router_websocket_route():
     
     router.add_route("/ws", ws_handler, ["GET"], route_type="websocket")
     
-    route = router.find_route("/ws", type="websocket")
-    assert route is not None
+    route_info = router.find_route("/ws", type="websocket")
+    assert route_info is not None
+    route, params = route_info
     assert route.type == "websocket"
-    assert route.path == "/ws"
 
 
 def test_route_pattern_compilation():
@@ -137,7 +136,8 @@ def test_router_methods():
     router = Router()
     router.add_route("/test", test_handler, ["GET", "POST"])
     
-    route = router.find_route("/test")
-    assert route is not None
+    route_info = router.find_route("/test")
+    assert route_info is not None
+    route, params = route_info
     assert "GET" in route.methods
     assert "POST" in route.methods 

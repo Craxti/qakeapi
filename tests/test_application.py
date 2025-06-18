@@ -2,7 +2,7 @@ import pytest
 
 from qakeapi.core.application import ASGIApplication
 from qakeapi.core.responses import Response
-from qakeapi.core.router import Router
+from qakeapi.core.routing import Router
 
 
 @pytest.mark.asyncio
