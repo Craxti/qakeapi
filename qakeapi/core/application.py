@@ -10,7 +10,7 @@ from .dependencies import DependencyContainer
 from .openapi import OpenAPIGenerator, OpenAPIInfo, OpenAPIPath, get_swagger_ui_html
 from .requests import Request
 from .responses import Response
-from .router import Router
+from .routing import Router
 from .websockets import WebSocket, WebSocketState
 
 
@@ -58,31 +58,76 @@ class ASGIApplication:
         self, scope: Dict[str, Any], receive: Callable, send: Callable
     ) -> None:
         """Handle HTTP request"""
-        # Получаем тело запроса
-        body = b""
-        more_body = True
+        try:
+            # Получаем тело запроса
+            body = b""
+            more_body = True
 
-        while more_body:
-            message = await receive()
-            body += message.get("body", b"")
-            more_body = message.get("more_body", False)
+            while more_body:
+                message = await receive()
+                body += message.get("body", b"")
+                more_body = message.get("more_body", False)
 
-        # Создаем объект Request
-        print(f"Creating request with scope: {scope}")
-        request = Request(scope, body)
-        request.dependency_container = self.dependency_container
-        request.scope["dependency_container"] = self.dependency_container
-        print(f"Request created: {request.method} {request.path}")
+            # Создаем объект Request
+            print(f"Creating request with scope: {scope}")
+            request = Request(scope, body)
+            request.dependency_container = self.dependency_container
+            request.scope["dependency_container"] = self.dependency_container
+            print(f"Request created: {request.method} {request.path}")
 
-        # Обрабатываем запрос через роутер
-        response = await self.router.handle_request(request)
-        print(f"Response: {response}")
+            # Находим маршрут
+            route_info = self.router.find_route(request.path)
+            if route_info is None:
+                response = Response.json({"detail": "Not Found"}, status_code=404)
+                await response(send)
+                return
 
-        # Отправляем ответ
-        if isinstance(response, Response):
+            route, params = route_info
+            request.scope["path_params"] = params
+
+            # Проверяем метод
+            if request.method not in route.methods and request.method != "OPTIONS":
+                response = Response.json(
+                    {"detail": f"Method {request.method} not allowed"}, status_code=405
+                )
+                await response(send)
+                return
+
+            # Применяем middleware
+            handler = route.handler
+            for middleware in reversed(self._middleware):
+                try:
+                    new_handler = await middleware(request=request, handler=handler)
+                    if new_handler is not None:
+                        handler = new_handler
+                except Exception as e:
+                    print(f"Error applying middleware: {str(e)}")
+                    import traceback
+                    print(traceback.format_exc())
+                    response = Response.json({"detail": "Internal Server Error"}, status_code=500)
+                    await response(send)
+                    return
+
+            # Вызываем обработчик
+            try:
+                response = await handler(request)
+                if isinstance(response, Response):
+                    await response(send)
+                else:
+                    await Response.json(response)(send)
+            except Exception as e:
+                print(f"Error in handler: {str(e)}")
+                import traceback
+                print(traceback.format_exc())
+                response = Response.json({"detail": "Internal Server Error"}, status_code=500)
+                await response(send)
+
+        except Exception as e:
+            print(f"Error handling request: {str(e)}")
+            import traceback
+            print(traceback.format_exc())
+            response = Response.json({"detail": "Internal Server Error"}, status_code=500)
             await response(send)
-        else:
-            await Response.json(response)(send)
 
     async def handle_websocket(
         self,
@@ -422,8 +467,8 @@ class Application(ASGIApplication):
         """Get middleware list"""
         return self._middleware
 
-    def add_middleware(self, middleware_func):
-        """Add middleware function"""
+    def add_middleware(self, middleware_func: Callable) -> None:
+        """Add middleware to the application"""
         self._middleware.append(middleware_func)
 
     async def handle_request(self, request: Request) -> Response:
@@ -436,14 +481,9 @@ class Application(ASGIApplication):
             route, params = route_info
             request.scope["path_params"] = params
 
-            # Apply middleware first
-            handler = route.handler
-            for middleware in self._middleware:
-                handler = partial(middleware, handler=handler)
-
             # Let middleware handle OPTIONS requests
             if request.method == "OPTIONS":
-                return await handler(request)
+                return Response.json({}, status_code=200)
 
             # Check if method is allowed
             if request.method not in route.methods:
@@ -451,7 +491,22 @@ class Application(ASGIApplication):
                     {"detail": f"Method {request.method} not allowed"}, status_code=405
                 )
 
-            return await handler(request)
+            # Apply middleware first
+            handler = route.handler
+            for middleware in reversed(self._middleware):
+                print(f"Applying middleware: {middleware}")
+                next_handler = await middleware(request, handler)
+                print(f"Middleware response: {next_handler}")
+                if isinstance(next_handler, Response):
+                    return next_handler
+                handler = next_handler
+
+            # Call the final handler
+            print(f"Calling final handler: {handler}")
+            response = await handler(request)
+            print(f"Final response: {response}")
+            return response
+
         except Exception as e:
             # Log the error
             print(f"Error handling request: {str(e)}")
@@ -462,31 +517,76 @@ class Application(ASGIApplication):
         self, scope: Dict[str, Any], receive: Callable, send: Callable
     ) -> None:
         """Handle HTTP request"""
-        # Получаем тело запроса
-        body = b""
-        more_body = True
+        try:
+            # Получаем тело запроса
+            body = b""
+            more_body = True
 
-        while more_body:
-            message = await receive()
-            body += message.get("body", b"")
-            more_body = message.get("more_body", False)
+            while more_body:
+                message = await receive()
+                body += message.get("body", b"")
+                more_body = message.get("more_body", False)
 
-        # Создаем объект Request
-        print(f"Creating request with scope: {scope}")
-        request = Request(scope, body)
-        request.dependency_container = self.dependency_container
-        request.scope["dependency_container"] = self.dependency_container
-        print(f"Request created: {request.method} {request.path}")
+            # Создаем объект Request
+            print(f"Creating request with scope: {scope}")
+            request = Request(scope, body)
+            request.dependency_container = self.dependency_container
+            request.scope["dependency_container"] = self.dependency_container
+            print(f"Request created: {request.method} {request.path}")
 
-        # Обрабатываем запрос через роутер
-        response = await self.handle_request(request)
-        print(f"Response: {response}")
+            # Находим маршрут
+            route_info = self.router.find_route(request.path)
+            if route_info is None:
+                response = Response.json({"detail": "Not Found"}, status_code=404)
+                await response(send)
+                return
 
-        # Отправляем ответ
-        if isinstance(response, Response):
+            route, params = route_info
+            request.scope["path_params"] = params
+
+            # Проверяем метод
+            if request.method not in route.methods and request.method != "OPTIONS":
+                response = Response.json(
+                    {"detail": f"Method {request.method} not allowed"}, status_code=405
+                )
+                await response(send)
+                return
+
+            # Применяем middleware
+            handler = route.handler
+            for middleware in reversed(self._middleware):
+                try:
+                    new_handler = await middleware(request=request, handler=handler)
+                    if new_handler is not None:
+                        handler = new_handler
+                except Exception as e:
+                    print(f"Error applying middleware: {str(e)}")
+                    import traceback
+                    print(traceback.format_exc())
+                    response = Response.json({"detail": "Internal Server Error"}, status_code=500)
+                    await response(send)
+                    return
+
+            # Вызываем обработчик
+            try:
+                response = await handler(request)
+                if isinstance(response, Response):
+                    await response(send)
+                else:
+                    await Response.json(response)(send)
+            except Exception as e:
+                print(f"Error in handler: {str(e)}")
+                import traceback
+                print(traceback.format_exc())
+                response = Response.json({"detail": "Internal Server Error"}, status_code=500)
+                await response(send)
+
+        except Exception as e:
+            print(f"Error handling request: {str(e)}")
+            import traceback
+            print(traceback.format_exc())
+            response = Response.json({"detail": "Internal Server Error"}, status_code=500)
             await response(send)
-        else:
-            await Response.json(response)(send)
 
     async def handle_websocket(self, scope: Dict, receive: Any, send: Any) -> None:
         """Handle WebSocket connections"""

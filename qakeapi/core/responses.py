@@ -209,34 +209,45 @@ class Response:
 
     @property
     def headers_dict(self) -> Dict[str, str]:
-        """Get response headers as dictionary"""
-        headers = {}
-        for k, v in self.headers_list:
-            headers[k.decode()] = v.decode()
-        return headers
+        """Get response headers as dict"""
+        return {k.decode(): v.decode() for k, v in self.headers_list}
 
     async def __call__(self, send) -> None:
-        """Send response through ASGI protocol"""
-        if not self.is_stream:
-            await send(
-                {
-                    "type": "http.response.start",
-                    "status": self.status_code,
-                    "headers": self.headers_list,
-                }
-            )
-            body = await self.body
-            await send({"type": "http.response.body", "body": body, "more_body": False})
-        else:
-            await send(
-                {
-                    "type": "http.response.start",
-                    "status": self.status_code,
-                    "headers": self.headers_list,
-                }
-            )
+        """Send response via ASGI"""
+        await send(
+            {
+                "type": "http.response.start",
+                "status": self.status_code,
+                "headers": self.headers_list,
+            }
+        )
+
+        if self.is_stream:
             async for chunk in self.content:
                 await send(
                     {"type": "http.response.body", "body": chunk, "more_body": True}
                 )
             await send({"type": "http.response.body", "body": b"", "more_body": False})
+        else:
+            body = await self.body
+            await send({"type": "http.response.body", "body": body})
+
+
+class JSONResponse(Response):
+    """JSON Response"""
+    def __init__(
+        self,
+        content: Any,
+        status_code: int = 200,
+        headers: Optional[List[Tuple[bytes, bytes]]] = None,
+    ) -> None:
+        super().__init__(
+            content=content,
+            status_code=status_code,
+            headers=headers,
+            media_type="application/json"
+        )
+
+    @property
+    async def body(self) -> bytes:
+        return json.dumps(self.content).encode()

@@ -8,7 +8,7 @@ from .dependencies import Dependency, DependencyContainer, inject
 from .files import UploadFile
 from .requests import Request
 from .responses import Response
-from .router import Router
+from .routing import Router
 
 __all__ = [
     "Application",

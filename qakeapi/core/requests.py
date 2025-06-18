@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import parse_qs
 
 from .files import UploadFile
-
+from .interfaces import UserProtocol
 
 class Request:
     """HTTP Request"""
@@ -20,7 +20,18 @@ class Request:
         self._files: Optional[Dict[str, UploadFile]] = None
         self._cookies: Optional[SimpleCookie] = None
         self.dependency_container = None
+        self._user: Optional[UserProtocol] = None
         print(f"Request created: {self.method} {self.path}")
+
+    @property
+    def user(self) -> Optional[UserProtocol]:
+        """Get authenticated user"""
+        return self._user
+
+    @user.setter
+    def user(self, value: Optional[UserProtocol]):
+        """Set authenticated user"""
+        self._user = value
 
     @property
     def type(self) -> str:
