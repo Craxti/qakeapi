@@ -93,47 +93,31 @@ async def index(request: Request, data_store: DataStore):
     return ResponseValidator.validate_response(message.dict(), Message)
 
 
-@app.get(
-    "/items",
-    summary="Get all items",
-    description="Get all items",
-    response_model=ItemList,
-    tags=["items"],
-)
-@inject(DataStore)
-async def get_items(request: Request, data_store: DataStore):
-    data = data_store
-    items_list = [{"id": k, **v} for k, v in data.items()]
-    response_data = {"items": items_list}
-    return ResponseValidator.validate_response(response_data, ItemList)
-
-
-@app.post(
-    "/items",
-    summary="Create new item",
-    description="Create a new item",
-    request_model=Item,
-    response_model=ItemResponse,
-    tags=["items"],
-)
-@inject(DataStore)
-async def create_item(request: Request, data_store: DataStore):
-    data = data_store
-    request_data = await request.json()
-
-    # Валидируем данные запроса
-    validated_item = await RequestValidator.validate_request_body(request_data, Item)
-    if validated_item is None:
-        return Response.json({"detail": "Invalid request data"}, status_code=400)
-
-    # Создаем новый элемент
-    item_id = str(len(data) + 1)
-    item_data = validated_item.dict()
-    data[item_id] = item_data
-
-    # Валидируем ответ
-    response_data = {"id": item_id, **item_data}
-    return ResponseValidator.validate_response(response_data, ItemResponse)
+@app.router.route("/items", methods=["GET", "POST"])
+async def items(request: Request):
+    data_store = await app.dependency_container.resolve(DataStore)
+    
+    if request.method == "GET":
+        items_list = [{"id": k, **v} for k, v in data_store.items()]
+        response_data = {"items": items_list}
+        return Response.json(response_data)
+    
+    elif request.method == "POST":
+        request_data = await request.json()
+        
+        # Валидируем данные запроса
+        validated_item = await RequestValidator.validate_request_body(request_data, Item)
+        if validated_item is None:
+            return Response.json({"detail": "Invalid request data"}, status_code=400)
+            
+        # Создаем новый элемент
+        item_id = str(len(data_store) + 1)
+        item_data = validated_item.model_dump()
+        data_store[item_id] = item_data
+        
+        # Возвращаем ответ
+        response_data = {"id": item_id, **item_data}
+        return Response.json(response_data)
 
 
 @app.get(

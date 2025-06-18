@@ -1,12 +1,12 @@
 import asyncio
 import json
-
 import websockets
+from config import PORTS
 
 
 async def test_chat():
     # Подключаемся к чату в комнате test_room
-    async with websockets.connect("ws://localhost:8004/ws/chat/test_room") as websocket:
+    async with websockets.connect(f"ws://localhost:{PORTS['websocket_app']}/ws/chat/test_room") as websocket:
         # Получаем приветственное сообщение
         response = await websocket.recv()
         print(f"Received: {response}")
@@ -22,7 +22,7 @@ async def test_chat():
 
 async def test_echo():
     # Подключаемся к echo endpoint
-    async with websockets.connect("ws://localhost:8004/ws/echo") as websocket:
+    async with websockets.connect(f"ws://localhost:{PORTS['websocket_app']}/ws/echo") as websocket:
         # Отправляем сообщение
         message = "Hello, Echo!"
         await websocket.send(message)

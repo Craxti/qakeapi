@@ -157,4 +157,5 @@ async def create_timeout_task(request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8005, log_level="debug")
+    from config import PORTS
+    uvicorn.run(app, host="0.0.0.0", port=PORTS['background_tasks_app'], log_level="debug")

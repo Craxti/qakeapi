@@ -41,8 +41,9 @@ config = Config()
 # Define routes
 @app.get("/", summary="Get index", description="Returns welcome message and config")
 async def index(request: Request):
+    config_data = await config.resolve()
     return Response.json(
-        {"message": "Welcome to QakeAPI!", "config": await config.resolve()}
+        {"message": "Welcome to QakeAPI!", "config": config_data}
     )
 
 
@@ -71,7 +72,8 @@ async def echo(request: Request):
 
 if __name__ == "__main__":
     import uvicorn
+    from config import PORTS
 
-    print("Starting server...")
+    print("Starting basic example server...")
     print("Available routes:", [(r.path, r.type, r.methods) for r in app.router.routes])
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=PORTS['basic_app'], log_level="debug")
