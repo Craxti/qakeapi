@@ -27,7 +27,7 @@ A clear and concise description of what you expected to happen.
 **Environment (please complete the following information):**
  - OS: [e.g. Ubuntu 20.04]
  - Python version: [e.g. 3.9.0]
- - QakeAPI version: [e.g. 0.2.0]
+ - QakeAPI version: [e.g. 1.0.0]
  - Dependencies versions: [if relevant]
 
 **Additional context**
