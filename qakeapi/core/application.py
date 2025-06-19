@@ -516,13 +516,13 @@ class Application(ASGIApplication):
             for middleware in reversed(self._middleware):
                 try:
                     if asyncio.iscoroutinefunction(middleware):
-                next_handler = await middleware(request, handler)
+                        next_handler = await middleware(request, handler)
                     else:
                         next_handler = middleware(request, handler)
                     
-                if isinstance(next_handler, Response):
-                    return next_handler
-                handler = next_handler
+                    if isinstance(next_handler, Response):
+                        return next_handler
+                    handler = next_handler
                 except Exception as e:
                     print(f"Error in middleware: {str(e)}")
                     continue
