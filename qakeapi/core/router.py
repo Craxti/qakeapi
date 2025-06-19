@@ -46,37 +46,59 @@ class Router:
         self._middleware: List[Callable] = []
 
     def add_route(
-        self, path: str, handler: Callable, methods: List[str] = None
+        self, path: str, handler: Callable, methods: List[str] = None, route_type: str = "http"
     ) -> None:
-        """Add HTTP route"""
+        """Add route"""
         if methods is None:
             methods = ["GET"]
         methods = [m.upper() for m in methods]
 
         # Check if route already exists
         for existing_route in self.routes:
-            if existing_route.path == path and existing_route.type == "http":
+            if existing_route.path == path and existing_route.type == route_type:
                 # Update existing route instead of adding a new one
                 existing_route.handler = handler
                 existing_route.methods = methods
-                print(f"Updated route: {path} {methods}")
+                logger.debug(f"Updated route: {path} {methods} [{route_type}]")
                 return
 
-        route = Route(path=path, handler=handler, methods=methods)
+        route = Route(path=path, handler=handler, methods=methods, type=route_type)
         self.routes.append(route)
-        print(f"Added route: {path} {methods}")
+        logger.debug(f"Added route: {path} {methods} [{route_type}]")
 
     def add_websocket_route(self, path: str, handler: Callable) -> None:
         """Add WebSocket route"""
-        route = Route(path=path, handler=handler, methods=["GET"], type="websocket")
-        self.routes.append(route)
-        print(f"Added WebSocket route: {path}")
+        self.add_route(path, handler, ["GET"], route_type="websocket")
+
+    def find_route(self, path: str, route_type: str = "http") -> Optional[Tuple[Route, Dict[str, str]]]:
+        """Find route by path and type"""
+        logger.debug(f"Finding route for path: {path} type: {route_type}")
+        logger.debug(f"Available routes: {[(r.path, r.type, r.methods) for r in self.routes]}")
+        
+        for route in self.routes:
+            if route.type == route_type:
+                params = route.match(path)
+                if params is not None:
+                    logger.debug(f"Found route: {route.path} [{route.type}]")
+                    return route, params
+        
+        logger.debug(f"No route found for path: {path} type: {route_type}")
+        return None
 
     def route(self, path: str, methods: List[str] = None):
         """Route decorator"""
 
         def decorator(handler: Callable) -> Callable:
             self.add_route(path, handler, methods)
+            return handler
+
+        return decorator
+
+    def websocket(self, path: str):
+        """WebSocket route decorator"""
+
+        def decorator(handler: Callable) -> Callable:
+            self.add_websocket_route(path, handler)
             return handler
 
         return decorator
@@ -93,27 +115,6 @@ class Router:
             return middleware
 
         return decorator
-
-    def find_route(
-        self, path: str, type: str = "http"
-    ) -> Optional[Tuple[Route, Dict[str, str]]]:
-        """Find matching route for path and type"""
-        logger.debug(f"Finding route for path: {path} type: {type}")
-        logger.debug(
-            f"Available routes: {[(r.path, r.type, r.methods) for r in self.routes]}"
-        )
-
-        for route in self.routes:
-            if route.type != type:
-                continue
-
-            params = route.match(path)
-            if params is not None:
-                logger.debug(f"Found route: {route.path} {route.methods}")
-                return route, params
-
-        logger.debug(f"No route found for path: {path}")
-        return None
 
     async def handle_request(self, request: Request) -> Response:
         """Handle incoming request"""

@@ -1,0 +1,17 @@
+DEBUG:qakeapi.core.routing:Created route: /docs ['GET'] http
+DEBUG:qakeapi.core.routing:Added route: /docs ['GET']
+DEBUG:qakeapi.core.routing:Created route: /openapi.json ['GET'] http
+DEBUG:qakeapi.core.routing:Added route: /openapi.json ['GET']
+DEBUG:qakeapi.core.routing:Created route: /docs ['GET'] http
+DEBUG:qakeapi.core.routing:Added route: /docs ['GET']
+DEBUG:qakeapi.core.routing:Created route: /openapi.json ['GET'] http
+DEBUG:qakeapi.core.routing:Added route: /openapi.json ['GET']
+DEBUG:qakeapi.core.routing:Created route: /ws/chat/{room_id} ['GET'] websocket
+DEBUG:qakeapi.core.routing:Added route: /ws/chat/{room_id} ['GET']
+DEBUG:qakeapi.core.routing:Created route: /ws/echo ['GET'] websocket
+DEBUG:qakeapi.core.routing:Added route: /ws/echo ['GET']
+DEBUG:asyncio:Using selector: KqueueSelector
+INFO:     Started server process [82144]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8003 (Press CTRL+C to quit)

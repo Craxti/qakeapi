@@ -49,9 +49,14 @@ line_length = 88
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra -q"
+addopts = "-ra -q --disable-warnings"
 testpaths = [
     "tests",
+]
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
 ]
 
 [tool.poetry]

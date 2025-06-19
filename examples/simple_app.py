@@ -18,7 +18,7 @@ class Item(BaseModel):
     name: str
     description: str = None
     price: float
-    tax: float = None
+    tax: float = 0.0
 
 
 class ItemResponse(BaseModel):
@@ -26,7 +26,7 @@ class ItemResponse(BaseModel):
     name: str
     description: str = None
     price: float
-    tax: float = None
+    tax: float = 0.0
 
 
 class ItemList(BaseModel):
@@ -113,6 +113,8 @@ async def items(request: Request):
         # Создаем новый элемент
         item_id = str(len(data_store) + 1)
         item_data = validated_item.model_dump()
+        if item_data.get("tax") is None:
+            item_data["tax"] = 0.0
         data_store[item_id] = item_data
         
         # Возвращаем ответ

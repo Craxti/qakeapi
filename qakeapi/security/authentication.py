@@ -3,7 +3,9 @@ from dataclasses import dataclass
 import logging
 from typing import Any, Dict, List, Optional
 import traceback
+from datetime import datetime, timedelta
 
+import jwt
 from pydantic import BaseModel
 
 from qakeapi.core.responses import Response
@@ -130,4 +132,91 @@ class BasicAuthBackend(AuthenticationBackend):
         except Exception as e:
             logger.error(f"Error getting user: {e}")
             logger.error(traceback.format_exc())
+            raise AuthenticationError("Failed to get user")
+
+
+@dataclass
+class JWTConfig:
+    secret_key: str
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+
+
+class JWTAuthBackend(AuthenticationBackend):
+    """JWT authentication backend"""
+
+    def __init__(self, config: JWTConfig):
+        self.config = config
+        self.users: Dict[str, Dict[str, Any]] = {}
+        logger.debug("Initialized JWTAuthBackend")
+
+    def add_user(self, username: str, password: str, roles: List[str] = None):
+        """Add a user to the backend"""
+        self.users[username] = {
+            "password": password,
+            "roles": roles or [],
+            "metadata": {},
+        }
+        logger.debug(f"Added user: {username} with roles: {roles}")
+
+    def create_access_token(self, data: Dict[str, Any]) -> str:
+        """Create JWT access token"""
+        try:
+            encoded_jwt = jwt.encode(data, self.config.secret_key, algorithm=self.config.algorithm)
+            return encoded_jwt
+        except Exception as e:
+            logger.error(f"Error creating access token: {e}")
+            raise AuthenticationError("Failed to create access token")
+
+    async def authenticate(self, credentials: Dict[str, str]) -> Optional[UserProtocol]:
+        """Authenticate user with JWT credentials"""
+        try:
+            username = credentials.get("username")
+            password = credentials.get("password")
+
+            if not username or not password:
+                return None
+
+            user_data = self.users.get(username)
+            if not user_data or user_data["password"] != password:
+                return None
+
+            return User(
+                username=username,
+                roles=user_data["roles"],
+                metadata=user_data.get("metadata")
+            )
+        except Exception as e:
+            logger.error(f"Error during authentication: {e}")
+            return None
+
+    async def get_current_user(self, token: str) -> Optional[UserProtocol]:
+        """Get current user from JWT token"""
+        try:
+            payload = jwt.decode(token, self.config.secret_key, algorithms=[self.config.algorithm])
+            username = payload.get("sub")
+            if not username:
+                return None
+            return await self.get_user(username)
+        except jwt.PyJWTError as e:
+            logger.error(f"JWT error: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Error getting current user: {e}")
+            return None
+
+    async def get_user(self, user_id: str) -> Optional[UserProtocol]:
+        """Get user by username"""
+        try:
+            user_data = self.users.get(user_id)
+            if not user_data:
+                return None
+
+            return User(
+                username=user_id,
+                roles=user_data["roles"],
+                metadata=user_data.get("metadata", {})
+            )
+        except Exception as e:
+            logger.error(f"Error getting user: {e}")
             raise AuthenticationError("Failed to get user")

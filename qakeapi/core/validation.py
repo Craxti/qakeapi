@@ -27,7 +27,13 @@ class PydanticValidator:
 
     def validate(self, data: Dict[str, Any]) -> BaseModel:
         """Validate data against Pydantic model"""
-        return self.model_class(**data)
+        try:
+            # Создаем модель с exclude_unset=True, чтобы использовать значения по умолчанию
+            model = self.model_class(**data, exclude_unset=True)
+            # Преобразуем в словарь и обратно для применения значений по умолчанию
+            return self.model_class(**model.model_dump())
+        except ValidationError as e:
+            raise ValueError(f"Validation error: {str(e)}")
 
 
 class ValidationFactory:
@@ -62,7 +68,10 @@ class RequestValidator:
     ) -> Optional[T]:
         """Валидация тела запроса"""
         try:
-            return model(**request_body)
+            # Используем exclude_unset=True для применения значений по умолчанию
+            validated = model(**request_body, exclude_unset=True)
+            # Преобразуем в словарь и обратно для применения значений по умолчанию
+            return model(**validated.model_dump())
         except ValidationError as e:
             return None
 
@@ -72,7 +81,10 @@ class RequestValidator:
     ) -> Optional[T]:
         """Валидация параметров пути"""
         try:
-            return model(**path_params)
+            # Используем exclude_unset=True для применения значений по умолчанию
+            validated = model(**path_params, exclude_unset=True)
+            # Преобразуем в словарь и обратно для применения значений по умолчанию
+            return model(**validated.model_dump())
         except ValidationError:
             return None
 
@@ -87,7 +99,10 @@ class RequestValidator:
                 k: v[0] if isinstance(v, list) and len(v) == 1 else v
                 for k, v in query_params.items()
             }
-            return model(**cleaned_params)
+            # Используем exclude_unset=True для применения значений по умолчанию
+            validated = model(**cleaned_params, exclude_unset=True)
+            # Преобразуем в словарь и обратно для применения значений по умолчанию
+            return model(**validated.model_dump())
         except ValidationError:
             return None
 
@@ -101,8 +116,10 @@ class ResponseValidator:
     ) -> Optional[Response]:
         """Валидация данных ответа"""
         try:
-            validated_data = model(**response_data)
-            return Response.json(validated_data.model_dump())
+            # Используем exclude_unset=True для применения значений по умолчанию
+            validated = model(**response_data, exclude_unset=True)
+            # Преобразуем в словарь и обратно для применения значений по умолчанию
+            return Response.json(validated.model_dump())
         except ValidationError as e:
             return Response.json(
                 {"detail": "Response validation failed", "errors": e.errors()},

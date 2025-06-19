@@ -4,6 +4,7 @@ import traceback
 from functools import partial
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple, Union
 from urllib.parse import parse_qs
+import logging
 
 from .background import BackgroundTask, BackgroundTaskManager
 from .dependencies import DependencyContainer
@@ -13,6 +14,9 @@ from .responses import Response
 from .routing import Router
 from .websockets import WebSocket, WebSocketState
 
+# Setup logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class ASGIApplication:
     """Базовый класс ASGI-приложения"""
@@ -212,14 +216,9 @@ class ASGIApplication:
             route, params = route_info
             request.scope["path_params"] = params
 
-            # Apply middleware first
-            handler = route.handler
-            for middleware in self._middleware:
-                handler = partial(middleware, handler=handler)
-
             # Let middleware handle OPTIONS requests
             if request.method == "OPTIONS":
-                return await handler(request)
+                return Response.json({}, status_code=200)
 
             # Check if method is allowed
             if request.method not in route.methods:
@@ -227,7 +226,28 @@ class ASGIApplication:
                     {"detail": f"Method {request.method} not allowed"}, status_code=405
                 )
 
-            return await handler(request)
+            # Apply middleware first
+            handler = route.handler
+            for middleware in reversed(self._middleware):
+                try:
+                    if asyncio.iscoroutinefunction(middleware):
+                        next_handler = await middleware(request, handler)
+                    else:
+                        next_handler = middleware(request, handler)
+                    
+                    if isinstance(next_handler, Response):
+                        return next_handler
+                    handler = next_handler
+                except Exception as e:
+                    print(f"Error in middleware: {str(e)}")
+                    continue
+
+            # Call the final handler
+            print(f"Calling final handler: {handler}")
+            response = await handler(request)
+            print(f"Final response: {response}")
+            return response
+
         except Exception as e:
             # Log the error
             print(f"Error handling request: {str(e)}")
@@ -494,12 +514,18 @@ class Application(ASGIApplication):
             # Apply middleware first
             handler = route.handler
             for middleware in reversed(self._middleware):
-                print(f"Applying middleware: {middleware}")
+                try:
+                    if asyncio.iscoroutinefunction(middleware):
                 next_handler = await middleware(request, handler)
-                print(f"Middleware response: {next_handler}")
+                    else:
+                        next_handler = middleware(request, handler)
+                    
                 if isinstance(next_handler, Response):
                     return next_handler
                 handler = next_handler
+                except Exception as e:
+                    print(f"Error in middleware: {str(e)}")
+                    continue
 
             # Call the final handler
             print(f"Calling final handler: {handler}")
@@ -596,11 +622,11 @@ class Application(ASGIApplication):
         # Find route
         route_info = self.router.find_route(path, "websocket")
         if not route_info:
-            await websocket.close(1008)  # Policy violation
+            await send({"type": "websocket.close", "code": 1008})  # Policy violation
             return
 
         route, params = route_info
-        websocket.scope["path_params"] = params
+        scope["path_params"] = params
 
         # Apply middleware
         handler = route.handler
@@ -608,9 +634,11 @@ class Application(ASGIApplication):
         try:
             await handler(websocket)
         except Exception as e:
+            logger.error(f"WebSocket error: {str(e)}", exc_info=True)
             if websocket.state == WebSocketState.CONNECTED:
                 await websocket.close(1011)  # Internal error
-            raise
+            else:
+                await send({"type": "websocket.close", "code": 1011})
 
     async def handle_lifespan(
         self,

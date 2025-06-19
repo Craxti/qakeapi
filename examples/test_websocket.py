@@ -1,41 +1,59 @@
 import asyncio
 import json
-
+import logging
 import websockets
 
+# Setup logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 async def test_echo():
-    uri = "ws://localhost:8000/ws/echo"
-    async with websockets.connect(uri) as websocket:
-        # Send a message
-        await websocket.send("Hello, WebSocket!")
-        # Receive the response
+    """Test echo WebSocket endpoint"""
+    print("Testing Echo WebSocket...")
+    async with websockets.connect("ws://localhost:8006/ws/echo") as websocket:
+        # Receive welcome message
+        welcome = await websocket.recv()
+        print(f"Welcome message: {welcome}")
+        
+        # Send test message
+        message = "Hello WebSocket!"
+        logger.debug(f"Sending message to echo: {message}")
+        await websocket.send(message)
+        
+        # Receive echo response
         response = await websocket.recv()
-        print(f"Received from echo: {response}")
-
+        print(f"Echo response: {response}")
 
 async def test_chat():
-    uri = "ws://localhost:8000/ws/chat/test-room"
-    async with websockets.connect(uri) as websocket:
+    """Test chat WebSocket endpoint"""
+    print("\nTesting Chat WebSocket...")
+    async with websockets.connect("ws://localhost:8006/ws/chat/test-room") as websocket:
         # Receive welcome message
         welcome = await websocket.recv()
         print(f"Welcome message: {welcome}")
 
-        # Send a chat message
-        message = {"type": "chat", "message": "Hello, chat room!"}
+        # Send test message
+        message = {
+            "message": "Hello Chat!",
+            "type": "message"
+        }
+        logger.debug(f"Sending message to chat: {message}")
         await websocket.send(json.dumps(message))
 
-        # Receive the broadcasted message
+        try:
+            # Receive confirmation
         response = await websocket.recv()
-        print(f"Received from chat: {response}")
-
+            print(f"Chat response: {response}")
+        except websockets.exceptions.ConnectionClosed:
+            logger.error("Connection closed before receiving response")
 
 async def main():
-    print("Testing echo WebSocket...")
+    try:
     await test_echo()
-    print("\nTesting chat WebSocket...")
+        await asyncio.sleep(1)  # Wait for echo connection to close
     await test_chat()
-
+    except Exception as e:
+        logger.error(f"Test error: {e}")
 
 if __name__ == "__main__":
     asyncio.run(main())

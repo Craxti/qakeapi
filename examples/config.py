@@ -7,8 +7,8 @@ PORTS = {
     'simple_app': 8001,
     'auth_app': 8002,
     'cors_app': 8003,
-    'rate_limit_app': 8004,
-    'jwt_auth_app': 8005,
-    'websocket_app': 8006,
-    'background_tasks_app': 8007
+    'rate_limit_app': 8002,
+    'jwt_auth_app': 8003,
+    'websocket_app': 8001,
+    'background_tasks_app': 8017
 } 

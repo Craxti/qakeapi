@@ -1,49 +1,90 @@
-from qakeapi.core.application import Application
-from qakeapi.security.rate_limit import InMemoryRateLimiter, RateLimitMiddleware
-from qakeapi.core.responses import Response
+import logging
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Callable, Awaitable
 
-# Создаем приложение
+from qakeapi.core.application import Application
+from qakeapi.core.requests import Request
+from qakeapi.core.responses import Response, JSONResponse
+from qakeapi.core.middleware import Middleware
+
+from examples.config import PORTS
+
+# Setup logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    filename='rate_limit.log'
+)
+logger = logging.getLogger(__name__)
+
+# Configuration
+REQUESTS_PER_MINUTE = 5
+WINDOW_SIZE = 60  # seconds
+RATE_LIMIT_PORT = 8007  # Используем фиксированный порт
+
+class RateLimitMiddleware(Middleware):
+    def __init__(self):
+        self.request_history: Dict[str, List[datetime]] = {}
+        self.requests_per_minute = REQUESTS_PER_MINUTE
+
+    async def __call__(self, request: Request, handler: Callable) -> Response:
+        return await self.process_request(request, handler)
+
+    async def process_request(self, request: Request, handler: Callable) -> Response:
+        client_ip = request.client.host if request.client else "unknown"
+        
+        # Initialize history for new clients
+        if client_ip not in self.request_history:
+            self.request_history[client_ip] = []
+        
+        # Clean old requests
+        now = datetime.now()
+        minute_ago = now - timedelta(minutes=1)
+        self.request_history[client_ip] = [
+            ts for ts in self.request_history[client_ip] 
+            if ts > minute_ago
+        ]
+        
+        # Check rate limit
+        if len(self.request_history[client_ip]) >= self.requests_per_minute:
+            return JSONResponse(
+                content={"detail": "Rate limit exceeded"},
+                status_code=429
+            )
+        
+        # Add current request timestamp
+        self.request_history[client_ip].append(now)
+        
+        # Process request
+        return await handler(request)
+
+# Create application
 app = Application()
 
-# Настраиваем rate limiting: 5 запросов в минуту
-rate_limiter = InMemoryRateLimiter(requests_per_minute=5)
+# Add rate limit middleware
+middleware = RateLimitMiddleware()
+app.add_middleware(middleware)
 
-# Отдельный rate limiter для защищенных эндпоинтов
-api_rate_limiter = InMemoryRateLimiter(requests_per_minute=2)
+@app.get("/")
+async def index(request: Request) -> Response:
+    return JSONResponse(
+        content={"message": "Rate limit example server is running"},
+        status_code=200
+    )
 
-@app.router.middleware()
-async def rate_limit_middleware(request, handler):
-    """Rate limit middleware implementation"""
-    key = request.client.host
-    
-    # Выбираем подходящий rate limiter
-    if request.path.startswith("/protected"):
-        limiter = api_rate_limiter
-    else:
-        limiter = rate_limiter
-        
-    # Проверяем лимит
-    if not await limiter.check_rate_limit(key):
-        return Response.json(
-            {"detail": "Rate limit exceeded"}, 
-            status_code=429
-        )
-        
-    return await handler(request)
-
-@app.router.route("/", methods=["GET"])
-async def index(request):
-    return Response.json({"message": "Hello from Rate Limited API!"})
-
-@app.router.route("/api", methods=["GET"])
-async def api(request):
-    return Response.json({"data": "API response"})
-
-@app.router.route("/protected", methods=["GET"])
-async def protected(request):
-    return Response.json({"data": "Protected API response"})
+@app.get("/status")
+async def status(request: Request) -> Response:
+    client_ip = request.client.host if request.client else "unknown"
+    requests_count = len(middleware.request_history.get(client_ip, []))
+    return JSONResponse(
+        content={
+            "requests_count": requests_count,
+            "requests_remaining": middleware.requests_per_minute - requests_count
+        },
+        status_code=200
+    )
 
 if __name__ == "__main__":
     import uvicorn
-    from config import PORTS
-    uvicorn.run(app, host="127.0.0.1", port=PORTS['rate_limit_app']) 
+    print("Starting rate limit example server...")
+    uvicorn.run(app, host="0.0.0.0", port=RATE_LIMIT_PORT) 

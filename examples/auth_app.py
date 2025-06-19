@@ -1,8 +1,6 @@
 import logging
 
-from qakeapi.core.application import Application
-from qakeapi.core.requests import Request
-from qakeapi.core.responses import Response
+from qakeapi import Application, Request, Response
 from qakeapi.security.authentication import BasicAuthBackend
 from qakeapi.security.authorization import IsAdmin, IsAuthenticated, requires_auth
 
@@ -37,7 +35,7 @@ app.add_middleware(auth_middleware)
 @app.get("/")
 async def index(request: Request) -> Response:
     """Public endpoint"""
-    return Response.json({"message": "Welcome to the Auth API!"})
+    return Response.json({"message": "Welcome to Auth API!"})
 
 @app.get("/profile")
 @requires_auth(IsAuthenticated())
@@ -57,12 +55,8 @@ async def profile(request: Request) -> Response:
 async def admin(request: Request) -> Response:
     """Protected endpoint - requires admin role"""
     return Response.json({
-        "message": "Welcome, admin!",
-        "user": {
-            "username": request.user.username,
-            "roles": request.user.roles,
-            "metadata": request.user.metadata
-        }
+        "message": "Admin endpoint",
+        "user": request.user.username
     })
 
 if __name__ == "__main__":

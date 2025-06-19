@@ -1,22 +1,25 @@
 import asyncio
+import time
+import uuid
+from typing import Dict
 
 import uvicorn
 from pydantic import BaseModel
 
-from qakeapi.core.application import Application
+from qakeapi import Application, Request, Response
+from qakeapi.core.background import BackgroundTaskManager
 from qakeapi.core.dependencies import Dependency
-from qakeapi.core.requests import Request
-from qakeapi.core.responses import Response
 
 
 # Создаем модели для документации
 class TaskRequest(BaseModel):
-    sleep_time: float = 5.0
+    duration: int = 10
 
 
 class TaskResponse(BaseModel):
     task_id: str
-    message: str
+    status: str
+    result: str = None
 
 
 class TaskStatus(BaseModel):
@@ -32,86 +35,90 @@ app = Application(
 )
 
 
-# Создаем зависимость для хранения задач
-class TaskStore(Dependency):
-    def __init__(self):
-        super().__init__(scope="singleton")
-        self.tasks = {}
-
-    async def resolve(self):
-        return self.tasks
-
-
-task_store = TaskStore()
+# Создаем задачи
+task_manager = BackgroundTaskManager()
 
 
 @app.on_startup
-async def register_dependencies():
-    app.dependency_container.register(task_store)
+async def startup():
+    await task_manager.start()
 
 
-async def long_running_task(sleep_time: float) -> None:
-    """Пример длительной задачи"""
-    await asyncio.sleep(sleep_time)
-    print(f"Задача выполнена после {sleep_time} секунд")
+@app.on_shutdown
+async def shutdown():
+    await task_manager.stop()
 
 
-@app.post(
-    "/tasks",
-    summary="Create a new task",
-    description="Creates a new background task that sleeps for the specified time",
-    request_model=TaskRequest,
-    response_model=TaskResponse,
-)
+async def process_task(duration: int):
+    await asyncio.sleep(duration)
+    return f"Task completed after {duration} seconds"
+
+
+@app.router.route("/tasks", methods=["POST"])
 async def create_task(request: Request):
     """Создание новой фоновой задачи"""
     try:
         data = await request.json()
-        sleep_time = float(data.get("sleep_time", 5.0))
-
-        task_id = await app.add_background_task(
-            long_running_task, sleep_time, task_id=f"task_{sleep_time}"
-        )
-
-        return Response.json(
-            {"task_id": task_id, "message": "Task created successfully"}
-        )
+        task_request = TaskRequest(**data)
+        task = task_manager.create_task(process_task(task_request.duration))
+        return Response.json({"task_id": str(task.id), "status": "pending"})
     except Exception as e:
-        return Response.json({"error": str(e)}, status_code=400)
+        return Response.json({"error": str(e)}, status=400)
 
 
-@app.get(
-    "/tasks/{task_id}",
-    summary="Get task status",
-    description="Returns the status of a background task",
-    response_model=TaskStatus,
-)
-async def get_task_status(request: Request):
+@app.router.route("/tasks/{task_id}", methods=["GET"])
+async def get_task(request: Request, task_id: str):
     """Получение статуса задачи"""
-    task_id = request.path_params["task_id"]
-    status = app.get_task_status(task_id)
-    return Response.json(status)
+    task = task_manager.get_task(task_id)
+    if not task:
+        return Response.json({"error": "Task not found"}, status=404)
+    
+    status = "completed" if task.done() else "running"
+    result = await task.result() if task.done() else None
+    
+    return Response.json({
+        "task_id": task_id,
+        "status": status,
+        "result": result
+    })
 
 
-@app.delete(
-    "/tasks/{task_id}",
-    summary="Cancel task",
-    description="Cancels a running background task",
-    response_model=TaskResponse,
-)
+@app.router.route("/tasks", methods=["GET"])
+async def list_tasks(request: Request):
+    """Получение списка всех задач"""
+    tasks = task_manager.list_tasks()
+    return Response.json({
+        str(task.id): {
+            "task_id": str(task.id),
+            "status": "completed" if task.done() else "running",
+            "result": await task.result() if task.done() else None
+        }
+        for task in tasks
+    })
+
+
+@app.delete("/tasks/{task_id}")
 async def cancel_task(request: Request):
     """Отмена задачи"""
     task_id = request.path_params["task_id"]
-    cancelled = await app.cancel_background_task(task_id)
-
-    if cancelled:
+    if task_id not in task_manager.tasks:
         return Response.json(
-            {"task_id": task_id, "message": "Task cancelled successfully"}
+            {"task_id": task_id, "message": "Task not found"},
+            status_code=404
         )
-    return Response.json(
-        {"task_id": task_id, "message": "Task not found or already completed"},
-        status_code=404,
-    )
+    
+    task = task_manager.tasks[task_id]
+    if task["status"] in ["completed", "failed"]:
+        return Response.json({
+            "task_id": task_id,
+            "message": f"Task already {task['status']}"
+        })
+    
+    task["status"] = "cancelled"
+    return Response.json({
+        "task_id": task_id,
+        "message": "Task cancelled successfully"
+    })
 
 
 # Пример задачи, которая может завершиться с ошибкой
@@ -158,4 +165,5 @@ async def create_timeout_task(request: Request):
 
 if __name__ == "__main__":
     from config import PORTS
+    print("Starting background tasks example server...")
     uvicorn.run(app, host="0.0.0.0", port=PORTS['background_tasks_app'], log_level="debug")
