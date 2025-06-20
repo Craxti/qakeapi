@@ -126,17 +126,21 @@ class Response:
         cls,
         content: dict,
         status_code: int = 200,
-        headers: Optional[Dict[str, str]] = None
+        headers: Optional[Union[Dict[str, str], List[Tuple[bytes, bytes]]]] = None
     ) -> "Response":
         """Create JSON response"""
         headers_list = []
         if headers:
-            headers_list.extend((k.encode(), v.encode()) for k, v in headers.items())
+            if isinstance(headers, dict):
+                headers_list.extend((k.encode(), v.encode()) for k, v in headers.items())
+            else:
+                headers_list.extend(headers)
+        
+        headers_list.append((b"content-type", b"application/json"))
         return cls(
-            content,
+            json.dumps(content).encode(),
             status_code=status_code,
-            headers=headers_list,
-            media_type="application/json"
+            headers=headers_list
         )
 
     @classmethod

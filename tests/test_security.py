@@ -10,6 +10,8 @@ from qakeapi.security.authorization import (
 from qakeapi.core.requests import Request
 from qakeapi.core.responses import Response
 import base64
+from qakeapi.security.cors import CORSMiddleware
+from qakeapi.security.csrf import CSRFMiddleware
 
 @pytest.fixture
 def auth_backend():
@@ -31,6 +33,24 @@ def mock_request():
             }
         )
     return create_request
+
+@pytest.fixture
+def cors_middleware():
+    return CORSMiddleware(
+        allow_origins=["http://localhost:3000"],
+        allow_methods=["GET", "POST"],
+        allow_headers=["Content-Type", "X-Custom-Header"],
+        allow_credentials=True
+    )
+
+@pytest.fixture
+def csrf_middleware():
+    return CSRFMiddleware(
+        secret_key="test_secret_key",
+        safe_methods=["GET", "HEAD", "OPTIONS"],
+        token_field_name="csrf_token",
+        cookie_name="csrf_token"
+    )
 
 @pytest.mark.asyncio
 async def test_basic_auth_success(auth_backend):
@@ -101,4 +121,115 @@ async def test_requires_auth_decorator():
 
     request.user = None
     response = await protected_handler(request)
-    assert response.status_code == 401 
+    assert response.status_code == 401
+
+async def test_cors_preflight_request(cors_middleware):
+    # Создаем тестовый preflight запрос
+    request = Request({
+        "type": "http",
+        "method": "OPTIONS",
+        "headers": [
+            (b"origin", b"http://localhost:3000"),
+            (b"access-control-request-method", b"POST"),
+            (b"access-control-request-headers", b"content-type")
+        ]
+    }, b"")
+
+    async def handler(request):
+        return Response.json({"message": "success"})
+
+    response = await cors_middleware(request, handler)
+    
+    assert response.status_code == 200
+    assert (b"access-control-allow-origin", b"http://localhost:3000") in response.headers
+    assert (b"access-control-allow-credentials", b"true") in response.headers
+
+async def test_cors_actual_request(cors_middleware):
+    # Создаем тестовый запрос
+    request = Request({
+        "type": "http",
+        "method": "GET",
+        "headers": [(b"origin", b"http://localhost:3000")]
+    }, b"")
+
+    async def handler(request):
+        return Response.json({"message": "success"})
+
+    response = await cors_middleware(request, handler)
+    
+    assert response.status_code == 200
+    assert (b"access-control-allow-origin", b"http://localhost:3000") in response.headers
+    assert (b"access-control-allow-credentials", b"true") in response.headers
+
+async def test_cors_disallowed_origin(cors_middleware):
+    # Создаем тестовый запрос с неразрешенным origin
+    request = Request({
+        "type": "http",
+        "method": "OPTIONS",
+        "headers": [(b"origin", b"http://evil.com")]
+    }, b"")
+
+    async def handler(request):
+        return Response.json({"message": "success"})
+
+    response = await cors_middleware(request, handler)
+    
+    assert response.status_code == 403
+
+async def test_csrf_safe_method(csrf_middleware):
+    # Тестируем безопасный метод (GET)
+    request = Request({
+        "type": "http",
+        "method": "GET",
+        "headers": []
+    }, b"")
+
+    async def handler(request):
+        return Response.json({"message": "success"})
+
+    response = await csrf_middleware(request, handler)
+    
+    assert response.status_code == 200
+    assert any(header[0] == b"set-cookie" for header in response.headers)
+
+async def test_csrf_unsafe_method_without_token(csrf_middleware):
+    # Тестируем небезопасный метод без CSRF токена
+    request = Request({
+        "type": "http",
+        "method": "POST",
+        "headers": []
+    }, b"")
+
+    async def handler(request):
+        return Response.json({"message": "success"})
+
+    response = await csrf_middleware(request, handler)
+    body = await response.body
+    
+    assert response.status_code == 403
+    assert b'{"detail": "CSRF token missing or invalid"}' in body
+
+async def test_csrf_unsafe_method_with_valid_token(csrf_middleware):
+    # Тестируем небезопасный метод с валидным CSRF токеном
+    token = "valid_token"
+    request = Request({
+        "type": "http",
+        "method": "POST",
+        "headers": [
+            (b"x-csrf-token", token.encode()),
+            (b"cookie", f"csrf_token={token}".encode())
+        ],
+        "cookies": {"csrf_token": token}
+    }, b"")
+
+    async def handler(request):
+        return Response.json({"message": "success"})
+
+    response = await csrf_middleware(request, handler)
+    
+    # Проверяем, что токен в куках совпадает с токеном в заголовке
+    cookie_token = request.cookies.get("csrf_token").value
+    header_token = request.headers.get(b"x-csrf-token", b"").decode()
+    
+    assert cookie_token == header_token
+    assert response.status_code == 200 

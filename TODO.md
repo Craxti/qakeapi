@@ -132,9 +132,11 @@ qakeapi/
 
 3. **Security**
    - [x] Secure defaults
-   - [ ] CORS protection
-   - [x] XSS prevention
-   - [ ] CSRF protection
+   - [x] CORS protection
+   - [x] CSRF protection
+   - [ ] XSS prevention
+   - [ ] SQL injection protection
+   - [ ] Security headers
    - [ ] Rate limiting
 
 4. **Scalability**
@@ -148,3 +150,38 @@ qakeapi/
    - [x] Easy testing utilities
    - [x] Performance benchmarks
    - [x] Security testing tools
+
+# TODO List
+
+## Security:
+[x] CORS protection
+[x] CSRF protection
+[x] Rate limiting
+[x] Input validation
+[ ] XSS protection
+[ ] SQL injection protection
+[ ] Security headers
+
+## Features:
+[x] WebSocket support
+[x] File uploads
+[x] Static files serving
+[x] Template rendering
+[x] Database integration
+[x] Caching
+[x] Background tasks
+[x] Logging
+
+## Documentation:
+[x] API documentation
+[x] User guide
+[x] Developer guide
+[x] Examples
+[x] Contributing guidelines
+
+## Testing:
+[x] Unit tests
+[x] Integration tests
+[x] Performance tests
+[x] Security tests
+[x] Documentation tests

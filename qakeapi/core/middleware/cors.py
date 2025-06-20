@@ -53,17 +53,16 @@ class CORSMiddleware:
         return ", ".join(self.config.allow_headers)
 
     def _get_origin_from_headers(
-        self, headers: List[tuple[bytes, bytes]]
+        self, headers: Dict[bytes, bytes]
     ) -> Optional[str]:
         """Extract origin from headers"""
-        for key, value in headers:
-            if key.lower() == b"origin":
-                return value.decode()
+        if b"origin" in headers:
+            return headers[b"origin"].decode()
         return None
 
     def _build_preflight_response(self, request: Request) -> Response:
         """Build response for preflight request"""
-        origin = self._get_origin_from_headers(request.scope["headers"])
+        origin = self._get_origin_from_headers(request.headers)
         logger.debug(f"Building preflight response for origin: {origin}")
 
         if not origin:
@@ -72,7 +71,8 @@ class CORSMiddleware:
         if not self._is_origin_allowed(origin):
             return Response(content={"detail": "Origin not allowed"}, status_code=400)
 
-        headers = [
+        response = Response(content={}, status_code=200)
+        response.headers = [
             (b"Access-Control-Allow-Origin", origin.encode()),
             (
                 b"Access-Control-Allow-Methods",
@@ -86,29 +86,27 @@ class CORSMiddleware:
         ]
 
         if self.config.allow_credentials:
-            headers.append((b"Access-Control-Allow-Credentials", b"true"))
+            response.headers.append((b"Access-Control-Allow-Credentials", b"true"))
 
         if self.config.expose_headers:
-            headers.append(
+            response.headers.append(
                 (
                     b"Access-Control-Expose-Headers",
                     ", ".join(self.config.expose_headers).encode(),
                 )
             )
 
-        logger.debug(f"Preflight response headers: {headers}")
-        return Response(content={}, status_code=200, headers=headers)
+        logger.debug(f"Preflight response headers: {response.headers}")
+        return response
 
     def _add_cors_headers(self, response: Response, origin: str) -> None:
         """Add CORS headers to response"""
         if not hasattr(response, "headers"):
             response.headers = []
 
-        response.headers.extend(
-            [
-                (b"Access-Control-Allow-Origin", origin.encode()),
-            ]
-        )
+        response.headers.extend([
+            (b"Access-Control-Allow-Origin", origin.encode()),
+        ])
 
         if self.config.allow_credentials:
             response.headers.append((b"Access-Control-Allow-Credentials", b"true"))
@@ -125,7 +123,7 @@ class CORSMiddleware:
 
     async def __call__(self, request: Request, handler) -> Response:
         """Process the request"""
-        origin = self._get_origin_from_headers(request.scope["headers"])
+        origin = self._get_origin_from_headers(request.headers)
         logger.debug(
             f"Processing request: {request.method} {request.path} origin: {origin}"
         )

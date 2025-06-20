@@ -7,7 +7,7 @@ from qakeapi.core.requests import Request
 from qakeapi.core.responses import Response, JSONResponse
 from qakeapi.core.middleware import Middleware
 
-from examples.config import PORTS
+from config import PORTS
 
 # Setup logging
 logging.basicConfig(

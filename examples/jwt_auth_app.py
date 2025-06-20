@@ -10,7 +10,7 @@ from qakeapi.security.authentication import JWTAuthBackend, JWTConfig
 from qakeapi.security.authorization import requires_auth
 import jwt
 
-from examples.config import PORTS
+from config import PORTS
 
 # Setup logging
 logging.basicConfig(

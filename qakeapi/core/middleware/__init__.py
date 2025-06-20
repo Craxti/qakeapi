@@ -68,7 +68,10 @@ class AuthenticationMiddleware(Middleware):
         if not auth_header:
             return JSONResponse({"detail": "Not authenticated"}, status_code=401)
 
-        scheme, token = auth_header.split(" ", 1)
+        try:
+            scheme, token = auth_header.split(" ", 1)
+        except ValueError:
+            return JSONResponse({"detail": "Invalid authorization header format"}, status_code=401)
 
         if scheme.lower() != self.auth_scheme.lower():
             return JSONResponse(
@@ -100,7 +103,7 @@ class RateLimitMiddleware(Middleware):
     async def __call__(
         self, request: Request, call_next: Callable[[Request], Response]
     ) -> Response:
-        client = request.client()[0] or "unknown"
+        client = request.client[0] if request.client else "unknown"
 
         if client not in self.requests:
             self.requests[client] = []

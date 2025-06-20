@@ -68,10 +68,10 @@ async def handle_data(request: Request):
             "supported_methods": ["GET", "POST"]
         })
     elif request.method == "POST":
-    data = await request.json()
-    response = Response.json({"message": "Data received successfully", "data": data})
-    response.headers.append((b"X-Custom-Header", b"custom-value"))
-    return response
+        data = await request.json()
+        response = Response.json({"message": "Data received successfully", "data": data})
+        response.headers.append((b"X-Custom-Header", b"custom-value"))
+        return response
 
 if __name__ == "__main__":
     import uvicorn
