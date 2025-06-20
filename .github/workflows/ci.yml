@@ -30,14 +30,20 @@ jobs:
     
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-cov pytest-asyncio
-        pip install -e .
+        python -m pip install --upgrade pip wheel setuptools
+        python -m pip install pytest pytest-cov pytest-asyncio
+        python -m pip install -r requirements.txt
+        python -m pip install -e .
+    
+    - name: Check installed packages
+      run: |
+        python -m pip list
+        which python
+        python -c "import pytest; print(pytest.__version__)"
     
     - name: Run tests
       run: |
-        python -m pytest --cov=qakeapi tests/ --cov-report=term
+        python -m pytest tests/ --cov=qakeapi --cov-report=term -v
 
   docs:
     runs-on: ubuntu-latest
@@ -54,8 +60,8 @@ jobs:
     
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install mkdocs mkdocs-material
+        python -m pip install --upgrade pip wheel setuptools
+        python -m pip install mkdocs mkdocs-material
     
     - name: Build documentation
       run: mkdocs build --strict
