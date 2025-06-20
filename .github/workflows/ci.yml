@@ -47,7 +47,10 @@ jobs:
 
   docs:
     runs-on: ubuntu-latest
-    needs: test  # Запускаем после успешного прохождения тестов
+    needs: test
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
     - uses: actions/checkout@v4
@@ -68,14 +71,15 @@ jobs:
     
     - name: Setup Pages
       uses: actions/configure-pages@v4
-      
+      with:
+        enablement: true
+    
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
         path: './site'
-        
+    
     - name: Deploy to GitHub Pages
+      id: deployment
       if: github.ref == 'refs/heads/main'
-      uses: actions/deploy-pages@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }} 
+      uses: actions/deploy-pages@v4 
