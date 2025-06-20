@@ -1,6 +1,10 @@
 site_name: QakeAPI Documentation
 site_description: Documentation for QakeAPI Framework
-site_author: Aleksandr
+theme:
+  name: material
+  palette:
+    primary: indigo
+    accent: indigo
 
 nav:
   - Home: index.md
@@ -13,12 +17,6 @@ nav:
     - Core: api/core.md
     - Middleware: api/middleware.md
     - Security: api/security.md
-
-theme:
-  name: material
-  palette:
-    primary: indigo
-    accent: indigo
 
 markdown_extensions:
   - pymdownx.highlight

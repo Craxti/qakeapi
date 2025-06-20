@@ -1,14 +1,14 @@
 # Welcome to QakeAPI
 
-QakeAPI is a modern Python web framework designed for building fast, secure and scalable web applications.
+QakeAPI is a modern, fast, and secure API framework for Python, designed with simplicity and performance in mind.
 
 ## Features
 
 - Fast and lightweight
-- Built-in security features (CSRF, CORS, Rate Limiting)
-- Extensive middleware support
-- Authentication and authorization
-- Easy to test and maintain
+- Built-in middleware support
+- Security features (CORS, CSRF, Rate Limiting)
+- Authentication support
+- Easy to test and extend
 
 ## Installation
 
@@ -25,17 +25,8 @@ from qakeapi.core.responses import JSONResponse
 app = QakeAPI()
 
 @app.route("/")
-async def hello_world(request):
+async def hello_world():
     return JSONResponse({"message": "Hello, World!"})
 
 if __name__ == "__main__":
-    app.run()
-```
-
-## Project Status
-
-Current test coverage: 93%
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](contributing.md) for details. 
+    app.run() 
