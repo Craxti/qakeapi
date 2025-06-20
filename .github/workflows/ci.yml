@@ -68,12 +68,7 @@ jobs:
       env:
         PYTHONPATH: ${{ github.workspace }}
       run: |
-        python -m pytest tests/ \
-          --cov=qakeapi \
-          --cov-report=term \
-          --cov-report=xml \
-          -v \
-          --import-mode=append
+        python -m pytest tests/ -v
 
   pages:
     runs-on: ubuntu-latest
