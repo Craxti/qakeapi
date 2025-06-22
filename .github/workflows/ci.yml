@@ -39,22 +39,24 @@ jobs:
         check-latest: true
         cache: 'pip'
     
-    - name: Install poetry
-      run: |
-        python -m pip install --upgrade pip
-        pip install poetry
-    
-    - name: Configure poetry
-      run: |
-        poetry config virtualenvs.create false
-    
     - name: Install dependencies
       run: |
-        poetry install --no-interaction --with dev
+        python -m pip install --upgrade pip setuptools wheel
+        python -m pip install pytest pytest-asyncio pytest-cov coverage
+        python -m pip install -e ".[dev]"
+    
+    - name: List installed packages
+      run: |
+        python -m pip list
+        which python
+        which pytest
+        echo $PATH
     
     - name: Run tests with coverage
       run: |
-        poetry run pytest tests/ --cov=qakeapi --cov-report=xml -v
+        export PATH=$PATH:$(python -c "import site; print(site.USER_BASE)")/bin
+        export PYTHONPATH=${PYTHONPATH:+$PYTHONPATH:}$(pwd)
+        python -m pytest tests/ --cov=qakeapi --cov-report=xml -v
 
   build:
     needs: test
@@ -77,7 +79,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install mkdocs mkdocs-material
+          python -m pip install mkdocs mkdocs-material
       
       - name: Build documentation
         run: mkdocs build --strict
