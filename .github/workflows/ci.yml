@@ -38,10 +38,13 @@ jobs:
         python-version: ${{ matrix.python-version }}
         check-latest: true
     
-    - name: Install dependencies
+    - name: Install test dependencies
       run: |
         python -m pip install --upgrade pip wheel setuptools
         python -m pip install pytest pytest-asyncio pytest-cov
+    
+    - name: Install package dependencies
+      run: |
         python -m pip install -r requirements.txt
         python -m pip install -r requirements-dev.txt
         python -m pip install -e .
