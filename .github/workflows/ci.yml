@@ -23,16 +23,22 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[test]"
-          pip install pytest pytest-asyncio pytest-cov
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install pytest pytest-asyncio pytest-cov httpx
+          python -m pip install python-jose[cryptography] passlib[bcrypt]
+          python -m pip install -e .
+
+      - name: Show package info
+        run: |
+          python -c "import qakeapi; print(qakeapi.__file__)"
+          pip list
 
       - name: Run tests
         run: |
-          python -m pytest tests/ -v
+          python -m pytest tests/ -v --disable-warnings
 
   docs:
-    needs: test
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
