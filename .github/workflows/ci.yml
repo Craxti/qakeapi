@@ -1,8 +1,9 @@
 name: CI
 
-# Важные разрешения для GitHub Actions
+# Important permissions for GitHub Actions
+
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -12,7 +13,8 @@ on:
   pull_request:
     branches: [ main ]
 
-# Настройка окружения для Pages
+# Setting up your Pages environment
+
 env:
   PYTHON_VERSION: "3.10"
   PYTHONUNBUFFERED: "1"
@@ -20,6 +22,8 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -38,61 +42,61 @@ jobs:
       run: |
         python -m pip install --upgrade pip wheel setuptools
         python -m pip install -r requirements.txt
+        python -m pip install -r requirements-dev.txt
+        python -m pip install pytest pytest-asyncio pytest-cov
         python -m pip install -e .
-        python -m pip install pytest pytest-asyncio
     
-    - name: Run tests
-      run: |
-        export PATH="$PATH:$(python -m site --user-base)/bin"
-        python -m pytest tests/ -v
+    - name: Run tests with coverage
+      run: python -m pytest tests/ --cov=qakeapi --cov-report=xml -v
 
-  pages:
-    runs-on: ubuntu-latest
+  build:
     needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          check-latest: true
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          python -m pip install mkdocs mkdocs-material
+      
+      - name: Build documentation
+        run: mkdocs build --strict
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        with:
+          enablement: true
+          static_site_generator: mkdocs
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    
-    # Настройка конкурентности для избежания конфликтов
-    concurrency:
-      group: "pages"
-      cancel-in-progress: false
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      pages: write
+      id-token: write
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        check-latest: true
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip wheel setuptools
-        python -m pip install mkdocs mkdocs-material
-    
-    - name: Build documentation
-      run: mkdocs build --strict
-    
-    - name: Setup Pages
-      id: pages
-      uses: actions/configure-pages@v4
-      with:
-        # Принудительно включаем Pages
-        enablement: true
-        # Указываем тип сборки
-        build_type: workflow
-    
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: './site'
-        retention-days: 7
-    
-    - name: Deploy to GitHub Pages
-      id: deployment
-      if: github.ref == 'refs/heads/main'
-      uses: actions/deploy-pages@v4
-      with:
-        artifact_name: github-pages 
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 
