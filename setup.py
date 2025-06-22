@@ -18,15 +18,30 @@ setup(
         "python-multipart>=0.0.5",
         "aiofiles>=0.8.0",
     ],
-    python_requires=">=3.7",
+    extras_require={
+        "test": [
+            "pytest>=7.0.0",
+            "pytest-asyncio>=0.18.0",
+            "pytest-cov>=3.0.0",
+            "httpx>=0.25.0",
+        ],
+        "dev": [
+            "black>=23.10.0",
+            "isort>=5.12.0",
+            "mypy>=1.6.0",
+        ],
+        "docs": [
+            "mkdocs>=1.3.0",
+            "mkdocs-material>=8.0.0",
+        ],
+    },
+    python_requires=">=3.9",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
