@@ -27,6 +27,7 @@ jobs:
           python -m pip install "pytest>=7.0.0" "pytest-asyncio>=0.18.0" "pytest-cov>=3.0.0" "httpx>=0.25.0"
           python -m pip install "python-jose[cryptography]>=3.3.0" "passlib[bcrypt]>=1.7.4"
           python -m pip install "uvicorn>=0.15.0" "pydantic>=2.0.0" "python-multipart>=0.0.5" "aiofiles>=0.8.0"
+          python -m pip install "PyJWT>=2.0.0"
           python -m pip install -e .
 
       - name: Show environment info
