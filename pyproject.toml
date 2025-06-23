@@ -9,7 +9,7 @@ authors = [
     {name = "Craxti", email = "fetis.dev@gmail.com"}]
 description = "A lightweight ASGI web framework"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -39,7 +39,7 @@ write_to = "qakeapi/_version.py"
 
 [tool.black]
 line-length = 88
-target-version = ['py37']
+target-version = ['py38']
 include = '\.pyi?$'
 
 [tool.isort]

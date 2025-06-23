@@ -1,26 +1,53 @@
-site_name: QakeAPI Documentation
-site_description: Documentation for QakeAPI Framework
+site_name: QakeAPI
+site_description: A lightweight ASGI web framework
+repo_url: https://github.com/craxti/qakeapi
 theme:
   name: material
-  palette:
-    primary: indigo
-    accent: indigo
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.highlight
 
 nav:
   - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quickstart.md
+    - Configuration: getting-started/configuration.md
   - User Guide:
-    - Installation: installation.md
-    - Quick Start: quickstart.md
-    - Middleware: middleware.md
-    - Security: security.md
+    - Core Concepts: guide/core-concepts.md
+    - Routing: guide/routing.md
+    - Middleware: guide/middleware.md
+    - Dependencies: guide/dependencies.md
+    - Security: guide/security.md
+    - Database: guide/database.md
+    - Caching: guide/caching.md
   - API Reference:
-    - Core: api/core.md
-    - Middleware: api/middleware.md
-    - Security: api/security.md
+    - Application: api/application.md
+    - Router: api/router.md
+    - Request: api/request.md
+    - Response: api/response.md
+    - Dependencies: api/dependencies.md
+    - Background Tasks: api/background-tasks.md
+  - Advanced:
+    - Performance: advanced/performance.md
+    - Best Practices: advanced/best-practices.md
+    - Examples: advanced/examples.md
+  - Development:
+    - Contributing: development/contributing.md
+    - Changelog: development/changelog.md
+    - FAQ: development/faq.md
 
 markdown_extensions:
   - pymdownx.highlight
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed
+  - pymdownx.emoji
   - admonition
   - toc:
       permalink: true

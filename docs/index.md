@@ -1,14 +1,19 @@
-# Welcome to QakeAPI
+# QakeAPI
 
-QakeAPI is a modern, fast, and secure API framework for Python, designed with simplicity and performance in mind.
+QakeAPI is a modern, fast (high-performance) ASGI web framework for building APIs with Python 3.8+.
 
-## Features
+## Key Features
 
-- Fast and lightweight
-- Built-in middleware support
-- Security features (CORS, CSRF, Rate Limiting)
-- Authentication support
-- Easy to test and extend
+- **Fast**: High performance, on par with NodeJS and Go
+- **Intuitive**: Great editor support. Completion everywhere. Less time debugging.
+- **Easy**: Designed to be easy to use and learn. Less time reading docs.
+- **Short**: Minimize code duplication. Multiple features from each parameter declaration.
+- **Robust**: Get production-ready code. With automatic interactive documentation.
+- **Standards-based**: Based on (and fully compatible with) OpenAPI (formerly known as Swagger) and JSON Schema.
+
+## Requirements
+
+Python 3.8+
 
 ## Installation
 
@@ -16,17 +21,26 @@ QakeAPI is a modern, fast, and secure API framework for Python, designed with si
 pip install qakeapi
 ```
 
-## Quick Example
+## Example
 
 ```python
-from qakeapi import QakeAPI
-from qakeapi.core.responses import JSONResponse
+from qakeapi import Application
 
-app = QakeAPI()
+app = Application()
 
-@app.route("/")
-async def hello_world():
-    return JSONResponse({"message": "Hello, World!"})
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
 
-if __name__ == "__main__":
-    app.run() 
+@app.get("/items/{item_id}")
+async def read_item(item_id: int):
+    return {"item_id": item_id}
+```
+
+## Documentation Structure
+
+- **Getting Started**: Basic installation and usage
+- **User Guide**: Detailed explanation of core concepts
+- **API Reference**: Complete API documentation
+- **Advanced Topics**: Performance optimization and best practices
+- **Development**: Contributing guidelines and project information 

@@ -2,7 +2,7 @@
 QakeAPI - A lightweight ASGI web framework for building fast web APIs with Python
 """
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 # Core components
 from .core.application import Application
