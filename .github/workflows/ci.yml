@@ -63,21 +63,18 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install "mkdocs>=1.4.0" 
-          pip install "mkdocs-material>=9.0.0"
-          pip install "mkdocstrings[python]>=0.18.0"
+          pip install sphinx sphinx-rtd-theme sphinx-autodoc-typehints
           pip install -e .
 
       - name: Build docs
-        run: mkdocs build
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+        run: |
+          cd docs
+          sphinx-build -b html . _build/html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: docs/_build/html
 
       - name: Deploy to GitHub Pages
         id: deployment
