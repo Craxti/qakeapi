@@ -1,56 +1,69 @@
 site_name: QakeAPI
 site_description: A lightweight ASGI web framework
+site_url: https://craxti.github.io/qakeapi/
+repo_name: craxti/qakeapi
 repo_url: https://github.com/craxti/qakeapi
+
 theme:
   name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
   features:
-    - navigation.tabs
     - navigation.sections
     - navigation.expand
+    - navigation.indexes
+    - navigation.top
     - search.highlight
+    - search.share
+    - search.suggest
+    - content.code.copy
 
 nav:
   - Home: index.md
   - Getting Started:
-    - Installation: getting-started/installation.md
-    - Quick Start: getting-started/quickstart.md
-    - Configuration: getting-started/configuration.md
+    - getting-started/index.md
+    - Installation: installation.md
+    - Quickstart: quickstart.md
   - User Guide:
-    - Core Concepts: guide/core-concepts.md
-    - Routing: guide/routing.md
-    - Middleware: guide/middleware.md
-    - Dependencies: guide/dependencies.md
-    - Security: guide/security.md
-    - Database: guide/database.md
-    - Caching: guide/caching.md
-  - API Reference:
-    - Application: api/application.md
-    - Router: api/router.md
-    - Request: api/request.md
-    - Response: api/response.md
-    - Dependencies: api/dependencies.md
-    - Background Tasks: api/background-tasks.md
+    - guide/index.md
+    - API Reference: api-reference.md
+    - Security: security.md
+    - Middleware: middleware.md
   - Advanced:
-    - Performance: advanced/performance.md
-    - Best Practices: advanced/best-practices.md
-    - Examples: advanced/examples.md
-  - Development:
-    - Contributing: development/contributing.md
-    - Changelog: development/changelog.md
-    - FAQ: development/faq.md
+    - advanced/index.md
 
 markdown_extensions:
-  - pymdownx.highlight
-  - pymdownx.superfences:
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
-  - pymdownx.tabbed
-  - pymdownx.emoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
   - admonition
-  - toc:
-      permalink: true
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - footnotes
+  - def_list
+  - tables
+  - meta
 
 plugins:
-  - search 
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [.]
+          options:
+            show_source: true
+            show_root_heading: true 
