@@ -8,6 +8,34 @@ from ..responses import JSONResponse, Response
 from .cors import CORSMiddleware
 
 
+class BaseMiddleware:
+    """Base class for all middleware in QakeAPI."""
+    
+    async def process_request(self, request: Request) -> Optional[Response]:
+        """Process the request before it reaches the view.
+        
+        Args:
+            request: The incoming request object
+            
+        Returns:
+            Optional[Response]: If a response is returned, the request processing
+            will be short-circuited and the response will be returned to the client.
+            If None is returned, the request will continue to be processed.
+        """
+        return None
+        
+    async def process_response(self, response: Response) -> Response:
+        """Process the response after it leaves the view.
+        
+        Args:
+            response: The outgoing response object
+            
+        Returns:
+            Response: The processed response object
+        """
+        return response
+
+
 class Middleware:
     async def __call__(
         self, request: Request, call_next: Callable[[Request], Response]

@@ -16,7 +16,8 @@ class Request:
         self.scope = scope
         self._body = body
         self._json = None
-        self._form: Optional[Dict[str, Any]] = None
+        self._form_data = None
+        self._query_params = self._parse_query_string()
         self._files: Optional[Dict[str, UploadFile]] = None
         self._cookies: Optional[SimpleCookie] = None
         self.dependency_container = None
@@ -53,10 +54,9 @@ class Request:
         return path
 
     @property
-    def query_params(self) -> Dict[str, List[str]]:
-        """Query parameters"""
-        query_string = self.scope.get("query_string", b"").decode()
-        return parse_qs(query_string)
+    def query_params(self) -> Dict[str, Any]:
+        """Get query parameters."""
+        return self._query_params
 
     @property
     def headers(self) -> Dict[bytes, bytes]:
@@ -79,14 +79,25 @@ class Request:
                 self._cookies.load(cookie_header)
         return self._cookies
 
-    async def json(self) -> Optional[Dict[str, Any]]:
-        """Get JSON body"""
-        if self._json is None:
-            try:
-                self._json = json.loads(self._body)
-            except json.JSONDecodeError:
-                return None
+    @property
+    def json(self) -> Optional[Dict[str, Any]]:
+        """Get JSON data."""
         return self._json
+
+    @json.setter
+    def json(self, value: Dict[str, Any]):
+        """Set JSON data."""
+        self._json = value
+
+    @property
+    def form_data(self) -> Optional[Dict[str, Any]]:
+        """Get form data."""
+        return self._form_data
+
+    @form_data.setter
+    def form_data(self, value: Dict[str, Any]):
+        """Set form data."""
+        self._form_data = value
 
     @property
     def body(self) -> bytes:
@@ -102,24 +113,24 @@ class Request:
 
     async def form(self) -> Dict[str, Any]:
         """Get form data"""
-        if self._form is None:
+        if self._form_data is None:
             content_type = self.content_type
             if content_type == "application/x-www-form-urlencoded":
                 form_data = parse_qs(self._body.decode())
-                self._form = {
+                self._form_data = {
                     k: v[0] if len(v) == 1 else v for k, v in form_data.items()
                 }
             elif content_type.startswith("multipart/form-data"):
-                self._form, self._files = await self._parse_multipart()
+                self._form_data, self._files = await self._parse_multipart()
             else:
-                self._form = {}
-        return self._form
+                self._form_data = {}
+        return self._form_data
 
     async def files(self) -> Dict[str, UploadFile]:
         """Get uploaded files"""
         if self._files is None:
             if self.content_type.startswith("multipart/form-data"):
-                self._form, self._files = await self._parse_multipart()
+                self._form_data, self._files = await self._parse_multipart()
             else:
                 self._files = {}
         return self._files
@@ -208,3 +219,11 @@ class Request:
             url = f"{url}?{query_string}"
 
         return url
+
+    def _parse_query_string(self) -> Dict[str, Any]:
+        """Parse query string into dictionary."""
+        query_string = self.scope.get('query_string', b'').decode()
+        if not query_string:
+            return {}
+        return {k: v[0] if len(v) == 1 else v 
+                for k, v in parse_qs(query_string).items()}

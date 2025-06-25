@@ -6,20 +6,23 @@ from typing import Any, AsyncIterable, Dict, List, Optional, Tuple, Union
 class Response:
     """HTTP Response"""
 
-    def __init__(
-        self,
-        content: Union[str, bytes, dict, AsyncIterable[bytes]],
-        status_code: int = 200,
-        headers: Optional[List[Tuple[bytes, bytes]]] = None,
-        media_type: Optional[str] = None,
-        is_stream: bool = False,
-    ):
-        self.content = content
+    def __init__(self, content: Any = None, status_code: int = 200,
+                 headers: Optional[Dict[str, str]] = None):
+        self._content = content if content is not None else {}
         self.status_code = status_code
-        self.headers = headers or []
-        self.media_type = media_type
-        self.is_stream = is_stream
+        self.headers = headers or {}
+        self.is_stream = False
         self._cookies = SimpleCookie()
+
+    @property
+    def content(self) -> Any:
+        """Get response content."""
+        return self._content
+
+    @content.setter
+    def content(self, value: Any):
+        """Set response content."""
+        self._content = value
 
     @property
     def status(self) -> int:
@@ -58,11 +61,11 @@ class Response:
     @property
     def headers_list(self) -> List[Tuple[bytes, bytes]]:
         """Get response headers"""
-        headers = list(self.headers)
+        headers = list(self.headers.items())
 
         # Add Content-Type if not set
         if not any(h[0] == b"content-type" for h in headers):
-            media_type = self.media_type or self._get_media_type()
+            media_type = self._get_media_type()
             headers.append((b"content-type", media_type.encode()))
 
         # Add cookie headers
@@ -78,7 +81,7 @@ class Response:
     def _get_media_type(self) -> str:
         """Get content type based on content"""
         if self.is_stream:
-            return self.media_type or "application/octet-stream"
+            return self.headers.get("content-type", "application/octet-stream")
         elif isinstance(self.content, bytes):
             return "application/octet-stream"
         elif isinstance(self.content, str):

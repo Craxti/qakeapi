@@ -134,10 +134,10 @@ qakeapi/
    - [x] Secure defaults
    - [x] CORS protection
    - [x] CSRF protection
-   - [ ] XSS prevention
+   - [x] XSS prevention
    - [ ] SQL injection protection
    - [ ] Security headers
-   - [ ] Rate limiting
+   - [x] Rate limiting
 
 4. **Scalability**
    - [x] Stateless design
@@ -158,7 +158,7 @@ qakeapi/
 [x] CSRF protection
 [x] Rate limiting
 [x] Input validation
-[ ] XSS protection
+[x] XSS protection
 [ ] SQL injection protection
 [ ] Security headers
 
