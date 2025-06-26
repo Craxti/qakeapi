@@ -9,6 +9,7 @@ from qakeapi import Application
 from qakeapi.security.auth import SecurityUtils, require_auth, rate_limit
 from qakeapi.validation.validators import CreateUser, UpdateUser, PaginationParams
 from qakeapi.core.logging import setup_logging, RequestLogger
+import json
 
 # Настройка логирования
 logger = setup_logging(level="DEBUG", json_output=True)
@@ -25,20 +26,32 @@ async def root(request):
     return {"status": "online"}
 
 @rate_limit(limit=10, window=60)  # 10 запросов в минуту
+@app.route("/users", methods=["POST"])
 async def create_user(request):
     """Создание нового пользователя."""
-    user_data = await request.json()
-    user_data = CreateUser(**user_data)
-    
-    # Хеширование пароля
-    hashed_password = SecurityUtils.get_password_hash(user_data.password)
-    
-    # Сохранение пользователя
-    user_dict = user_data.dict()
-    user_dict["password"] = hashed_password
-    users_db[user_data.username] = user_dict
-    
-    return {"message": "User created", "username": user_data.username}
+    try:
+        user_data = await request.json()
+        if not isinstance(user_data, dict):
+            return {"error": "Invalid JSON data"}, 400
+            
+        # Валидация данных
+        if not all(key in user_data for key in ["username", "email", "password"]):
+            return {"error": "Missing required fields"}, 400
+            
+        # Проверка на существующего пользователя
+        if user_data["username"] in users_db:
+            return {"error": "User already exists"}, 400
+            
+        # Хеширование пароля
+        hashed_password = SecurityUtils.get_password_hash(user_data["password"])
+        
+        # Сохранение пользователя
+        user_data["password"] = hashed_password
+        users_db[user_data["username"]] = user_data
+        
+        return {"message": "User created", "username": user_data["username"]}
+    except (ValueError, TypeError, json.JSONDecodeError) as e:
+        return {"error": str(e)}, 400
 
 @require_auth()
 async def get_user(request):
@@ -84,12 +97,10 @@ async def delete_user(request):
 async def list_users(request):
     """Получение списка пользователей с пагинацией."""
     # Получение параметров пагинации из query string
-    try:
-        page = max(1, int(request.query_params.get('page', '1')))
-        per_page = max(1, min(100, int(request.query_params.get('per_page', '10'))))
-    except ValueError:
-        page = 1
-        per_page = 10
+    params = PaginationParams(
+        page=request.query_params.get('page', '1'),
+        per_page=request.query_params.get('per_page', '10')
+    )
     
     # Получение списка пользователей без паролей
     users_list = []
@@ -99,13 +110,13 @@ async def list_users(request):
         users_list.append(user_copy)
     
     # Пагинация
-    start = (page - 1) * per_page
-    end = start + per_page
+    start = (params.page - 1) * params.per_page
+    end = start + params.per_page
     
     return {
         "total": len(users_list),
-        "page": page,
-        "per_page": per_page,
+        "page": params.page,
+        "per_page": params.per_page,
         "users": users_list[start:end]
     }
 

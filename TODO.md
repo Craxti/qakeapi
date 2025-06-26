@@ -135,8 +135,8 @@ qakeapi/
    - [x] CORS protection
    - [x] CSRF protection
    - [x] XSS prevention
-   - [ ] SQL injection protection
-   - [ ] Security headers
+   - [x] SQL injection protection
+   - [x] Security headers
    - [x] Rate limiting
 
 4. **Scalability**
@@ -159,8 +159,8 @@ qakeapi/
 [x] Rate limiting
 [x] Input validation
 [x] XSS protection
-[ ] SQL injection protection
-[ ] Security headers
+[x] SQL injection protection
+[x] Security headers
 
 ## Features:
 [x] WebSocket support

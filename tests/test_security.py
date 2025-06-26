@@ -12,6 +12,8 @@ from qakeapi.core.responses import Response
 import base64
 from qakeapi.security.cors import CORSMiddleware
 from qakeapi.security.csrf import CSRFMiddleware
+from qakeapi.security.sql_protection import SQLProtection
+from qakeapi.security.headers import SecurityHeaders
 
 @pytest.fixture
 def auth_backend():
@@ -232,4 +234,101 @@ async def test_csrf_unsafe_method_with_valid_token(csrf_middleware):
     header_token = request.headers.get(b"x-csrf-token", b"").decode()
     
     assert cookie_token == header_token
-    assert response.status_code == 200 
+    assert response.status_code == 200
+
+def test_sql_protection_sanitize_input():
+    """Test SQL input sanitization."""
+    assert SQLProtection.sanitize_input(None) == "NULL"
+    assert SQLProtection.sanitize_input(123) == "123"
+    assert SQLProtection.sanitize_input("test") == "'test'"
+    assert SQLProtection.sanitize_input("O'Reilly") == "'O''Reilly'"
+    assert SQLProtection.sanitize_input("back\\slash") == "'back\\\\slash'"
+    
+    with pytest.raises(ValueError):
+        SQLProtection.sanitize_input([1, 2, 3])
+
+def test_sql_protection_validate_names():
+    """Test SQL name validation."""
+    assert SQLProtection.validate_table_name("users")
+    assert SQLProtection.validate_table_name("user_data")
+    assert not SQLProtection.validate_table_name("users;")
+    assert not SQLProtection.validate_table_name("drop table")
+    
+    assert SQLProtection.validate_column_name("username")
+    assert SQLProtection.validate_column_name("user_email")
+    assert not SQLProtection.validate_column_name("username;")
+    assert not SQLProtection.validate_column_name("drop column")
+
+def test_sql_protection_build_query():
+    """Test safe SQL query building."""
+    # Test SELECT
+    query = SQLProtection.build_safe_query(
+        "SELECT",
+        "users",
+        columns=["id", "username"],
+        where={"active": True}
+    )
+    assert query == "SELECT id, username FROM users WHERE active = True"
+    
+    # Test INSERT
+    query = SQLProtection.build_safe_query(
+        "INSERT",
+        "users",
+        values={"username": "test", "email": "test@example.com"}
+    )
+    assert query == "INSERT INTO users (username, email) VALUES ('test', 'test@example.com')"
+    
+    # Test invalid table name
+    with pytest.raises(ValueError):
+        SQLProtection.build_safe_query("SELECT", "users;")
+    
+    # Test invalid column name
+    with pytest.raises(ValueError):
+        SQLProtection.build_safe_query("SELECT", "users", columns=["id;"])
+
+def test_security_headers_default():
+    """Test default security headers."""
+    headers = SecurityHeaders.get_default_headers()
+    assert "X-Content-Type-Options" in headers
+    assert "X-Frame-Options" in headers
+    assert "Content-Security-Policy" in headers
+    assert "Strict-Transport-Security" in headers
+    assert "Referrer-Policy" in headers
+    assert "Permissions-Policy" in headers
+
+def test_security_headers_custom():
+    """Test custom security headers."""
+    headers = SecurityHeaders.get_custom_headers(
+        hsts_max_age=3600,
+        frame_options="SAMEORIGIN",
+        permissions={"geolocation": "self"},
+        csp_custom={
+            "default_src": ["'self'"],
+            "script_src": ["'self'", "trusted-scripts.com"],
+            "style_src": ["'self'", "trusted-styles.com"]
+        }
+    )
+    
+    assert headers["Strict-Transport-Security"] == "max-age=3600; includeSubDomains"
+    assert headers["X-Frame-Options"] == "SAMEORIGIN"
+    assert headers["Permissions-Policy"] == "geolocation=self"
+    assert "trusted-scripts.com" in headers["Content-Security-Policy"]
+    assert "trusted-styles.com" in headers["Content-Security-Policy"]
+
+def test_security_headers_csp():
+    """Test Content Security Policy customization."""
+    csp = SecurityHeaders.customize_csp(
+        default_src=["'self'"],
+        script_src=["'self'", "trusted-scripts.com"],
+        style_src=["'self'", "trusted-styles.com"],
+        img_src=["'self'", "trusted-images.com"],
+        font_src=["'self'", "trusted-fonts.com"],
+        connect_src=["'self'", "api.example.com"]
+    )
+    
+    assert "default-src 'self'" in csp
+    assert "script-src 'self' trusted-scripts.com" in csp
+    assert "style-src 'self' trusted-styles.com" in csp
+    assert "img-src 'self' trusted-images.com" in csp
+    assert "font-src 'self' trusted-fonts.com" in csp
+    assert "connect-src 'self' api.example.com" in csp 

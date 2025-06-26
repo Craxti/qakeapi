@@ -76,23 +76,25 @@ class CORSMiddleware:
             (b"Access-Control-Allow-Origin", origin.encode()),
             (
                 b"Access-Control-Allow-Methods",
-                ", ".join(self.config.allow_methods).encode(),
+                ", ".join(self.config.allow_methods).encode()
             ),
             (b"Access-Control-Max-Age", str(self.config.max_age).encode()),
             (
                 b"Access-Control-Allow-Headers",
-                ", ".join(self.config.allow_headers).encode(),
-            ),
+                ", ".join(self.config.allow_headers).encode()
+            )
         ]
 
         if self.config.allow_credentials:
-            response.headers.append((b"Access-Control-Allow-Credentials", b"true"))
+            response.headers.append(
+                (b"Access-Control-Allow-Credentials", b"true")
+            )
 
         if self.config.expose_headers:
             response.headers.append(
                 (
                     b"Access-Control-Expose-Headers",
-                    ", ".join(self.config.expose_headers).encode(),
+                    ", ".join(self.config.expose_headers).encode()
                 )
             )
 
@@ -102,22 +104,28 @@ class CORSMiddleware:
     def _add_cors_headers(self, response: Response, origin: str) -> None:
         """Add CORS headers to response"""
         if not hasattr(response, "headers"):
+            response.headers = {}
+
+        if isinstance(response.headers, dict):
             response.headers = []
 
-        response.headers.extend([
-            (b"Access-Control-Allow-Origin", origin.encode()),
-        ])
-
-        if self.config.allow_credentials:
-            response.headers.append((b"Access-Control-Allow-Credentials", b"true"))
-
-        if self.config.expose_headers:
+        if origin and self._is_origin_allowed(origin):
             response.headers.append(
-                (
-                    b"Access-Control-Expose-Headers",
-                    ", ".join(self.config.expose_headers).encode(),
-                )
+                (b"Access-Control-Allow-Origin", origin.encode())
             )
+
+            if self.config.allow_credentials:
+                response.headers.append(
+                    (b"Access-Control-Allow-Credentials", b"true")
+                )
+
+            if self.config.expose_headers:
+                response.headers.append(
+                    (
+                        b"Access-Control-Expose-Headers",
+                        ", ".join(self.config.expose_headers).encode()
+                    )
+                )
 
         logger.debug(f"Added CORS headers: {response.headers}")
 

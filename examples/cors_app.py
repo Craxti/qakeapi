@@ -31,24 +31,27 @@ async def cors_middleware(request, handler):
     if request.method == "OPTIONS":
         response = Response.json({})
         if origin and origin in cors_config["allow_origins"]:
-            response.headers.extend([
+            response.headers = [
                 (b"Access-Control-Allow-Origin", origin.encode()),
                 (b"Access-Control-Allow-Credentials", b"true"),
                 (b"Access-Control-Allow-Methods", b", ".join(method.encode() for method in cors_config["allow_methods"])),
                 (b"Access-Control-Allow-Headers", b", ".join(header.encode() for header in cors_config["allow_headers"])),
                 (b"Access-Control-Max-Age", b"3600"),
-            ])
+            ]
         return response
     
+    response = await handler(request)
     if origin and origin in cors_config["allow_origins"]:
-        response = await handler(request)
+        if not hasattr(response, "headers"):
+            response.headers = []
+        elif response.headers is None:
+            response.headers = []
         response.headers.extend([
             (b"Access-Control-Allow-Origin", origin.encode()),
             (b"Access-Control-Allow-Credentials", b"true"),
             (b"Access-Control-Expose-Headers", b", ".join(header.encode() for header in cors_config["expose_headers"])),
         ])
-        return response
-    return await handler(request)
+    return response
 
 @app.router.route("/", methods=["GET"])
 async def index(request: Request):

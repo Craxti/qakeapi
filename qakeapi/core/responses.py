@@ -7,12 +7,19 @@ class Response:
     """HTTP Response"""
 
     def __init__(self, content: Any = None, status_code: int = 200,
-                 headers: Optional[Dict[str, str]] = None):
+                 headers: Optional[Union[Dict[str, str], List[Tuple[bytes, bytes]]]] = None,
+                 media_type: Optional[str] = None, is_stream: bool = False):
         self._content = content if content is not None else {}
         self.status_code = status_code
-        self.headers = headers or {}
-        self.is_stream = False
+        self._headers = []
+        if headers:
+            if isinstance(headers, dict):
+                self._headers.extend((k.encode(), v.encode()) for k, v in headers.items())
+            else:
+                self._headers.extend(headers)
+        self.is_stream = is_stream
         self._cookies = SimpleCookie()
+        self._media_type = media_type
 
     @property
     def content(self) -> Any:
@@ -47,21 +54,34 @@ class Response:
         """Convert to ASGI response dict"""
         if isinstance(self.content, dict):
             body = json.dumps(self.content).encode()
-            if not any(h[0] == b"content-type" for h in self.headers):
-                self.headers.append((b"content-type", b"application/json"))
+            if not any(h[0] == b"content-type" for h in self._headers):
+                self._headers.append((b"content-type", b"application/json"))
         elif isinstance(self.content, str):
             body = self.content.encode()
-            if not any(h[0] == b"content-type" for h in self.headers):
-                self.headers.append((b"content-type", b"text/plain"))
+            if not any(h[0] == b"content-type" for h in self._headers):
+                self._headers.append((b"content-type", b"text/plain"))
         else:
             body = self.content
 
         return {"status": self.status_code, "headers": self.headers_list, "body": body}
 
     @property
+    def headers(self) -> List[Tuple[bytes, bytes]]:
+        """Get response headers."""
+        return self._headers
+
+    @headers.setter
+    def headers(self, value: Union[Dict[str, str], List[Tuple[bytes, bytes]]]):
+        """Set response headers."""
+        if isinstance(value, dict):
+            self._headers = [(k.encode(), v.encode()) for k, v in value.items()]
+        else:
+            self._headers = value
+
+    @property
     def headers_list(self) -> List[Tuple[bytes, bytes]]:
         """Get response headers"""
-        headers = list(self.headers.items())
+        headers = self._headers.copy()
 
         # Add Content-Type if not set
         if not any(h[0] == b"content-type" for h in headers):
@@ -80,8 +100,10 @@ class Response:
 
     def _get_media_type(self) -> str:
         """Get content type based on content"""
+        if self._media_type is not None:
+            return self._media_type
         if self.is_stream:
-            return self.headers.get("content-type", "application/octet-stream")
+            return self._headers[0][1].decode() if self._headers else "application/octet-stream"
         elif isinstance(self.content, bytes):
             return "application/octet-stream"
         elif isinstance(self.content, str):
@@ -218,6 +240,16 @@ class Response:
     def headers_dict(self) -> Dict[str, str]:
         """Get response headers as dict"""
         return {k.decode(): v.decode() for k, v in self.headers_list}
+
+    @property
+    def media_type(self) -> Optional[str]:
+        """Get media type."""
+        return self._media_type
+
+    @media_type.setter
+    def media_type(self, value: Optional[str]):
+        """Set media type."""
+        self._media_type = value
 
     async def __call__(self, send) -> None:
         """Send response via ASGI"""

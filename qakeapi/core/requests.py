@@ -227,3 +227,14 @@ class Request:
             return {}
         return {k: v[0] if len(v) == 1 else v 
                 for k, v in parse_qs(query_string).items()}
+
+    async def json(self) -> Dict[str, Any]:
+        """Parse JSON body."""
+        if self._json is None:
+            if not self.body:
+                return {}
+            try:
+                self._json = json.loads(self.body.decode())
+            except json.JSONDecodeError:
+                return {}
+        return self._json

@@ -31,23 +31,24 @@ class XSSProtection:
         value = value.lower()
         
         # Remove script tags and their contents
-        value = re.sub(r'<script[^>]*>.*?</script>', '', value, flags=re.DOTALL)
+        value = re.sub(r'<script[^>]*>.*?</script>', '', value, flags=re.DOTALL | re.IGNORECASE)
         
         # Remove inline event handlers
         for attr in XSSProtection.DANGEROUS_ATTRIBUTES:
             value = re.sub(
                 fr'\s*{attr}\s*=\s*(["\'])[^"\']*\1',
                 ' data-removed=""',
-                value
+                value,
+                flags=re.IGNORECASE
             )
         
         # Remove dangerous protocols
-        value = re.sub(r'javascript:', 'removed:', value)
-        value = re.sub(r'data:', 'removed:', value)
-        value = re.sub(r'vbscript:', 'removed:', value)
+        value = re.sub(r'javascript:', 'removed:', value, flags=re.IGNORECASE)
+        value = re.sub(r'data:', 'removed:', value, flags=re.IGNORECASE)
+        value = re.sub(r'vbscript:', 'removed:', value, flags=re.IGNORECASE)
         
         # Remove expression(...) CSS
-        value = re.sub(r'expression\s*\([^)]*\)', 'removed()', value)
+        value = re.sub(r'expression\s*\([^)]*\)', 'removed()', value, flags=re.IGNORECASE)
         
         # Remove other potentially dangerous patterns
         dangerous_tags = [
@@ -63,7 +64,7 @@ class XSSProtection:
         ]
         
         for pattern in dangerous_tags:
-            value = re.sub(pattern, '', value, flags=re.DOTALL)
+            value = re.sub(pattern, '', value, flags=re.DOTALL | re.IGNORECASE)
         
         return value
     
@@ -100,7 +101,10 @@ class XSSMiddleware(BaseMiddleware):
             
         # Sanitize JSON data if present
         if hasattr(request, 'json') and request.json:
-            request._json = XSSProtection.sanitize_dict(request.json)
+            if isinstance(request.json, dict):
+                request.json = XSSProtection.sanitize_dict(request.json)
+            elif isinstance(request.json, str):
+                request.json = XSSProtection.sanitize_value(request.json)
             
         return None
     

@@ -72,14 +72,17 @@ async def echo(websocket: WebSocket):
                     await websocket.send_text("Error: Message too long")
                     continue
                 await websocket.send_text(message)
-            except json.JSONDecodeError:
-                await websocket.send_text("Error: Invalid message format")
-            
+            except Exception as e:
+                logger.error(f"Error processing message: {str(e)}")
+                await websocket.send_text("Error: Internal server error")
+                break
     except Exception as e:
-        logger.error(f"Echo error: {str(e)}")
+        logger.error(f"WebSocket error: {str(e)}")
     finally:
-        await websocket.close()
-        logger.info("Echo connection closed")
+        try:
+            await websocket.close()
+        except:
+            pass
 
 @app.websocket("/ws/chat/{room_id}")
 async def chat(websocket: WebSocket, room_id: str):
@@ -182,5 +185,11 @@ async def root(request: Request) -> Response:
 
 if __name__ == "__main__":
     import uvicorn
-    print("Starting WebSocket example server...")
-    uvicorn.run(app, host="0.0.0.0", port=WEBSOCKET_PORT)
+    import asyncio
+    
+    async def start_server():
+        config = uvicorn.Config(app, host="127.0.0.1", port=8006, log_level="info")
+        server = uvicorn.Server(config)
+        await server.serve()
+    
+    asyncio.run(start_server())
