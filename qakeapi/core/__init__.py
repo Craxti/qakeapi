@@ -8,13 +8,15 @@ from .dependencies import Dependency, DependencyContainer, inject
 from .files import UploadFile
 from .requests import Request
 from .responses import Response
-from .routing import Router
+from .routing import HTTPRouter, WebSocketRouter, MiddlewareManager
 
 __all__ = [
     "Application",
     "Response",
     "Request",
-    "Router",
+    "HTTPRouter",
+    "WebSocketRouter",
+    "MiddlewareManager",
     "Dependency",
     "DependencyContainer",
     "inject",

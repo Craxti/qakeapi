@@ -1,22 +1,19 @@
 import pytest
 
-from qakeapi.core.application import ASGIApplication
+from qakeapi.core.application import Application
 from qakeapi.core.responses import Response
-from qakeapi.core.routing import Router
+from qakeapi.core.routing import HTTPRouter, WebSocketRouter
 
 
 @pytest.mark.asyncio
-class TestASGIApplication:
+class TestApplication:
     async def test_http_request(self):
-        app = ASGIApplication()
-        router = Router()
+        app = Application()
 
         # Добавляем тестовый маршрут
-        @router.route("/")
+        @app.route("/")
         async def test_handler(request):
             return Response({"message": "Hello, World!"}, status_code=200)
-
-        app.router = router
 
         # Создаем тестовый scope
         scope = {
@@ -47,7 +44,7 @@ class TestASGIApplication:
         assert received_messages[1]["body"] == b'{"message": "Hello, World!"}'
 
     async def test_websocket_request(self):
-        app = ASGIApplication()
+        app = Application()
 
         # Создаем тестовый scope
         scope = {
@@ -73,7 +70,7 @@ class TestASGIApplication:
         assert received_messages[0]["type"] == "websocket.close"
 
     async def test_lifespan_events(self):
-        app = ASGIApplication()
+        app = Application()
 
         # Создаем тестовый scope
         scope = {
@@ -105,3 +102,17 @@ class TestASGIApplication:
         assert len(received_messages) == 2
         assert received_messages[0]["type"] == "lifespan.startup.complete"
         assert received_messages[1]["type"] == "lifespan.shutdown.complete"
+
+    def test_route_decorators(self):
+        app = Application()
+        
+        @app.get("/test")
+        async def test_get(request):
+            return {"method": "GET"}
+        
+        @app.post("/test")
+        async def test_post(request):
+            return {"method": "POST"}
+        
+        # Проверяем, что маршруты добавлены
+        assert len(app.http_router.routes) == 3  # 2 + /docs и /openapi.json

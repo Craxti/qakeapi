@@ -17,6 +17,8 @@ class WebSocket:
         self.state = WebSocketState.CONNECTING
         self._iter = None
         self.client = scope.get("client", None)
+        self.path = scope.get("path", "")
+        self.path_params = {}
 
     async def accept(self, subprotocol: Optional[str] = None) -> None:
         """Accept the WebSocket connection"""

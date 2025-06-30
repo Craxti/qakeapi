@@ -10,7 +10,7 @@ A modern, lightweight, and fast ASGI web framework for building APIs in Python, 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 <p align="center">
-  <img src="docs/assets/logo.png" alt="QakeAPI Logo" width="200"/>
+  <img src="logo.png" alt="QakeAPI Logo" width="200"/>
 </p>
 
 ## ✨ Why QakeAPI?

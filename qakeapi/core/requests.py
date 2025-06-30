@@ -66,7 +66,9 @@ class Request:
     @property
     def path_params(self) -> Dict[str, str]:
         """Path parameters"""
-        return self.scope.get("path_params", {})
+        if "path_params" not in self.scope:
+            self.scope["path_params"] = {}
+        return self.scope["path_params"]
 
     @property
     def cookies(self) -> SimpleCookie:

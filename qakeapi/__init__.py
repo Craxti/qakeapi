@@ -1,26 +1,28 @@
-"""
-QakeAPI - A lightweight ASGI web framework for building fast web APIs with Python
-"""
+"""QakeAPI - Modern async web framework for Python."""
 
-__version__ = "1.0.0"
-
-# Core components
 from .core.application import Application
-from .core.background import BackgroundTask
-from .core.dependencies import Dependency, inject
-from .core.files import UploadFile
 from .core.requests import Request
 from .core.responses import Response
-from .core.router import Router
+from .core.websockets import WebSocket
+from .core.routing import (
+    HTTPRouter,
+    WebSocketRouter,
+    MiddlewareManager,
+    BaseRoute,
+    BaseRouter
+)
 
-# Make commonly used classes available at package level
+__version__ = "1.0.0"
+__author__ = "QakeAPI Team"
+
 __all__ = [
     "Application",
+    "Request", 
     "Response",
-    "Request",
-    "Router",
-    "Dependency",
-    "inject",
-    "BackgroundTask",
-    "UploadFile",
+    "WebSocket",
+    "HTTPRouter",
+    "WebSocketRouter", 
+    "MiddlewareManager",
+    "BaseRoute",
+    "BaseRouter"
 ]

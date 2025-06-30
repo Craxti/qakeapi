@@ -75,27 +75,19 @@ class TestWebSocketRouting:
                 received_messages.append(message)
                 await websocket.send_text(f"Echo: {message}")
 
-        # Создаем тестовый клиент
-        async def mock_receive():
-            return {"type": "websocket.connect"}
-
-        async def mock_send(message):
-            pass
-
-        scope = {
-            "type": "websocket",
-            "path": "/ws/test",
-            "headers": [],
-            "query_string": b"",
-            "client": ("127.0.0.1", 8000),
-            "path_params": {},
-        }
-
-        # Проверяем маршрутизацию
-        route_info = app.router.find_route("/ws/test", "websocket")
-        assert route_info is not None
-        route, params = route_info
-        assert route.handler == websocket_handler
+        # Проверяем, что маршрут был зарегистрирован
+        # В новой архитектуре роутеры находятся внутри приложения
+        assert len(app.ws_router.routes) > 0
+        
+        # Проверяем, что есть маршрут с нужным путем
+        found_route = None
+        for route in app.ws_router.routes:
+            if route.path == "/ws/test":
+                found_route = route
+                break
+        
+        assert found_route is not None
+        assert found_route.handler == websocket_handler
 
 
 class TestWebSocketMiddleware:
