@@ -18,7 +18,7 @@ from pydantic import Field
 # Initialize application
 app = Application(
     title="Authentication Example",
-    version="1.0.0",
+    version="1.0.2",
     description="Authentication and authorization example with QakeAPI"
 )
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Пример оптимизации производительности с QakeAPI.
+Performance optimization example with QakeAPI.
 """
 import sys
 import os
@@ -16,7 +16,7 @@ import aiofiles
 import redis.asyncio as redis
 from concurrent.futures import ThreadPoolExecutor
 
-# Добавляем путь к локальному QakeAPI
+# Add path to local QakeAPI
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from qakeapi import Application, Request, Response
@@ -24,28 +24,30 @@ from qakeapi.core.middleware import Middleware
 from qakeapi.validation.models import validate_request_body, RequestModel
 from pydantic import BaseModel, Field
 
-# Инициализация приложения
-app = Application(title="Performance Optimization Example", version="1.0.0")
+# Application initialization
+app = Application(title="Performance Optimization Example", version="1.0.2")
 
-# Глобальные переменные для кэширования
+# Global variables for caching
 memory_cache = {}
 cache_timestamps = {}
 executor = ThreadPoolExecutor(max_workers=4)
 
-# Pydantic модели
+# Pydantic models
 class DataProcessRequest(RequestModel):
-    data_size: int = Field(..., ge=1, le=1000000, description="Размер данных для обработки")
-    complexity: str = Field(..., description="Сложность обработки", pattern="^(simple|medium|complex)$")
-    use_cache: bool = Field(True, description="Использовать кэширование")
+    data_size: int = Field(..., ge=1, le=1000000, description="Data size for processing")
+    complexity: str = Field(..., description="Processing complexity", pattern="^(simple|medium|complex)$")
+    use_cache: bool = Field(True, description="Use caching")
 
 class BatchProcessRequest(RequestModel):
-    items: List[str] = Field(..., min_items=1, max_items=1000, description="Список элементов для обработки")
-    batch_size: int = Field(10, ge=1, le=100, description="Размер пакета")
+    items: List[str] = Field(..., min_items=1, max_items=1000, description="List of items for processing")
+    batch_size: int = Field(10, ge=1, le=100, description="Batch size")
 
-# Кэш для тяжелых вычислений
+# Cache for heavy computations
 @lru_cache(maxsize=128)
 def heavy_computation(n: int, complexity: str) -> int:
-    """Тяжелые вычисления с кэшированием"""
+    """
+    Heavy computations with caching
+    """
     if complexity == "simple":
         return sum(i for i in range(n))
     elif complexity == "medium":
@@ -53,15 +55,19 @@ def heavy_computation(n: int, complexity: str) -> int:
     else:  # complex
         return sum(i * i * i for i in range(n))
 
-# Асинхронные функции для оптимизации
+# Async functions for optimization
 async def async_data_processing(data: List[int]) -> List[int]:
-    """Асинхронная обработка данных"""
-    # Имитируем асинхронную обработку
+    """
+    Asynchronous data processing
+    """
+    # Simulate async processing
     await asyncio.sleep(0.1)
     return [x * 2 for x in data]
 
 async def async_file_operation(filename: str, content: str) -> str:
-    """Асинхронная работа с файлами"""
+    """
+    Asynchronous file operations
+    """
     async with aiofiles.open(filename, 'w') as f:
         await f.write(content)
     
@@ -69,41 +75,47 @@ async def async_file_operation(filename: str, content: str) -> str:
         return await f.read()
 
 async def async_database_query(query: str) -> List[Dict]:
-    """Асинхронный запрос к базе данных (имитация)"""
-    await asyncio.sleep(0.05)  # Имитируем задержку БД
+    """
+    Asynchronous database query (simulation)
+    """
+    await asyncio.sleep(0.05)  # Simulate DB delay
     return [{"id": i, "data": f"result_{i}"} for i in range(10)]
 
 def cpu_intensive_task(data: List[int]) -> int:
-    """CPU-интенсивная задача для выполнения в отдельном потоке"""
+    """
+    CPU-intensive task for execution in a separate thread
+    """
     result = 0
     for i in data:
         result += i * i
     return result
 
-# Эндпоинты
+# Endpoints
 
 @app.get("/")
 async def root(request: Request):
-    """Базовый эндпоинт"""
+    """
+    Basic endpoint
+    """
     return {
         "message": "Performance Optimization Example API is running",
         "endpoints": {
-            "/data-process": "POST - Обработка данных с оптимизацией",
-            "/batch-process": "POST - Пакетная обработка",
-            "/cache-test": "GET - Тест кэширования",
-            "/async-operations": "GET - Асинхронные операции",
-            "/cpu-intensive": "POST - CPU-интенсивные задачи",
-            "/cache/stats": "GET - Статистика кэша",
-            "/cache/clear": "POST - Очистка кэша",
-            "/performance/stats": "GET - Статистика производительности"
+            "/data-process": "POST - Data processing with optimization",
+            "/batch-process": "POST - Batch processing",
+            "/cache-test": "GET - Cache test",
+            "/async-operations": "GET - Asynchronous operations",
+            "/cpu-intensive": "POST - CPU-intensive tasks",
+            "/cache/stats": "GET - Cache statistics",
+            "/cache/clear": "POST - Clear cache",
+            "/performance/stats": "GET - Performance statistics"
         },
         "optimization_features": [
-            "Кэширование ответов",
-            "Асинхронная обработка",
-            "Пакетная обработка",
-            "Сжатие ответов",
-            "Мониторинг производительности",
-            "LRU кэш для вычислений"
+            "Response caching",
+            "Asynchronous processing",
+            "Batch processing",
+            "Response compression",
+            "Performance monitoring",
+            "LRU cache for computations"
         ]
     }
 
@@ -111,22 +123,22 @@ async def root(request: Request):
 @validate_request_body(DataProcessRequest)
 async def process_data(request: Request):
     """
-    Обработка данных с оптимизацией
+    Data processing with optimization
     
-    Этот эндпоинт демонстрирует различные техники оптимизации:
-    1. LRU кэширование для тяжелых вычислений
-    2. Асинхронная обработка
-    3. Пакетная обработка
+    This endpoint demonstrates various optimization techniques:
+    1. LRU caching for heavy computations
+    2. Asynchronous processing
+    3. Batch processing
     """
     data = request.validated_data
     
     start_time = time.time()
     
-    # Используем кэшированные вычисления
+    # Use cached computations
     if data.use_cache:
         computation_result = heavy_computation(data.data_size, data.complexity)
     else:
-        # Выполняем вычисления без кэша
+        # Perform computations without cache
         if data.complexity == "simple":
             computation_result = sum(i for i in range(data.data_size))
         elif data.complexity == "medium":
@@ -134,7 +146,7 @@ async def process_data(request: Request):
         else:  # complex
             computation_result = sum(i * i * i for i in range(data.data_size))
     
-    # Асинхронная обработка данных
+    # Asynchronous data processing
     data_list = list(range(data.data_size))
     processed_data = await async_data_processing(data_list)
     
@@ -154,27 +166,27 @@ async def process_data(request: Request):
 @validate_request_body(BatchProcessRequest)
 async def batch_process(request: Request):
     """
-    Пакетная обработка данных
+    Batch data processing
     
-    Демонстрирует эффективную обработку больших объемов данных
-    с использованием пакетов и асинхронности.
+    Demonstrates efficient processing of large data volumes
+    using batches and async.
     """
     data = request.validated_data
     
     start_time = time.time()
     results = []
     
-    # Обрабатываем данные пакетами
+    # Process data in batches
     for i in range(0, len(data.items), data.batch_size):
         batch = data.items[i:i + data.batch_size]
         
-        # Создаем задачи для асинхронной обработки пакета
+        # Create tasks for async batch processing
         tasks = []
         for item in batch:
             task = asyncio.create_task(async_data_processing([len(item)]))
             tasks.append(task)
         
-        # Выполняем все задачи пакета одновременно
+        # Run all batch tasks concurrently
         batch_results = await asyncio.gather(*tasks)
         results.extend(batch_results)
     
@@ -192,14 +204,14 @@ async def batch_process(request: Request):
 @app.get("/cache-test")
 async def cache_test(request: Request):
     """
-    Тест кэширования
+    Cache test
     
-    Первый запрос будет медленным, последующие - быстрыми благодаря кэшу.
+    The first request will be slow, subsequent ones will be fast due to cache.
     """
-    # Имитируем тяжелую операцию
+    # Simulate heavy operation
     await asyncio.sleep(2)
     
-    # Генерируем данные
+    # Generate data
     data = {
         "timestamp": datetime.utcnow().isoformat(),
         "random_data": [i * i for i in range(1000)],
@@ -215,13 +227,13 @@ async def cache_test(request: Request):
 @app.get("/async-operations")
 async def async_operations(request: Request):
     """
-    Демонстрация асинхронных операций
+    Demonstration of asynchronous operations
     
-    Выполняет несколько асинхронных операций параллельно.
+    Performs multiple asynchronous operations concurrently.
     """
     start_time = time.time()
     
-    # Создаем несколько асинхронных задач
+    # Create multiple asynchronous tasks
     tasks = [
         async_database_query("SELECT * FROM users"),
         async_database_query("SELECT * FROM products"),
@@ -229,7 +241,7 @@ async def async_operations(request: Request):
         async_data_processing(list(range(100)))
     ]
     
-    # Выполняем все задачи параллельно
+    # Run all tasks concurrently
     results = await asyncio.gather(*tasks)
     
     execution_time = time.time() - start_time
@@ -248,10 +260,10 @@ async def async_operations(request: Request):
 @app.post("/cpu-intensive")
 async def cpu_intensive_operations(request: Request):
     """
-    CPU-интенсивные операции
+    CPU-intensive operations
     
-    Демонстрирует выполнение CPU-интенсивных задач в отдельном потоке
-    для предотвращения блокировки event loop.
+    Demonstrates execution of CPU-intensive tasks in a separate thread
+    to prevent blocking the event loop.
     """
     try:
         body = await request.json()
@@ -259,10 +271,10 @@ async def cpu_intensive_operations(request: Request):
         
         start_time = time.time()
         
-        # Создаем данные для обработки
+        # Create data for processing
         data = list(range(data_size))
         
-        # Выполняем CPU-интенсивную задачу в отдельном потоке
+        # Run CPU-intensive task in a separate thread
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(executor, cpu_intensive_task, data)
         
@@ -283,8 +295,8 @@ async def cpu_intensive_operations(request: Request):
 
 @app.get("/cache/stats")
 async def cache_stats(request: Request):
-    """Статистика кэша"""
-    # Получаем middleware
+    """Cache statistics"""
+    # Get middleware
     caching_middleware = None
     for middleware in app.http_router._middleware:
         if hasattr(middleware, '__name__') and middleware.__name__ == "CachingMiddleware":
@@ -294,7 +306,7 @@ async def cache_stats(request: Request):
     if not caching_middleware:
         return Response.json({"error": "Caching middleware not found"}, status_code=500)
     
-    # Вычисляем статистику
+    # Calculate statistics
     total_requests = caching_middleware.cache_stats["hits"] + caching_middleware.cache_stats["misses"]
     hit_rate = (caching_middleware.cache_stats["hits"] / total_requests * 100) if total_requests > 0 else 0
     
@@ -308,14 +320,14 @@ async def cache_stats(request: Request):
 
 @app.post("/cache/clear")
 async def clear_cache(request: Request):
-    """Очистка кэша"""
+    """Clear cache"""
     global memory_cache, cache_timestamps
     
-    # Очищаем кэш
+    # Clear cache
     memory_cache.clear()
     cache_timestamps.clear()
     
-    # Очищаем LRU кэш
+    # Clear LRU cache
     heavy_computation.cache_clear()
     
     return {
@@ -325,8 +337,8 @@ async def clear_cache(request: Request):
 
 @app.get("/performance/stats")
 async def performance_stats(request: Request):
-    """Статистика производительности"""
-    # Получаем middleware
+    """Performance statistics"""
+    # Get middleware
     performance_middleware = None
     for middleware in app.http_router._middleware:
         if hasattr(middleware, '__name__') and middleware.__name__ == "PerformanceMiddleware":
@@ -336,7 +348,7 @@ async def performance_stats(request: Request):
     if not performance_middleware:
         return Response.json({"error": "Performance middleware not found"}, status_code=500)
     
-    # Вычисляем статистику
+    # Calculate statistics
     if performance_middleware.request_times:
         avg_time = sum(performance_middleware.request_times) / len(performance_middleware.request_times)
         min_time = min(performance_middleware.request_times)
@@ -355,10 +367,10 @@ async def performance_stats(request: Request):
     return {
         "message": "Performance statistics",
         "performance": performance_stats,
-        "slow_requests": performance_middleware.slow_requests[-5:],  # Последние 5 медленных запросов
+        "slow_requests": performance_middleware.slow_requests[-5:],  # Last 5 slow requests
         "optimization_features": [
             "Response caching",
-            "Async processing",
+            "Asynchronous processing",
             "Batch operations",
             "Thread pool for CPU-intensive tasks",
             "Compression middleware"
@@ -367,29 +379,29 @@ async def performance_stats(request: Request):
 
 @app.get("/optimization/benchmark")
 async def optimization_benchmark(request: Request):
-    """Бенчмарк оптимизаций"""
+    """Optimization benchmark"""
     results = {}
     
-    # Тест 1: Без кэширования
+    # Test 1: Without caching
     start_time = time.time()
     result1 = heavy_computation(10000, "medium")
     time1 = time.time() - start_time
     results["without_cache"] = {"time": time1, "result": result1}
     
-    # Тест 2: С кэшированием (второй вызов)
+    # Test 2: With caching (second call)
     start_time = time.time()
     result2 = heavy_computation(10000, "medium")
     time2 = time.time() - start_time
     results["with_cache"] = {"time": time2, "result": result2}
     
-    # Тест 3: Асинхронная обработка
+    # Test 3: Asynchronous processing
     start_time = time.time()
     tasks = [async_data_processing(list(range(100))) for _ in range(10)]
     await asyncio.gather(*tasks)
     time3 = time.time() - start_time
     results["async_processing"] = {"time": time3, "tasks": 10}
     
-    # Тест 4: Пакетная обработка
+    # Test 4: Batch processing
     start_time = time.time()
     large_data = list(range(10000))
     batch_size = 100

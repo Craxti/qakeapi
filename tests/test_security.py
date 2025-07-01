@@ -126,7 +126,7 @@ async def test_requires_auth_decorator():
     assert response.status_code == 401
 
 async def test_cors_preflight_request(cors_middleware):
-    # Создаем тестовый preflight запрос
+    # Create test preflight request
     request = Request({
         "type": "http",
         "method": "OPTIONS",
@@ -147,7 +147,7 @@ async def test_cors_preflight_request(cors_middleware):
     assert (b"access-control-allow-credentials", b"true") in response.headers
 
 async def test_cors_actual_request(cors_middleware):
-    # Создаем тестовый запрос
+    # Create test request
     request = Request({
         "type": "http",
         "method": "GET",
@@ -164,7 +164,7 @@ async def test_cors_actual_request(cors_middleware):
     assert (b"access-control-allow-credentials", b"true") in response.headers
 
 async def test_cors_disallowed_origin(cors_middleware):
-    # Создаем тестовый запрос с неразрешенным origin
+    # Create test request with disallowed origin
     request = Request({
         "type": "http",
         "method": "OPTIONS",
@@ -179,7 +179,7 @@ async def test_cors_disallowed_origin(cors_middleware):
     assert response.status_code == 403
 
 async def test_csrf_safe_method(csrf_middleware):
-    # Тестируем безопасный метод (GET)
+    # Test safe method (GET)
     request = Request({
         "type": "http",
         "method": "GET",
@@ -195,7 +195,7 @@ async def test_csrf_safe_method(csrf_middleware):
     assert any(header[0] == b"set-cookie" for header in response.headers)
 
 async def test_csrf_unsafe_method_without_token(csrf_middleware):
-    # Тестируем небезопасный метод без CSRF токена
+    # Test unsafe method without CSRF token
     request = Request({
         "type": "http",
         "method": "POST",
@@ -212,7 +212,7 @@ async def test_csrf_unsafe_method_without_token(csrf_middleware):
     assert b'{"detail": "CSRF token missing or invalid"}' in body
 
 async def test_csrf_unsafe_method_with_valid_token(csrf_middleware):
-    # Тестируем небезопасный метод с валидным CSRF токеном
+    # Test unsafe method with valid CSRF token
     token = "valid_token"
     request = Request({
         "type": "http",
@@ -229,7 +229,7 @@ async def test_csrf_unsafe_method_with_valid_token(csrf_middleware):
 
     response = await csrf_middleware(request, handler)
     
-    # Проверяем, что токен в куках совпадает с токеном в заголовке
+    # Check that cookie token matches header token
     cookie_token = request.cookies.get("csrf_token").value
     header_token = request.headers.get(b"x-csrf-token", b"").decode()
     

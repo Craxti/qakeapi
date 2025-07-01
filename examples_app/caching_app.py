@@ -20,7 +20,7 @@ from pydantic import Field
 # Initialize application
 app = Application(
     title="Caching Example",
-    version="1.0.0",
+    version="1.0.2",
     description="Caching functionality example with QakeAPI"
 )
 

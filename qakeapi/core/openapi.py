@@ -11,7 +11,7 @@ class OpenAPIInfo:
     """OpenAPI information"""
 
     title: str = "QakeAPI"
-    version: str = "1.0.0"
+    version: str = "1.0.2"
     description: str = ""
 
 

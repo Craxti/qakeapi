@@ -18,7 +18,7 @@ from pydantic import Field, validator, EmailStr
 # Initialize application
 app = Application(
     title="Validation Example",
-    version="1.0.0",
+    version="1.0.2",
     description="Request validation example with QakeAPI"
 )
 

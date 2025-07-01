@@ -5,44 +5,44 @@ T = TypeVar("T")
 
 
 class DataValidator(ABC):
-    """Базовый интерфейс для валидации данных"""
+    """Base interface for data validation"""
 
     @abstractmethod
     def validate(self, data: Dict[str, Any]) -> Any:
-        """Валидация данных"""
+        """Data validation"""
         pass
 
 
 class RequestValidator(DataValidator):
-    """Интерфейс для валидации запросов"""
+    """Interface for request validation"""
 
     @abstractmethod
     def validate_query_params(self, params: Dict[str, Any]) -> Any:
-        """Валидация query-параметров"""
+        """Query parameters validation"""
         pass
 
     @abstractmethod
     def validate_path_params(self, params: Dict[str, Any]) -> Any:
-        """Валидация path-параметров"""
+        """Path parameters validation"""
         pass
 
     @abstractmethod
     def validate_body(self, body: Dict[str, Any]) -> Any:
-        """Валидация тела запроса"""
+        """Request body validation"""
         pass
 
 
 class ResponseValidator(DataValidator):
-    """Интерфейс для валидации ответов"""
+    """Interface for response validation"""
 
     @abstractmethod
     def validate_response(self, response: Dict[str, Any]) -> Any:
-        """Валидация ответа"""
+        """Response validation"""
         pass
 
 
 class PydanticValidator(RequestValidator, ResponseValidator):
-    """Реализация валидатора с использованием Pydantic"""
+    """Pydantic-based validator implementation"""
 
     def __init__(self, model_class: Type[Any]):
         self.model_class = model_class
@@ -64,20 +64,20 @@ class PydanticValidator(RequestValidator, ResponseValidator):
 
 
 class ValidationFactory:
-    """Фабрика для создания валидаторов"""
+    """Factory for creating validators"""
 
     @staticmethod
     def create_validator(validator_type: str, **kwargs: Any) -> DataValidator:
-        """Создает валидатор указанного типа"""
+        """Creates validator of specified type"""
         if validator_type == "pydantic":
             try:
                 from pydantic import BaseModel
 
                 if not issubclass(kwargs.get("model_class", type), BaseModel):
-                    raise ValueError("model_class должен быть подклассом BaseModel")
+                    raise ValueError("model_class must be a subclass of BaseModel")
                 return PydanticValidator(kwargs["model_class"])
             except ImportError:
                 raise ImportError(
-                    "Для использования PydanticValidator необходимо установить pydantic"
+                    "pydantic must be installed to use PydanticValidator"
                 )
-        raise ValueError(f"Неизвестный тип валидатора: {validator_type}")
+        raise ValueError(f"Unknown validator type: {validator_type}")

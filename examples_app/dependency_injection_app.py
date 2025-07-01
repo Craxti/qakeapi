@@ -20,7 +20,7 @@ from pydantic import Field, EmailStr
 # Initialize application
 app = Application(
     title="Dependency Injection Example",
-    version="1.0.0",
+    version="1.0.2",
     description="Dependency injection functionality example with QakeAPI"
 )
 

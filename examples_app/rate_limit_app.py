@@ -16,7 +16,7 @@ from qakeapi import Application, Request, Response
 # Initialize application
 app = Application(
     title="Rate Limiting Example",
-    version="1.0.0",
+    version="1.0.2",
     description="Rate limiting functionality example with QakeAPI"
 )
 

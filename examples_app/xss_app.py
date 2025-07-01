@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Пример XSS защиты с QakeAPI.
+XSS Protection Example with QakeAPI.
 """
 import sys
 import os
@@ -11,7 +11,7 @@ from datetime import datetime
 from typing import List, Optional, Dict, Any
 from urllib.parse import quote, unquote
 
-# Добавляем путь к локальному QakeAPI
+# Add path to local QakeAPI
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from qakeapi import Application, Request, Response
@@ -19,24 +19,24 @@ from qakeapi.core.middleware import Middleware
 from qakeapi.validation.models import validate_request_body, RequestModel
 from pydantic import BaseModel, Field, validator
 
-# Инициализация приложения
-app = Application(title="XSS Protection Example", version="1.0.0")
+# Application initialization
+app = Application(title="XSS Protection Example", version="1.0.2")
 
-# Pydantic модели с валидацией XSS
+# Pydantic models with XSS validation
 class CommentRequest(RequestModel):
-    """Модель для комментария с XSS защитой"""
-    author: str = Field(..., min_length=1, max_length=100, description="Автор комментария")
-    content: str = Field(..., min_length=1, max_length=1000, description="Содержание комментария")
-    email: Optional[str] = Field(None, description="Email автора")
-    website: Optional[str] = Field(None, description="Веб-сайт автора")
+    """Model for comment with XSS protection"""
+    author: str = Field(..., min_length=1, max_length=100, description="Comment author")
+    content: str = Field(..., min_length=1, max_length=1000, description="Comment content")
+    email: Optional[str] = Field(None, description="Author email")
+    website: Optional[str] = Field(None, description="Author website")
     
     @validator('author')
     def validate_author(cls, v):
-        """Валидация имени автора"""
+        """Author name validation"""
         if not v or not v.strip():
             raise ValueError('Author name cannot be empty')
         
-        # Проверяем на опасные символы
+        # Check for dangerous characters
         dangerous_chars = ['<', '>', '"', "'", '&', 'javascript:', 'onload', 'onerror']
         for char in dangerous_chars:
             if char.lower() in v.lower():
@@ -46,11 +46,11 @@ class CommentRequest(RequestModel):
     
     @validator('content')
     def validate_content(cls, v):
-        """Валидация содержания комментария"""
+        """Comment content validation"""
         if not v or not v.strip():
             raise ValueError('Content cannot be empty')
         
-        # Проверяем на HTML теги
+        # Check for HTML tags
         if re.search(r'<[^>]+>', v):
             raise ValueError('Content cannot contain HTML tags')
         
@@ -58,11 +58,11 @@ class CommentRequest(RequestModel):
     
     @validator('email')
     def validate_email(cls, v):
-        """Валидация email"""
+        """Email validation"""
         if v is None:
             return v
         
-        # Простая проверка email
+        # Simple email check
         email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if not re.match(email_pattern, v):
             raise ValueError('Invalid email format')
@@ -71,15 +71,15 @@ class CommentRequest(RequestModel):
     
     @validator('website')
     def validate_website(cls, v):
-        """Валидация веб-сайта"""
+        """Website validation"""
         if v is None:
             return v
         
-        # Проверяем протокол
+        # Check protocol
         if not v.startswith(('http://', 'https://')):
             v = 'https://' + v
         
-        # Простая проверка URL
+        # Simple URL check
         url_pattern = r'^https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
         if not re.match(url_pattern, v):
             raise ValueError('Invalid website URL')
@@ -87,48 +87,48 @@ class CommentRequest(RequestModel):
         return v
 
 class MessageRequest(RequestModel):
-    """Модель для сообщения"""
-    title: str = Field(..., min_length=1, max_length=200, description="Заголовок сообщения")
-    message: str = Field(..., min_length=1, max_length=5000, description="Текст сообщения")
-    recipient: str = Field(..., description="Получатель")
+    """Model for message"""
+    title: str = Field(..., min_length=1, max_length=200, description="Message title")
+    message: str = Field(..., min_length=1, max_length=5000, description="Message text")
+    recipient: str = Field(..., description="Recipient")
 
 class SearchRequest(RequestModel):
-    """Модель для поиска"""
-    query: str = Field(..., min_length=1, max_length=100, description="Поисковый запрос")
-    category: Optional[str] = Field(None, description="Категория")
+    """Model for search"""
+    query: str = Field(..., min_length=1, max_length=100, description="Search query")
+    category: Optional[str] = Field(None, description="Category")
 
-# Имитация базы данных
+# Database simulation
 comments_db = []
 messages_db = []
 search_history = []
 
-# Эндпоинты
+# Endpoints
 
 @app.get("/")
 async def root(request: Request):
-    """Базовый эндпоинт"""
+    """Base endpoint"""
     return {
         "message": "XSS Protection Example API is running",
         "endpoints": {
-            "/comments": "GET/POST - Управление комментариями",
-            "/messages": "POST - Отправка сообщений",
-            "/search": "POST - Поиск с защитой",
-            "/preview": "POST - Предварительный просмотр",
-            "/sanitize": "POST - Очистка текста",
-            "/test-xss": "GET - Тестовые XSS векторы"
+            "/comments": "GET/POST - Comment management",
+            "/messages": "POST - Send messages",
+            "/search": "POST - Search with protection",
+            "/preview": "POST - Content preview",
+            "/sanitize": "POST - Text sanitization",
+            "/test-xss": "GET - XSS test vectors"
         },
         "security_features": [
-            "Автоматическая очистка HTML",
-            "Валидация входных данных",
-            "Защита от XSS атак",
+            "Automatic HTML sanitization",
+            "Input data validation",
+            "XSS attack protection",
             "Content Security Policy",
-            "Безопасные заголовки"
+            "Security headers"
         ]
     }
 
 @app.get("/comments")
 async def get_comments(request: Request):
-    """Получить список комментариев"""
+    """Get list of comments"""
     return {
         "comments": comments_db,
         "total_count": len(comments_db)
@@ -138,22 +138,22 @@ async def get_comments(request: Request):
 @validate_request_body(CommentRequest)
 async def create_comment(request: Request):
     """
-    Создать комментарий с XSS защитой
+    Create comment with XSS protection
     
-    Этот эндпоинт демонстрирует защиту от XSS атак:
-    1. Валидация входных данных
-    2. Очистка HTML
-    3. Безопасное отображение
+    This endpoint demonstrates XSS attack protection:
+    1. Input data validation
+    2. HTML sanitization
+    3. Safe display
     """
     data = request.validated_data
     
-    # Дополнительная очистка данных
+    # Additional data sanitization
     sanitized_comment = {
         "id": len(comments_db) + 1,
         "author": html.escape(data.author),
         "content": html.escape(data.content),
         "email": html.escape(data.email) if data.email else None,
-        "website": data.website,  # URL уже проверен
+        "website": data.website,  # URL already validated
         "created_at": datetime.utcnow().isoformat(),
         "sanitized": True
     }
@@ -169,11 +169,11 @@ async def create_comment(request: Request):
 @validate_request_body(MessageRequest)
 async def send_message(request: Request):
     """
-    Отправить сообщение с XSS защитой
+    Send message with XSS protection
     """
     data = request.validated_data
     
-    # Очищаем данные
+    # Sanitize data
     sanitized_message = {
         "id": len(messages_db) + 1,
         "title": html.escape(data.title),
@@ -193,14 +193,14 @@ async def send_message(request: Request):
 @validate_request_body(SearchRequest)
 async def search_content(request: Request):
     """
-    Поиск с XSS защитой
+    Search with XSS protection
     """
     data = request.validated_data
     
-    # Очищаем поисковый запрос
+    # Sanitize search query
     sanitized_query = html.escape(data.query)
     
-    # Имитируем поиск
+    # Simulate search
     search_results = [
         {
             "id": 1,
@@ -210,7 +210,7 @@ async def search_content(request: Request):
         }
     ]
     
-    # Сохраняем в историю
+    # Save to history
     search_history.append({
         "query": sanitized_query,
         "category": html.escape(data.category) if data.category else None,
@@ -226,13 +226,13 @@ async def search_content(request: Request):
 @app.post("/preview")
 async def preview_content(request: Request):
     """
-    Предварительный просмотр с XSS защитой
+    Content preview with XSS protection
     """
     try:
         body = await request.json()
         content = body.get("content", "")
         
-        # Очищаем контент
+        # Sanitize content
         sanitized_content = html.escape(content)
         
         return {
@@ -249,13 +249,13 @@ async def preview_content(request: Request):
 @app.post("/sanitize")
 async def sanitize_text(request: Request):
     """
-    Очистка текста от потенциально опасного содержимого
+    Sanitize text from potentially dangerous content
     """
     try:
         body = await request.json()
         text = body.get("text", "")
         
-        # Получаем middleware
+        # Get middleware
         xss_middleware = None
         for middleware in app.http_router._middleware:
             if hasattr(middleware, '__name__') and middleware.__name__ == "XSSProtectionMiddleware":
@@ -268,7 +268,7 @@ async def sanitize_text(request: Request):
                 status_code=500
             )
         
-        # Очищаем текст
+        # Sanitize text
         sanitized_text = xss_middleware.sanitize_html(text)
         
         return {
@@ -285,28 +285,28 @@ async def sanitize_text(request: Request):
 @app.get("/test-xss")
 async def test_xss_vectors(request: Request):
     """
-    Тестовые XSS векторы для демонстрации защиты
+    XSS test vectors for protection demonstration
     """
     test_vectors = [
         {
             "name": "Basic Script Tag",
             "vector": "<script>alert('XSS')</script>",
-            "description": "Базовый тег script"
+            "description": "Basic script tag"
         },
         {
             "name": "JavaScript Protocol",
             "vector": "javascript:alert('XSS')",
-            "description": "JavaScript протокол в URL"
+            "description": "JavaScript protocol in URL"
         },
         {
             "name": "Event Handler",
             "vector": "<img src=x onerror=alert('XSS')>",
-            "description": "Обработчик события onerror"
+            "description": "onerror event handler"
         },
         {
             "name": "Iframe Injection",
             "vector": "<iframe src='javascript:alert(\"XSS\")'></iframe>",
-            "description": "Внедрение iframe"
+            "description": "Iframe injection"
         },
         {
             "name": "CSS Injection",
@@ -326,12 +326,12 @@ async def test_xss_vectors(request: Request):
         {
             "name": "Mixed Case",
             "vector": "<ScRiPt>alert('XSS')</ScRiPt>",
-            "description": "Смешанный регистр"
+            "description": "Mixed case"
         },
         {
             "name": "Nested Tags",
             "vector": "<scr<script>ipt>alert('XSS')</scr</script>ipt>",
-            "description": "Вложенные теги"
+            "description": "Nested tags"
         },
         {
             "name": "Null Byte",
@@ -342,22 +342,22 @@ async def test_xss_vectors(request: Request):
     
     return {
         "message": "XSS Test Vectors",
-        "description": "Эти векторы используются для тестирования XSS защиты",
+        "description": "These vectors are used for testing XSS protection",
         "vectors": test_vectors,
-        "warning": "Не используйте эти векторы в продакшене!"
+        "warning": "Do not use these vectors in production!"
     }
 
 @app.get("/search-history")
 async def get_search_history(request: Request):
-    """Получить историю поиска"""
+    """Get search history"""
     return {
-        "search_history": search_history[-10:],  # Последние 10 запросов
+        "search_history": search_history[-10:],  # Last 10 requests
         "total_searches": len(search_history)
     }
 
 @app.get("/security-headers")
 async def get_security_headers(request: Request):
-    """Получить информацию о заголовках безопасности"""
+    """Get security headers information"""
     return {
         "message": "Security Headers Information",
         "headers": {
@@ -366,7 +366,7 @@ async def get_security_headers(request: Request):
             "X-Frame-Options": "DENY",
             "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
         },
-        "description": "Эти заголовки добавляются автоматически middleware"
+        "description": "These headers are added automatically by middleware"
     }
 
 if __name__ == "__main__":

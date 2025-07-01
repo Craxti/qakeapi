@@ -21,10 +21,10 @@ class SampleResponseModel(BaseModel):
 def test_openapi_info():
     """Тест создания OpenAPI информации"""
     info = OpenAPIInfo(
-        title="Test API", version="1.0.0", description="Test Description"
+        title="Test API", version="1.0.2", description="Test Description"
     )
     assert info.title == "Test API"
-    assert info.version == "1.0.0"
+    assert info.version == "1.0.2"
     assert info.description == "Test Description"
 
 
@@ -52,7 +52,7 @@ def test_openapi_path():
 def test_openapi_generator():
     """Тест генерации OpenAPI спецификации"""
     info = OpenAPIInfo(
-        title="Test API", version="1.0.0", description="Test Description"
+        title="Test API", version="1.0.2", description="Test Description"
     )
     generator = OpenAPIGenerator(info)
 
@@ -74,7 +74,7 @@ def test_openapi_generator():
     # Проверяем базовую информацию
     assert spec["openapi"] == "3.0.0"
     assert spec["info"]["title"] == "Test API"
-    assert spec["info"]["version"] == "1.0.0"
+    assert spec["info"]["version"] == "1.0.2"
 
     # Проверяем путь
     assert "/users" in spec["paths"]

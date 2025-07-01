@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field, EmailStr, HttpUrl
 # Initialize application with extended OpenAPI documentation
 app = Application(
     title="OpenAPI/Swagger Example",
-    version="1.0.0",
+    version="1.0.2",
     description="""
     ## API Example with Full OpenAPI Documentation
     
@@ -166,7 +166,7 @@ async def root(request: Request):
     """
     return {
         "message": "OpenAPI/Swagger Example API is running",
-        "version": "1.0.0",
+        "version": "1.0.2",
         "documentation": "/docs",
         "openapi_schema": "/openapi.json",
         "endpoints": {
@@ -430,7 +430,7 @@ async def health_check(request: Request):
     return {
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat(),
-        "version": "1.0.0"
+        "version": "1.0.2"
     }
 
 @app.put("/users/{user_id}", tags=["Users"], response_model=UserResponse)

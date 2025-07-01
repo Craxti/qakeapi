@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qakeapi"
-version = "1.0.1"
+version = "1.0.2"
 authors = [
     {name = "Craxti", email = "fetis.dev@gmail.com"}]
 description = "A lightweight ASGI web framework"
@@ -61,7 +61,7 @@ filterwarnings = [
 
 [tool.poetry]
 name = "qakeapi"
-version = "1.0.1"
+version = "1.0.2"
 description = "A custom async web framework inspired by FastAPI and Starlette"
 authors = ["Craxti <fetis.dev@gmail.com>"]
 

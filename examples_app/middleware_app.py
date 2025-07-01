@@ -18,7 +18,7 @@ from qakeapi.middleware import Middleware
 # Initialize application
 app = Application(
     title="Middleware Example",
-    version="1.0.0",
+    version="1.0.2",
     description="Middleware functionality example with QakeAPI"
 )
 

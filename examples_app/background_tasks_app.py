@@ -21,7 +21,7 @@ from pydantic import Field
 # Initialize application
 app = Application(
     title="Background Tasks Example",
-    version="1.0.0",
+    version="1.0.2",
     description="Background tasks functionality example with QakeAPI"
 )
 

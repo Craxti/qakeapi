@@ -148,5 +148,5 @@ def test_media_type_parse_with_invalid_q():
         media_type = MediaType.parse("application/json; q=invalid")
         assert media_type.q == 1.0
     except ValueError:
-        # Если реализация выбрасывает исключение при неверном q, это тоже допустимо
+        # If implementation throws exception for invalid q, that's also acceptable
         pass 

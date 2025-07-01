@@ -8,9 +8,9 @@ from qakeapi.core.application import Application
 
 @pytest.fixture
 def app():
-    """Фикстура для создания тестового приложения"""
+    """Fixture for creating test application"""
     return Application(
-        title="Test API", version="1.0.0", description="Test API Description"
+        title="Test API", version="1.0.2", description="Test API Description"
     )
 
 
@@ -24,7 +24,7 @@ def event_loop_policy():
 
 @pytest.fixture
 async def test_client(app):
-    """Фикстура для создания тестового клиента"""
+    """Fixture for creating test client"""
     from httpx import AsyncClient
 
     async with AsyncClient(app=app, base_url="http://test") as client:

@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class Application:
     """Main application class with new routing architecture."""
 
-    def __init__(self, title: str = "QakeAPI", version: str = "1.0.0", description: str = ""):
+    def __init__(self, title: str = "QakeAPI", version: str = "1.0.2", description: str = ""):
         self.title = title
         self.version = version
         self.description = description

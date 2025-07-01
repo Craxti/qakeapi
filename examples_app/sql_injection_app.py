@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Пример защиты от SQL инъекций с QakeAPI.
+SQL Injection Protection Example with QakeAPI.
 """
 import sys
 import os
@@ -11,7 +11,7 @@ from datetime import datetime
 from typing import List, Optional, Dict, Any
 from contextlib import asynccontextmanager
 
-# Добавляем путь к локальному QakeAPI
+# Add path to local QakeAPI
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from qakeapi import Application, Request, Response
@@ -19,88 +19,88 @@ from qakeapi.core.middleware import Middleware
 from qakeapi.validation.models import validate_request_body, RequestModel
 from pydantic import BaseModel, Field, validator
 
-# Инициализация приложения
-app = Application(title="SQL Injection Protection Example", version="1.0.0")
+# Application initialization
+app = Application(title="SQL Injection Protection Example", version="1.0.2")
 
-# Middleware для защиты от SQL инъекций
+# Middleware for SQL injection protection
 class SQLInjectionProtectionMiddleware(Middleware):
-    """Middleware для защиты от SQL инъекций"""
+    """Middleware for SQL injection protection"""
     
     def __init__(self):
         self.__name__ = "SQLInjectionProtectionMiddleware"
         self.dangerous_patterns = [
-            # SQL ключевые слова
+            # SQL keywords
             r'\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE|UNION|OR|AND)\b',
-            # Комментарии SQL
+            # SQL comments
             r'--',
             r'/\*.*?\*/',
-            # Кавычки и точки с запятой
+            # Quotes and semicolons
             r'[\'";]',
-            # Функции SQL
+            # SQL functions
             r'\b(COUNT|SUM|AVG|MAX|MIN|LENGTH|SUBSTR|CONCAT|UPPER|LOWER)\b',
-            # Условия WHERE
+            # WHERE conditions
             r'\bWHERE\b.*?\b(OR|AND)\b',
             # JOIN
             r'\b(INNER|LEFT|RIGHT|FULL)\s+JOIN\b',
-            # Подзапросы
+            # Subqueries
             r'\(\s*SELECT\b',
-            # Инъекции через UNION
+            # UNION injection
             r'\bUNION\s+(ALL\s+)?SELECT\b',
-            # Инъекции через OR 1=1
+            # OR 1=1 injection
             r'\bOR\s+1\s*=\s*1\b',
             r'\bOR\s+\'1\'\s*=\s*\'1\'\b',
-            # Инъекции через комментарии
+            # Comment injection
             r'#.*$',
-            # Инъекции через экранирование
+            # Escaping injection
             r'\\\'.*?\\\'',
-            # Инъекции через hex
+            # Hex injection
             r'0x[0-9a-fA-F]+',
-            # Инъекции через char
+            # Char injection
             r'CHAR\s*\(\s*\d+\s*\)',
-            # Инъекции через concat
+            # Concat injection
             r'CONCAT\s*\([^)]*\)',
-            # Инъекции через substring
+            # Substring injection
             r'SUBSTRING\s*\([^)]*\)',
-            # Инъекции через case
+            # Case injection
             r'\bCASE\s+WHEN\b',
-            # Инъекции через if
+            # If injection
             r'\bIF\s*\([^)]*\)',
-            # Инъекции через sleep
+            # Sleep injection
             r'\bSLEEP\s*\(\s*\d+\s*\)',
-            # Инъекции через benchmark
+            # Benchmark injection
             r'\bBENCHMARK\s*\([^)]*\)',
-            # Инъекции через load_file
+            # Load_file injection
             r'\bLOAD_FILE\s*\([^)]*\)',
-            # Инъекции через into outfile
+            # Into outfile injection
             r'\bINTO\s+OUTFILE\b',
-            # Инъекции через into dumpfile
+            # Into dumpfile injection
             r'\bINTO\s+DUMPFILE\b',
-            # Инъекции через information_schema
+            # information_schema injection
             r'\binformation_schema\b',
-            # Инъекции через mysql
+            # mysql injection
             r'\bmysql\b',
-            # Инъекции через sys
+            # sys injection
             r'\bsys\b',
-            # Инъекции через performance_schema
+            # performance_schema injection
             r'\bperformance_schema\b',
         ]
         
-        # Компилируем регулярные выражения
+        # Compile regex patterns
         self.compiled_patterns = [re.compile(pattern, re.IGNORECASE | re.DOTALL) for pattern in self.dangerous_patterns]
     
     def detect_sql_injection(self, text: str) -> bool:
-        """Обнаруживает потенциальные SQL инъекции"""
+        """Detects potential SQL injection"""
         if not text:
             return False
         
         text_lower = text.lower()
         
-        # Проверяем паттерны
+        # Check patterns
         for pattern in self.compiled_patterns:
             if pattern.search(text):
                 return True
         
-        # Дополнительные проверки
+        # Additional checks
         suspicious_combinations = [
             ('or', '1=1'),
             ('or', '1=1'),
@@ -122,23 +122,23 @@ class SQLInjectionProtectionMiddleware(Middleware):
         return False
     
     def sanitize_input(self, text: str) -> str:
-        """Очищает входные данные от потенциально опасных символов"""
+        """Sanitizes input from potentially dangerous characters"""
         if not text:
             return text
         
-        # Удаляем опасные символы
+        # Remove dangerous characters
         dangerous_chars = ['\'', '"', ';', '--', '/*', '*/', '#']
         for char in dangerous_chars:
             text = text.replace(char, '')
         
-        # Удаляем множественные пробелы
+        # Remove multiple spaces
         text = re.sub(r'\s+', ' ', text)
         
         return text.strip()
     
     async def __call__(self, request: Request, call_next):
-        """Обработка запроса с защитой от SQL инъекций"""
-        # Проверяем заголовки
+        """Request processing with SQL injection protection"""
+        # Check headers
         for key, value in request.headers.items():
             if isinstance(value, str) and self.detect_sql_injection(value):
                 return Response.json(
@@ -146,7 +146,7 @@ class SQLInjectionProtectionMiddleware(Middleware):
                     status_code=400
                 )
         
-        # Проверяем query параметры
+        # Check query parameters
         for key, value in request.query_params.items():
             if isinstance(value, str) and self.detect_sql_injection(value):
                 return Response.json(
@@ -154,7 +154,7 @@ class SQLInjectionProtectionMiddleware(Middleware):
                     status_code=400
                 )
         
-        # Проверяем body (если это JSON)
+        # Check body (if JSON)
         if request.method in ["POST", "PUT", "PATCH"]:
             try:
                 body = await request.json()
@@ -168,31 +168,31 @@ class SQLInjectionProtectionMiddleware(Middleware):
             except:
                 pass
         
-        # Обрабатываем запрос
+        # Process request
         response = await call_next(request)
         
-        # Добавляем заголовки безопасности
+        # Add security headers
         response.headers["X-SQL-Injection-Protection"] = "enabled"
         
         return response
 
-# Подключаем middleware
+# Connect middleware
 # app.http_router.add_middleware(SQLInjectionProtectionMiddleware())
 
-# Безопасный класс для работы с базой данных
+# Safe database class
 class SafeDatabase:
-    """Безопасный класс для работы с базой данных"""
+    """Safe class for working with the database"""
     
     def __init__(self, db_path: str = ":memory:"):
         self.db_path = db_path
         self.init_database()
     
     def init_database(self):
-        """Инициализация базы данных"""
+        """Database initialization"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             
-            # Создаем таблицу пользователей
+            # Create users table
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -203,7 +203,7 @@ class SafeDatabase:
                 )
             ''')
             
-            # Создаем таблицу продуктов
+            # Create products table
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS products (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -216,7 +216,7 @@ class SafeDatabase:
                 )
             ''')
             
-            # Создаем таблицу заказов
+            # Create orders table
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS orders (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -231,7 +231,7 @@ class SafeDatabase:
             conn.commit()
     
     def safe_query(self, query: str, params: tuple = ()) -> List[Dict]:
-        """Безопасное выполнение запроса с параметрами"""
+        """Safe execution of query with parameters"""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 conn.row_factory = sqlite3.Row
@@ -247,25 +247,25 @@ class SafeDatabase:
             raise Exception(f"Database error: {str(e)}")
     
     def get_user_by_username(self, username: str) -> Optional[Dict]:
-        """Безопасное получение пользователя по имени"""
+        """Safely get user by username"""
         query = "SELECT * FROM users WHERE username = ?"
         result = self.safe_query(query, (username,))
         return result[0] if result else None
     
     def get_user_by_email(self, email: str) -> Optional[Dict]:
-        """Безопасное получение пользователя по email"""
+        """Safely get user by email"""
         query = "SELECT * FROM users WHERE email = ?"
         result = self.safe_query(query, (email,))
         return result[0] if result else None
     
     def create_user(self, username: str, email: str, password_hash: str) -> Dict:
-        """Безопасное создание пользователя"""
+        """Safely create user"""
         query = "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)"
         result = self.safe_query(query, (username, email, password_hash))
         return {"id": result[0]["affected_rows"], "username": username, "email": email}
     
     def search_products(self, query: str, category: str = None) -> List[Dict]:
-        """Безопасный поиск продуктов"""
+        """Safe product search"""
         if category:
             sql_query = "SELECT * FROM products WHERE name LIKE ? AND category = ?"
             params = (f"%{query}%", category)
@@ -276,41 +276,41 @@ class SafeDatabase:
         return self.safe_query(sql_query, params)
     
     def get_products_by_category(self, category: str) -> List[Dict]:
-        """Безопасное получение продуктов по категории"""
+        """Safely get products by category"""
         query = "SELECT * FROM products WHERE category = ?"
         return self.safe_query(query, (category,))
     
     def create_product(self, name: str, description: str, price: float, category: str, stock_quantity: int) -> Dict:
-        """Безопасное создание продукта"""
+        """Safely create product"""
         query = "INSERT INTO products (name, description, price, category, stock_quantity) VALUES (?, ?, ?, ?, ?)"
         result = self.safe_query(query, (name, description, price, category, stock_quantity))
         return {"id": result[0]["affected_rows"], "name": name, "price": price}
     
     def update_product_stock(self, product_id: int, new_quantity: int) -> Dict:
-        """Безопасное обновление количества товара"""
+        """Safely update product stock quantity"""
         query = "UPDATE products SET stock_quantity = ? WHERE id = ?"
         result = self.safe_query(query, (new_quantity, product_id))
         return {"affected_rows": result[0]["affected_rows"]}
 
-# Инициализация базы данных
+# Database initialization
 db = SafeDatabase("sql_injection_example.db")
 
-# Создаем базу данных при запуске
+# Create database on startup
 db.init_database()
 
-# Pydantic модели
+# Pydantic models
 class UserCreateRequest(RequestModel):
-    username: str = Field(..., min_length=3, max_length=50, description="Имя пользователя")
-    email: str = Field(..., description="Email адрес")
-    password: str = Field(..., min_length=8, description="Пароль")
+    username: str = Field(..., min_length=3, max_length=50, description="Username")
+    email: str = Field(..., description="Email address")
+    password: str = Field(..., min_length=8, description="Password")
     
     @validator('username')
     def validate_username(cls, v):
-        """Валидация имени пользователя"""
+        """Username validation"""
         if not v or not v.strip():
             raise ValueError('Username cannot be empty')
         
-        # Проверяем на SQL инъекции
+        # Check for SQL injection
         dangerous_chars = ['\'', '"', ';', '--', '/*', '*/', '#', 'DROP', 'DELETE', 'UPDATE', 'INSERT']
         for char in dangerous_chars:
             if char.lower() in v.lower():
@@ -320,11 +320,11 @@ class UserCreateRequest(RequestModel):
     
     @validator('email')
     def validate_email(cls, v):
-        """Валидация email"""
+        """Email validation"""
         if not v or not v.strip():
             raise ValueError('Email cannot be empty')
         
-        # Простая проверка email
+        # Simple email check
         email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if not re.match(email_pattern, v):
             raise ValueError('Invalid email format')
@@ -332,19 +332,19 @@ class UserCreateRequest(RequestModel):
         return v.lower().strip()
 
 class ProductCreateRequest(RequestModel):
-    name: str = Field(..., min_length=1, max_length=200, description="Название продукта")
-    description: Optional[str] = Field(None, description="Описание продукта")
-    price: float = Field(..., gt=0, description="Цена продукта")
-    category: str = Field(..., description="Категория продукта")
-    stock_quantity: int = Field(0, ge=0, description="Количество на складе")
+    name: str = Field(..., min_length=1, max_length=200, description="Product name")
+    description: Optional[str] = Field(None, description="Product description")
+    price: float = Field(..., gt=0, description="Product price")
+    category: str = Field(..., description="Product category")
+    stock_quantity: int = Field(0, ge=0, description="Stock quantity")
     
     @validator('name')
     def validate_name(cls, v):
-        """Валидация названия продукта"""
+        """Product name validation"""
         if not v or not v.strip():
             raise ValueError('Product name cannot be empty')
         
-        # Проверяем на SQL инъекции
+        # Check for SQL injection
         dangerous_chars = ['\'', '"', ';', '--', '/*', '*/', '#']
         for char in dangerous_chars:
             if char in v:
@@ -353,16 +353,16 @@ class ProductCreateRequest(RequestModel):
         return v.strip()
 
 class SearchRequest(RequestModel):
-    query: str = Field(..., min_length=1, max_length=100, description="Поисковый запрос")
-    category: Optional[str] = Field(None, description="Категория для фильтрации")
+    query: str = Field(..., min_length=1, max_length=100, description="Search query")
+    category: Optional[str] = Field(None, description="Category for filtering")
     
     @validator('query')
     def validate_query(cls, v):
-        """Валидация поискового запроса"""
+        """Search query validation"""
         if not v or not v.strip():
             raise ValueError('Search query cannot be empty')
         
-        # Проверяем на SQL инъекции
+        # Check for SQL injection
         dangerous_chars = ['\'', '"', ';', '--', '/*', '*/', '#', 'UNION', 'SELECT', 'DROP', 'DELETE']
         for char in dangerous_chars:
             if char.lower() in v.lower():
@@ -370,33 +370,33 @@ class SearchRequest(RequestModel):
         
         return v.strip()
 
-# Эндпоинты
+# Endpoints
 
 @app.get("/")
 async def root(request: Request):
-    """Базовый эндпоинт"""
+    """Base endpoint"""
     return {
         "message": "SQL Injection Protection Example API is running",
         "endpoints": {
-            "/users": "GET/POST - Управление пользователями",
-            "/products": "GET/POST - Управление продуктами",
-            "/search": "POST - Безопасный поиск",
-            "/categories": "GET - Список категорий",
-            "/test-injection": "GET - Тестовые SQL инъекции",
-            "/database-info": "GET - Информация о базе данных"
+            "/users": "GET/POST - User management",
+            "/products": "GET/POST - Product management",
+            "/search": "POST - Safe search",
+            "/categories": "GET - List of categories",
+            "/test-injection": "GET - SQL injection test vectors",
+            "/database-info": "GET - Database information"
         },
         "security_features": [
-            "Защита от SQL инъекций",
-            "Параметризованные запросы",
-            "Валидация входных данных",
-            "Middleware для обнаружения атак",
-            "Безопасные заголовки"
+            "SQL injection protection",
+            "Parameterized queries",
+            "Input data validation",
+            "Middleware for attack detection",
+            "Security headers"
         ]
     }
 
 @app.get("/users")
 async def get_users(request: Request):
-    """Получить список пользователей"""
+    """Get list of users"""
     try:
         users = db.safe_query("SELECT id, username, email, created_at FROM users")
         return {
@@ -413,17 +413,17 @@ async def get_users(request: Request):
 @validate_request_body(UserCreateRequest)
 async def create_user(request: Request):
     """
-    Создать пользователя с защитой от SQL инъекций
+    Create user with SQL injection protection
     
-    Этот эндпоинт демонстрирует безопасную работу с базой данных:
-    1. Валидация входных данных
-    2. Параметризованные запросы
-    3. Обработка ошибок
+    This endpoint demonstrates safe database operations:
+    1. Input data validation
+    2. Parameterized queries
+    3. Error handling
     """
     data = request.validated_data
     
     try:
-        # Проверяем существование пользователя
+        # Check for existing user
         existing_user = db.get_user_by_username(data.username)
         if existing_user:
             return Response.json(
@@ -438,7 +438,7 @@ async def create_user(request: Request):
                 status_code=400
             )
         
-        # Создаем пользователя (в реальном приложении хешировали бы пароль)
+        # Create user (in a real application, we would hash the password)
         user = db.create_user(data.username, data.email, data.password)
         
         return {
@@ -453,7 +453,7 @@ async def create_user(request: Request):
 
 @app.get("/products")
 async def get_products(request: Request):
-    """Получить список продуктов"""
+    """Get list of products"""
     try:
         products = db.safe_query("SELECT * FROM products")
         return {
@@ -470,7 +470,7 @@ async def get_products(request: Request):
 @validate_request_body(ProductCreateRequest)
 async def create_product(request: Request):
     """
-    Создать продукт с защитой от SQL инъекций
+    Create product with SQL injection protection
     """
     data = request.validated_data
     
@@ -497,9 +497,9 @@ async def create_product(request: Request):
 @validate_request_body(SearchRequest)
 async def search_products(request: Request):
     """
-    Безопасный поиск продуктов
+    Safe product search
     
-    Этот эндпоинт демонстрирует безопасный поиск с параметризованными запросами.
+    This endpoint demonstrates safe search with parameterized queries.
     """
     data = request.validated_data
     
@@ -520,7 +520,7 @@ async def search_products(request: Request):
 
 @app.get("/categories")
 async def get_categories(request: Request):
-    """Получить список категорий"""
+    """Get list of categories"""
     try:
         categories = db.safe_query("SELECT DISTINCT category FROM products ORDER BY category")
         return {
@@ -535,9 +535,9 @@ async def get_categories(request: Request):
 
 @app.get("/products/category/{category}")
 async def get_products_by_category(request: Request, category: str):
-    """Получить продукты по категории"""
+    """Get products by category"""
     try:
-        # Очищаем категорию от потенциально опасных символов
+        # Sanitize category from potentially dangerous characters
         safe_category = category.replace("'", "").replace('"', "").replace(";", "")
         
         products = db.get_products_by_category(safe_category)
@@ -556,82 +556,82 @@ async def get_products_by_category(request: Request, category: str):
 @app.get("/test-injection")
 async def test_sql_injection(request: Request):
     """
-    Тестовые SQL инъекции для демонстрации защиты
+    SQL injection test vectors for demonstration purposes
     
-    ВНИМАНИЕ: Эти примеры показывают, как НЕ нужно делать запросы!
+    WARNING: These examples show how NOT to make queries!
     """
     test_vectors = [
         {
             "name": "Basic SQL Injection",
             "vector": "'; DROP TABLE users; --",
-            "description": "Базовая SQL инъекция для удаления таблицы"
+            "description": "Basic SQL injection to delete table"
         },
         {
             "name": "Union Based Injection",
             "vector": "' UNION SELECT * FROM users --",
-            "description": "Union-based инъекция"
+            "description": "Union-based injection"
         },
         {
             "name": "Boolean Based Injection",
             "vector": "' OR 1=1 --",
-            "description": "Boolean-based инъекция"
+            "description": "Boolean-based injection"
         },
         {
             "name": "Time Based Injection",
             "vector": "'; WAITFOR DELAY '00:00:05' --",
-            "description": "Time-based инъекция"
+            "description": "Time-based injection"
         },
         {
             "name": "Error Based Injection",
             "vector": "' AND (SELECT 1 FROM (SELECT COUNT(*),CONCAT(0x7e,VERSION(),0x7e,FLOOR(RAND(0)*2))x FROM INFORMATION_SCHEMA.TABLES GROUP BY x)a) --",
-            "description": "Error-based инъекция"
+            "description": "Error-based injection"
         },
         {
             "name": "Stacked Queries",
             "vector": "'; INSERT INTO users (username, email, password_hash) VALUES ('hacker', 'hacker@evil.com', 'hash'); --",
-            "description": "Stacked queries инъекция"
+            "description": "Stacked queries injection"
         },
         {
             "name": "Comment Injection",
             "vector": "admin'/*",
-            "description": "Инъекция через комментарии"
+            "description": "Injection through comments"
         },
         {
             "name": "Hex Injection",
             "vector": "0x61646D696E",  # hex for 'admin'
-            "description": "Hex-encoded инъекция"
+            "description": "Hex-encoded injection"
         },
         {
             "name": "Unicode Injection",
             "vector": "admin\u0027",
-            "description": "Unicode-encoded инъекция"
+            "description": "Unicode-encoded injection"
         },
         {
             "name": "Case Manipulation",
             "vector": "AdMiN' Or '1'='1",
-            "description": "Case manipulation инъекция"
+            "description": "Case manipulation injection"
         }
     ]
     
     return {
         "message": "SQL Injection Test Vectors",
-        "description": "Эти векторы демонстрируют различные типы SQL инъекций",
-        "warning": "НЕ используйте эти векторы в продакшене!",
+        "description": "These vectors demonstrate various types of SQL injection",
+        "warning": "DO NOT USE THESE VECTORS IN PRODUCTION!",
         "vectors": test_vectors,
         "protection_methods": [
-            "Параметризованные запросы",
-            "Валидация входных данных",
-            "Экранирование специальных символов",
-            "Использование ORM",
-            "Принцип наименьших привилегий"
+            "Parameterized queries",
+            "Input data validation",
+            "Special characters escaping",
+            "ORM usage",
+            "Least privilege principle"
         ]
     }
 
 @app.get("/database-info")
 async def get_database_info(request: Request):
-    """Получить информацию о базе данных"""
+    """Get database information"""
     try:
-        # Получаем статистику
+        # Get statistics
         users_count = db.safe_query("SELECT COUNT(*) as count FROM users")[0]["count"]
         products_count = db.safe_query("SELECT COUNT(*) as count FROM products")[0]["count"]
         categories_count = db.safe_query("SELECT COUNT(DISTINCT category) as count FROM products")[0]["count"]
@@ -646,7 +646,7 @@ async def get_database_info(request: Request):
             "security_features": [
                 "SQL injection protection enabled",
                 "Parameterized queries",
-                "Input validation",
+                "Input data validation",
                 "Error handling"
             ]
         }
@@ -658,7 +658,7 @@ async def get_database_info(request: Request):
 
 @app.get("/security-info")
 async def get_security_info(request: Request):
-    """Получить информацию о безопасности"""
+    """Get security information"""
     return {
         "message": "Security Information",
         "sql_injection_protection": {
@@ -667,7 +667,7 @@ async def get_security_info(request: Request):
                 "Pattern detection",
                 "Input sanitization",
                 "Parameterized queries",
-                "Input validation"
+                "Input data validation"
             ]
         },
         "headers": {
