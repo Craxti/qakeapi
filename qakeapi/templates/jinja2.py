@@ -8,10 +8,12 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 try:
-    from jinja2 import Environment, FileSystemLoader, Template, select_autoescape
+    from jinja2 import Environment, FileSystemLoader, select_autoescape
+    from jinja2 import Template as Jinja2Template
     JINJA2_AVAILABLE = True
 except ImportError:
     JINJA2_AVAILABLE = False
+    Jinja2Template = None
 
 from ..core.responses import Response
 
@@ -101,7 +103,7 @@ class Jinja2TemplateEngine(TemplateEngine):
         self.env.globals[name] = value
         logger.debug(f"Added Jinja2 global: {name}")
     
-    def get_template(self, template_name: str) -> Template:
+    def get_template(self, template_name: str) -> Jinja2Template:
         """Get Jinja2 template object."""
         return self.env.get_template(template_name)
 
