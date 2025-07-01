@@ -19,6 +19,7 @@ setup(
         "aiofiles>=0.8.0",
         "aiohttp>=3.8.0",
         "jinja2>=3.0.0",
+        "psutil>=5.8.0",
     ],
     extras_require={
         "test": [
