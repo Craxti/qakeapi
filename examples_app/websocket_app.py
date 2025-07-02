@@ -18,7 +18,7 @@ from pydantic import Field
 # Initialize application
 app = Application(
     title="WebSocket Example",
-    version="1.0.2",
+    version="1.0.3",
     description="WebSocket functionality example with QakeAPI"
 )
 

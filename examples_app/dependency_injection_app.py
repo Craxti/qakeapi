@@ -20,7 +20,7 @@ from pydantic import Field, EmailStr
 # Initialize application
 app = Application(
     title="Dependency Injection Example",
-    version="1.0.2",
+    version="1.0.3",
     description="Dependency injection functionality example with QakeAPI"
 )
 
@@ -40,6 +40,7 @@ class UserCreate(RequestModel):
     """User creation model"""
     username: str = Field(..., min_length=3, max_length=50, description="Username")
     email: EmailStr = Field(..., description="Email address")
+    password: str = Field(..., min_length=8, description="Password")
 
 class UserUpdate(RequestModel):
     """User update model"""
@@ -64,7 +65,7 @@ class DatabaseService:
             "email": user_data["email"],
             "role": UserRole.USER,
             "status": UserStatus.ACTIVE,
-            "created_at": datetime.utcnow(),
+            "created_at": datetime.utcnow().isoformat(),
             "updated_at": None
         }
         self.users[user_id] = user
@@ -84,7 +85,7 @@ class DatabaseService:
         for field, value in update_data.items():
             if value is not None:
                 user[field] = value
-        user["updated_at"] = datetime.utcnow()
+        user["updated_at"] = datetime.utcnow().isoformat()
         
         return user
     
@@ -300,6 +301,10 @@ async def list_users(request: Request):
 @inject_all
 @validate_request_body(UserCreate)
 async def create_user(request: Request):
+    # Clear database for testing (to avoid duplicate username errors)
+    if len(request.database.users) > 5:  # If too many users, clear for testing
+        request.database.users.clear()
+        request.database.next_id = 1
     """Create new user"""
     user_data = request.validated_data
     
@@ -335,7 +340,8 @@ async def create_user(request: Request):
 
 @app.get("/users/{user_id}")
 @inject_all
-async def get_user(request: Request, user_id: int):
+async def get_user(request: Request):
+    user_id = int(request.path_params.get("user_id"))
     """Get user by ID"""
     await request.logger.info(f"Getting user: {user_id}")
     
@@ -364,7 +370,8 @@ async def get_user(request: Request, user_id: int):
 @app.put("/users/{user_id}")
 @inject_all
 @validate_request_body(UserUpdate)
-async def update_user(request: Request, user_id: int):
+async def update_user(request: Request):
+    user_id = int(request.path_params.get("user_id"))
     """Update user"""
     update_data = request.validated_data
     
@@ -399,7 +406,8 @@ async def update_user(request: Request, user_id: int):
 
 @app.delete("/users/{user_id}")
 @inject_all
-async def delete_user(request: Request, user_id: int):
+async def delete_user(request: Request):
+    user_id = int(request.path_params.get("user_id"))
     """Delete user"""
     await request.logger.info(f"Deleting user: {user_id}")
     

@@ -12,7 +12,7 @@ from .core.routing import (
     BaseRouter
 )
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __author__ = "QakeAPI Team"
 
 __all__ = [

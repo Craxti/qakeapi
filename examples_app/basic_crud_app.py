@@ -16,19 +16,20 @@ from pydantic import Field
 # Initialize application
 app = Application(
     title="Basic CRUD Example",
-    version="1.0.2",
+    version="1.0.3",
     description="Basic CRUD operations example with QakeAPI"
 )
 
 # Pydantic models
 class UserCreate(RequestModel):
     """User creation model"""
-    name: str = Field(..., description="User name")
+    username: str = Field(..., description="Username")
     email: str = Field(..., description="User email")
+    password: str = Field(..., description="Password")
 
 class UserUpdate(RequestModel):
     """User update model"""
-    name: Optional[str] = Field(None, description="New name")
+    username: Optional[str] = Field(None, description="New username")
     email: Optional[str] = Field(None, description="New email")
 
 # In-memory database
@@ -40,11 +41,6 @@ async def root(request: Request):
     """Root endpoint"""
     return {"message": "Basic CRUD API is running"}
 
-@app.get("/users")
-async def list_users(request: Request):
-    """Get all users"""
-    return list(users_db.values())
-
 @app.post("/users", status_code=201)
 @validate_request_body(UserCreate)
 async def create_user(request: Request):
@@ -54,7 +50,7 @@ async def create_user(request: Request):
     
     user = {
         "id": next_user_id,
-        "name": user_data.name,
+        "username": user_data.username,
         "email": user_data.email
     }
     
@@ -63,9 +59,15 @@ async def create_user(request: Request):
     
     return user
 
+@app.get("/users")
+async def list_users(request: Request):
+    """Get all users"""
+    return list(users_db.values())
+
 @app.get("/users/{user_id}")
-async def get_user(request: Request, user_id: int):
+async def get_user(request: Request):
     """Get user by ID"""
+    user_id = int(request.path_params.get("user_id"))
     if user_id not in users_db:
         return Response.json(
             {"error": "User not found"},
@@ -75,7 +77,8 @@ async def get_user(request: Request, user_id: int):
 
 @app.put("/users/{user_id}")
 @validate_request_body(UserUpdate)
-async def update_user(request: Request, user_id: int):
+async def update_user(request: Request):
+    user_id = int(request.path_params.get("user_id"))
     """Update user"""
     if user_id not in users_db:
         return Response.json(
@@ -86,15 +89,16 @@ async def update_user(request: Request, user_id: int):
     user_data = request.validated_data
     user = users_db[user_id]
     
-    if user_data.name is not None:
-        user["name"] = user_data.name
+    if user_data.username is not None:
+        user["username"] = user_data.username
     if user_data.email is not None:
         user["email"] = user_data.email
     
     return user
 
 @app.delete("/users/{user_id}", status_code=204)
-async def delete_user(request: Request, user_id: int):
+async def delete_user(request: Request):
+    user_id = int(request.path_params.get("user_id"))
     """Delete user"""
     if user_id not in users_db:
         return Response.json(

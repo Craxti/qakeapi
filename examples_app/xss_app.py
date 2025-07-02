@@ -20,7 +20,7 @@ from qakeapi.validation.models import validate_request_body, RequestModel
 from pydantic import BaseModel, Field, validator
 
 # Application initialization
-app = Application(title="XSS Protection Example", version="1.0.2")
+app = Application(title="XSS Protection Example", version="1.0.3")
 
 # Pydantic models with XSS validation
 class CommentRequest(RequestModel):

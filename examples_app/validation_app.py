@@ -18,7 +18,7 @@ from pydantic import Field, validator, EmailStr
 # Initialize application
 app = Application(
     title="Validation Example",
-    version="1.0.2",
+    version="1.0.3",
     description="Request validation example with QakeAPI"
 )
 
@@ -99,7 +99,7 @@ async def create_user(request: Request):
         "username": user_data.username,
         "email": user_data.email,
         "age": user_data.age,
-        "created_at": datetime.utcnow()
+        "created_at": datetime.utcnow().isoformat()
     }
     
     users_db[next_user_id] = user
@@ -111,14 +111,14 @@ async def create_user(request: Request):
     }
 
 @app.get("/users/{user_id}")
-async def get_user(request: Request, user_id: int):
+async def get_user(request: Request):
     """Get user by ID"""
+    user_id = int(request.path_params.get("user_id"))
     if user_id not in users_db:
         return Response.json(
             {"error": "User not found"},
             status_code=404
         )
-    
     return users_db[user_id]
 
 @app.get("/search")

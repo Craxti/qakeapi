@@ -101,7 +101,7 @@ user_template.write_text("""
 """)
 
 # Create application
-app = Application(title="Template Example", version="1.0.2")
+app = Application(title="Template Example", version="1.0.3")
 
 # Create template engine with caching and debugging
 template_engine = create_template_engine(

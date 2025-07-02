@@ -72,7 +72,7 @@ def test_openapi_generator():
     spec = generator.generate()
 
     # Проверяем базовую информацию
-    assert spec["openapi"] == "3.0.0"
+    assert spec["openapi"] == "3.1.0"
     assert spec["info"]["title"] == "Test API"
     assert spec["info"]["version"] == "1.0.2"
 

@@ -39,7 +39,7 @@ from qakeapi.testing.load_testing import (
 )
 
 # Create application for testing
-app = Application(title="Enhanced Testing Example", version="1.0.2")
+app = Application(title="Enhanced Testing Example", version="1.0.3")
 
 @app.get("/users")
 async def get_users(request):

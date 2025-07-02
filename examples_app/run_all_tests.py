@@ -57,8 +57,8 @@ TEST_CONFIG = {
     ]},
     "validation_app": {"port": 8008, "tests": [
         {"method": "GET", "path": "/", "expected_status": 200},
-        {"method": "POST", "path": "/users", "data": {"username": "testuser10", "email": "test10@example.com", "password": "testpass123"}, "expected_status": 200},
-        {"method": "GET", "path": "/users/1", "expected_status": 404},
+        {"method": "POST", "path": "/users", "data": {"username": "testuser10", "email": "test10@example.com", "password": "TestPass123"}, "expected_status": 200},
+        {"method": "GET", "path": "/users/999", "expected_status": 404},
         {"method": "GET", "path": "/search?query=test", "expected_status": 200}
     ]},
     "jwt_auth_app": {"port": 8009, "tests": [
@@ -135,7 +135,7 @@ def random_user():
     return {
         "username": f"testuser{suffix}",
         "email": f"test{suffix}@example.com",
-        "password": "testpass123"
+        "password": "TestPass123"
     }
 
 async def main():
@@ -167,8 +167,8 @@ async def main():
                     data = test.get('data')
                     expected_status = test['expected_status']
 
-                    # If test creates user, use unique data except for dependency_injection_app
-                    if method == "POST" and "/users" in path and data and "username" in data and app_name != "dependency_injection_app":
+                    # If test creates user, use unique data
+                    if method == "POST" and "/users" in path and data and "username" in data:
                         data = random_user()
                     
                     success, response = await test_endpoint(

@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field, EmailStr, HttpUrl
 # Initialize application with extended OpenAPI documentation
 app = Application(
     title="OpenAPI/Swagger Example",
-    version="1.0.2",
+    version="1.0.3",
     description="""
     ## API Example with Full OpenAPI Documentation
     

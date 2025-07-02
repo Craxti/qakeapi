@@ -13,17 +13,20 @@ from typing import Dict, Any
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from qakeapi import Application, Request, Response
-from qakeapi.middleware import Middleware
+from qakeapi.core.middleware import Middleware
 
 # Initialize application
 app = Application(
     title="Middleware Example",
-    version="1.0.2",
+    version="1.0.3",
     description="Middleware functionality example with QakeAPI"
 )
 
-# Custom middleware classes
-class LoggingMiddleware(Middleware):
+# Middleware classes will be defined as decorators below
+
+# Add middleware to application using decorators
+@app.middleware()
+class LoggingMiddleware:
     """Logging middleware for request/response logging"""
     
     def __init__(self):
@@ -54,7 +57,8 @@ class LoggingMiddleware(Middleware):
         
         return response
 
-class AuthenticationMiddleware(Middleware):
+@app.middleware()
+class AuthenticationMiddleware:
     """Authentication middleware"""
     
     def __init__(self):
@@ -83,7 +87,8 @@ class AuthenticationMiddleware(Middleware):
         # Add user info to request
         request.user = {"id": 1, "username": "testuser"}
 
-class RateLimitMiddleware(Middleware):
+@app.middleware()
+class RateLimitMiddleware:
     """Rate limiting middleware"""
     
     def __init__(self, requests_per_minute: int = 60):
@@ -114,7 +119,8 @@ class RateLimitMiddleware(Middleware):
         # Add current request
         self.requests[client_ip].append(current_time)
 
-class CachingMiddleware(Middleware):
+@app.middleware()
+class CachingMiddleware:
     """Caching middleware"""
     
     def __init__(self):
@@ -145,12 +151,6 @@ class CachingMiddleware(Middleware):
                 pass
         
         return response
-
-# Add middleware to application
-app.add_middleware(LoggingMiddleware())
-app.add_middleware(AuthenticationMiddleware())
-app.add_middleware(RateLimitMiddleware(requests_per_minute=100))
-app.add_middleware(CachingMiddleware())
 
 # Routes
 @app.get("/")

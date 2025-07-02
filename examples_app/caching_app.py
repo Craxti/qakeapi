@@ -20,7 +20,7 @@ from pydantic import Field
 # Initialize application
 app = Application(
     title="Caching Example",
-    version="1.0.2",
+    version="1.0.3",
     description="Caching functionality example with QakeAPI"
 )
 
@@ -130,7 +130,8 @@ async def root(request: Request):
     }
 
 @app.get("/compute/{n}")
-async def compute_fibonacci(request: Request, n: int):
+async def compute_fibonacci(request: Request):
+    n = int(request.path_params.get("n"))
     """Compute Fibonacci number with caching"""
     if n < 0:
         return Response.json(
@@ -172,7 +173,8 @@ async def compute_fibonacci(request: Request, n: int):
     }
 
 @app.get("/factorial/{n}")
-async def compute_factorial(request: Request, n: int):
+async def compute_factorial(request: Request):
+    n = int(request.path_params.get("n"))
     """Compute factorial with caching"""
     if n < 0:
         return Response.json(
@@ -238,7 +240,8 @@ async def get_cache_info(request: Request):
     }
 
 @app.get("/cache/{key}")
-async def get_cache_value(request: Request, key: str):
+async def get_cache_value(request: Request):
+    key = request.path_params.get("key")
     """Get value from cache by key"""
     value = get_cache(key)
     
@@ -256,7 +259,8 @@ async def get_cache_value(request: Request, key: str):
 
 @app.post("/cache/{key}")
 @validate_request_body(CacheRequest)
-async def set_cache_value(request: Request, key: str):
+async def set_cache_value(request: Request):
+    key = request.path_params.get("key")
     """Set value in cache by key"""
     cache_data = request.validated_data
     
@@ -269,7 +273,8 @@ async def set_cache_value(request: Request, key: str):
     }
 
 @app.delete("/cache/{key}")
-async def delete_cache_value(request: Request, key: str):
+async def delete_cache_value(request: Request):
+    key = request.path_params.get("key")
     """Delete value from cache by key"""
     if delete_cache(key):
         return {

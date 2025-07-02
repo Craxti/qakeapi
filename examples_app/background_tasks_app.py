@@ -21,7 +21,7 @@ from pydantic import Field
 # Initialize application
 app = Application(
     title="Background Tasks Example",
-    version="1.0.2",
+    version="1.0.3",
     description="Background tasks functionality example with QakeAPI"
 )
 
@@ -146,26 +146,6 @@ async def root(request: Request):
         }
     }
 
-@app.get("/tasks")
-async def list_tasks(request: Request):
-    """List all tasks"""
-    task_list = []
-    for task_id, task in tasks.items():
-        task_list.append({
-            "id": task_id,
-            "type": task["type"],
-            "status": task["status"],
-            "progress": task.get("progress", 0),
-            "created_at": task["created_at"].isoformat(),
-            "started_at": task.get("started_at", "").isoformat() if task.get("started_at") else None,
-            "completed_at": task.get("completed_at", "").isoformat() if task.get("completed_at") else None
-        })
-    
-    return {
-        "tasks": task_list,
-        "total": len(tasks)
-    }
-
 @app.post("/tasks")
 @validate_request_body(TaskRequest)
 async def create_task(request: Request):
@@ -202,8 +182,29 @@ async def create_task(request: Request):
         "status": TaskStatus.PENDING
     }
 
+@app.get("/tasks")
+async def list_tasks(request: Request):
+    """List all tasks"""
+    task_list = []
+    for task_id, task in tasks.items():
+        task_list.append({
+            "id": task_id,
+            "type": task["type"],
+            "status": task["status"],
+            "progress": task.get("progress", 0),
+            "created_at": task["created_at"].isoformat(),
+            "started_at": task.get("started_at", "").isoformat() if task.get("started_at") else None,
+            "completed_at": task.get("completed_at", "").isoformat() if task.get("completed_at") else None
+        })
+    
+    return {
+        "tasks": task_list,
+        "total": len(tasks)
+    }
+
 @app.get("/tasks/{task_id}")
-async def get_task(request: Request, task_id: str):
+async def get_task(request: Request):
+    task_id = request.path_params.get("task_id")
     """Get task status and details"""
     if task_id not in tasks:
         return Response.json(

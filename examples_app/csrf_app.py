@@ -19,7 +19,7 @@ from pydantic import Field
 # Initialize application
 app = Application(
     title="CSRF Protection Example",
-    version="1.0.2",
+    version="1.0.3",
     description="CSRF protection functionality example with QakeAPI"
 )
 

@@ -25,7 +25,7 @@ from qakeapi.validation.models import validate_request_body, RequestModel
 from pydantic import BaseModel, Field
 
 # Application initialization
-app = Application(title="Performance Optimization Example", version="1.0.2")
+app = Application(title="Performance Optimization Example", version="1.0.3")
 
 # Global variables for caching
 memory_cache = {}

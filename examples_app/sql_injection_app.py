@@ -20,7 +20,7 @@ from qakeapi.validation.models import validate_request_body, RequestModel
 from pydantic import BaseModel, Field, validator
 
 # Application initialization
-app = Application(title="SQL Injection Protection Example", version="1.0.2")
+app = Application(title="SQL Injection Protection Example", version="1.0.3")
 
 # Middleware for SQL injection protection
 class SQLInjectionProtectionMiddleware(Middleware):

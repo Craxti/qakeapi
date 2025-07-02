@@ -67,14 +67,15 @@ def check_port_available(port):
 
 def kill_process_on_port(port):
     """Kill process using specified port"""
-    for proc in psutil.process_iter(['pid', 'name', 'connections']):
+    for proc in psutil.process_iter(['pid', 'name']):
         try:
-            for conn in proc.info['connections']:
-                if conn.laddr.port == port:
+            connections = proc.connections()
+            for conn in connections:
+                if hasattr(conn, 'laddr') and conn.laddr.port == port:
                     print(f"Killing process {proc.info['pid']} on port {port}")
                     proc.kill()
                     time.sleep(1)
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
 
 def start_app(app_name):

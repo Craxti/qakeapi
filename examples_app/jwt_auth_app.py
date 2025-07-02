@@ -20,7 +20,7 @@ from pydantic import Field, EmailStr
 # Initialize application
 app = Application(
     title="JWT Authentication Example",
-    version="1.0.2",
+    version="1.0.3",
     description="JWT authentication example with QakeAPI"
 )
 

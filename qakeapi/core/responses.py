@@ -46,9 +46,13 @@ class Response:
         elif isinstance(self.content, str):
             return self.content.encode()
         elif isinstance(self.content, dict):
-            return json.dumps(self.content).encode()
+            try:
+                return json.dumps(self.content).encode()
+            except (TypeError, ValueError):
+                # Convert to string representation if not JSON serializable
+                return json.dumps({"error": str(self.content)}).encode()
         else:
-            return b""
+            return str(self.content).encode()
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to ASGI response dict"""
@@ -289,4 +293,7 @@ class JSONResponse(Response):
 
     @property
     async def body(self) -> bytes:
-        return json.dumps(self.content).encode()
+        try:
+            return json.dumps(self.content).encode()
+        except (TypeError, ValueError):
+            return json.dumps({"error": str(self.content)}).encode()
