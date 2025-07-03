@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/security/rate_limit.py
+# hypothesis_version: 6.135.22
+
+[429, 'Rate limit exceeded', 'X-RateLimit-Limit', 'X-RateLimit-Reset', 'error']

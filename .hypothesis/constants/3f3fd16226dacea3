@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/core/application.py
+# hypothesis_version: 6.135.22
+
+[b'*', b'access-control-allow-origin', b'application/json', b'cache-control', b'content-type', b'no-cache', 200, 500, 1011, '/', '/docs', '/openapi.json', '1.0.3', '200', '3.0.0', 'DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'QakeAPI', 'Starting application', 'Successful response', 'application/json', 'body', 'code', 'content', 'dependency_container', 'description', 'detail', 'http', 'in', 'info', 'lifespan', 'lifespan.shutdown', 'lifespan.startup', 'more_body', 'name', 'openapi', 'openapi_metadata', 'parameters', 'path', 'paths', 'requestBody', 'request_model', 'required', 'response_model', 'responses', 'schema', 'string', 'summary', 'tags', 'title', 'type', 'version', 'websocket', 'websocket.close', '{', '}']

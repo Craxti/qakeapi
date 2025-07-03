@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/core/dependencies.py
+# hypothesis_version: 6.135.22
+
+['T', '__dependencies__', 'cleanup', 'dependency_container', 'request', 'singleton', 'transient']

@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/templates/renderers.py
+# hypothesis_version: 6.135.22
+
+[100, 'avg_time', 'last_render', 'render_count', 'templates', 'total_time']

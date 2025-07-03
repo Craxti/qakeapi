@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/core/websockets.py
+# hypothesis_version: 6.135.22
+
+[1000, 'CONNECTED', 'CONNECTING', 'DISCONNECTED', 'bytes', 'client', 'code', 'path', 'ping', 'pong', 'reason', 'subprotocol', 'text', 'type', 'websocket', 'websocket.accept', 'websocket.close', 'websocket.disconnect', 'websocket.send']

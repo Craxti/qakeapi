@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/core/responses.py
+# hypothesis_version: 6.135.22
+
+[b'application/json', b'chunked', b'content-type', b'location', b'set-cookie', b'text/html; charset=utf-8', b'text/plain', b'transfer-encoding', 200, 302, '/', 'Response', 'application/json', 'body', 'domain', 'error', 'expires', 'headers', 'http.response.body', 'http.response.start', 'httponly', 'lax', 'max-age', 'more_body', 'path', 'samesite', 'secure', 'status', 'text/plain', 'type']

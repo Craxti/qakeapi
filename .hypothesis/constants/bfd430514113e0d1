@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/core/routing/http.py
+# hypothesis_version: 6.135.22
+
+[404, 405, 500, '(?P<\\1>[^/]+)', 'GET', 'Method not allowed', 'Not found', 'detail']

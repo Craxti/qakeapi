@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/security/csrf.py
+# hypothesis_version: 6.135.22
+
+[b'application/json', b'content-type', b'set-cookie', b'x-csrf-token', 403, '; HttpOnly', '; Secure', 'GET', 'HEAD', 'Lax', 'OPTIONS', 'csrf_token', 'detail']

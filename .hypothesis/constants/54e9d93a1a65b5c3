@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/security/jwt_auth.py
+# hypothesis_version: 6.135.22
+
+['Bearer', 'HS256', 'Invalid token', 'exp', 'metadata', 'password', 'roles', 'sub', 'token', 'username']

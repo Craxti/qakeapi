@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/core/middleware/__init__.py
+# hypothesis_version: 6.135.22
+
+[401, 429, 500, 'Authorization', 'Bearer', 'CORSMiddleware', 'Middleware', 'Not authenticated', 'RateLimitMiddleware', 'Too many requests', 'detail', 'type', 'unknown']
