@@ -7,7 +7,7 @@ from qakeapi.core.dependencies import Dependency, DependencyContainer, inject
 
 class ConfigDependency(Dependency):
     async def resolve(self) -> Dict[str, Any]:
-        return {"app_name": "Test App", "version": "1.0.2"}
+        return {"app_name": "Test App", "version": "1.0.3"}
 
 
 class DatabaseDependency(Dependency):
@@ -43,7 +43,7 @@ async def test_dependency_resolution():
     container.register(config)
 
     result = await container.resolve(ConfigDependency)
-    assert result == {"app_name": "Test App", "version": "1.0.2"}
+    assert result == {"app_name": "Test App", "version": "1.0.3"}
 
 
 @pytest.mark.asyncio
@@ -87,7 +87,7 @@ async def test_inject_decorator():
         return {"config": config, "db": db}
 
     result = await handler({"type": "http"}, container=container)
-    assert result["config"] == {"app_name": "Test App", "version": "1.0.2"}
+    assert result["config"] == {"app_name": "Test App", "version": "1.0.3"}
     assert result["db"]["connected"] is True
 
 
@@ -106,3 +106,8 @@ async def test_multiple_dependencies():
     result = await handler({"type": "http"}, container=container)
     assert result["db"]["connected"] is True
     assert result["service"] == {"service": "test"}
+
+
+def get_app_config():
+    """Dependency that returns app configuration"""
+    return {"app_name": "Test App", "version": "1.0.3"}

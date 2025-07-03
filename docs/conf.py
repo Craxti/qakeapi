@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.abspath('..'))
 project = 'QakeAPI'
 copyright = '2024, Craxti'
 author = 'Craxti'
-release = '1.0.2'
+release = '1.0.3'
 
 extensions = [
     'sphinx.ext.autodoc',

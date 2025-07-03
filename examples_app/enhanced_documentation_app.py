@@ -65,30 +65,14 @@ class ChatMessage(BaseModel):
     timestamp: str = Field(..., description="Message timestamp", example="2024-01-01T00:00:00Z")
 
 
-# Create application
-app = Application(title="Enhanced Documentation API", version="1.0.0")
+# Create application with enhanced documentation
+app = Application(title="Enhanced Documentation API", version="1.0.3")
 
-# Initialize OpenAPI generator with enhanced info
-openapi_info = OpenAPIInfo(
+# Create OpenAPI info
+info = OpenAPIInfo(
     title="Enhanced Documentation API",
-    version="1.0.0",
-    description="""
-    This is an enhanced API documentation example showcasing:
-    
-    * **Interactive Swagger UI** with themes and customization
-    * **ReDoc integration** for beautiful documentation
-    * **WebSocket documentation** with event schemas
-    * **Security schemes** (Bearer token, API key)
-    * **Extended examples** and descriptions
-    * **Tags and grouping** for better organization
-    
-    ## Features
-    
-    - User management with CRUD operations
-    - Real-time messaging via WebSocket
-    - Authentication with JWT tokens
-    - Rate limiting and validation
-    """,
+    version="1.0.3",
+    description="A comprehensive API with enhanced documentation features",
     terms_of_service="https://example.com/terms/",
     contact={
         "name": "API Support",
@@ -100,13 +84,14 @@ openapi_info = OpenAPIInfo(
         "url": "https://opensource.org/licenses/MIT"
     },
     servers=[
-        {"url": "http://localhost:8000", "description": "Development server"},
-        {"url": "https://api.example.com", "description": "Production server"}
+        {"url": "https://api.example.com", "description": "Production server"},
+        {"url": "https://staging-api.example.com", "description": "Staging server"},
+        {"url": "http://localhost:8000", "description": "Development server"}
     ]
 )
 
-# Create OpenAPI generator
-openapi_generator = OpenAPIGenerator(openapi_info)
+# Initialize OpenAPI generator with enhanced info
+openapi_generator = OpenAPIGenerator(info)
 
 # Add security schemes
 bearer_scheme = SecurityScheme(
@@ -204,7 +189,7 @@ async def root():
     return Response(
         content=json.dumps({
             "message": "Enhanced Documentation API",
-            "version": "1.0.0",
+            "version": "1.0.3",
             "documentation": {
                 "swagger": "/docs",
                 "redoc": "/redoc",

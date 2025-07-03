@@ -10,7 +10,7 @@ from qakeapi.core.application import Application
 def app():
     """Fixture for creating test application"""
     return Application(
-        title="Test API", version="1.0.2", description="Test API Description"
+        title="Test API", version="1.0.3", description="Test API Description"
     )
 
 

@@ -196,10 +196,10 @@ class ProjectGenerator:
         print_info("Let's create your QakeAPI project!")
         
         project_name = get_user_input("Project name", project_name)
-        description = get_user_input("Project description", f"A QakeAPI application")
-        version = get_user_input("Version", "1.0.0")
+        description = get_user_input("Description", "A QakeAPI web application")
         author = get_user_input("Author", "Your Name")
         email = get_user_input("Email", "your.email@example.com")
+        version = get_user_input("Version", "1.0.3")
         
         # Select template
         template_options = list(self.templates.keys())

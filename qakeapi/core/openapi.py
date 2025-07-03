@@ -49,7 +49,7 @@ class WebSocketDocumentation:
 class OpenAPIInfo:
     """Enhanced OpenAPI information"""
     title: str = "QakeAPI"
-    version: str = "1.0.2"
+    version: str = "1.0.3"
     description: str = ""
     terms_of_service: Optional[str] = None
     contact: Optional[Dict[str, str]] = None
