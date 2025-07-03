@@ -16,6 +16,7 @@ except ImportError:
     Jinja2Template = None
 
 from ..core.responses import Response
+from .live_reload import setup_live_reload, start_live_reload, stop_live_reload
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,7 @@ class Jinja2TemplateEngine(TemplateEngine):
         template_dir: Union[str, Path] = "templates",
         auto_reload: bool = True,
         autoescape: bool = True,
+        live_reload: bool = False,
         **kwargs
     ):
         """
@@ -51,6 +53,7 @@ class Jinja2TemplateEngine(TemplateEngine):
             template_dir: Directory containing templates
             auto_reload: Enable auto-reload for development
             autoescape: Enable auto-escaping for security
+            live_reload: Enable live reload functionality
             **kwargs: Additional Jinja2 environment options
         """
         if not JINJA2_AVAILABLE:
@@ -68,6 +71,18 @@ class Jinja2TemplateEngine(TemplateEngine):
         }
         
         self.env = Environment(**env_kwargs)
+        self.live_reload_enabled = live_reload
+        
+        # Setup live reload if enabled
+        if self.live_reload_enabled:
+            try:
+                setup_live_reload([str(self.template_dir)], enabled=True)
+                start_live_reload()
+                logger.info(f"Live reload enabled for template directory: {template_dir}")
+            except ImportError:
+                logger.warning("Live reload requires watchdog. Install with: pip install watchdog")
+                self.live_reload_enabled = False
+        
         logger.debug(f"Initialized Jinja2 template engine with template_dir: {template_dir}")
     
     def render(self, template_name: str, context: Dict[str, Any]) -> str:
@@ -106,6 +121,18 @@ class Jinja2TemplateEngine(TemplateEngine):
     def get_template(self, template_name: str) -> Jinja2Template:
         """Get Jinja2 template object."""
         return self.env.get_template(template_name)
+    
+    def stop_live_reload(self):
+        """Stop live reload functionality."""
+        if self.live_reload_enabled:
+            stop_live_reload()
+            self.live_reload_enabled = False
+            logger.info("Live reload stopped")
+    
+    def __del__(self):
+        """Cleanup when template engine is destroyed."""
+        if hasattr(self, 'live_reload_enabled') and self.live_reload_enabled:
+            self.stop_live_reload()
 
 
 def render_template(
@@ -113,7 +140,8 @@ def render_template(
     context: Dict[str, Any],
     template_engine: Optional[Jinja2TemplateEngine] = None,
     status_code: int = 200,
-    headers: Optional[Dict[str, str]] = None
+    headers: Optional[Dict[str, str]] = None,
+    live_reload: bool = False
 ) -> Response:
     """
     Render template and return Response.
@@ -124,9 +152,10 @@ def render_template(
         template_engine: Template engine instance (creates default if None)
         status_code: HTTP status code
         headers: Additional response headers
+        live_reload: Enable live reload for this template
     """
     if template_engine is None:
-        template_engine = Jinja2TemplateEngine()
+        template_engine = Jinja2TemplateEngine(live_reload=live_reload)
     
     content = template_engine.render(template_name, context)
     

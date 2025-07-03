@@ -108,6 +108,24 @@ TEST_CONFIG = {
         {"method": "GET", "path": "/", "expected_status": 200},
         {"method": "GET", "path": "/cache-test", "expected_status": 200},
         {"method": "GET", "path": "/async-operations", "expected_status": 200}
+    ]},
+    "live_reload_app": {"port": 8019, "tests": [
+        {"method": "GET", "path": "/", "expected_status": 200},
+        {"method": "GET", "path": "/about", "expected_status": 200},
+        {"method": "GET", "path": "/dynamic", "expected_status": 200},
+        {"method": "GET", "path": "/api/info", "expected_status": 200},
+        {"method": "GET", "path": "/health", "expected_status": 200}
+    ]},
+    "advanced_testing_app": {"port": 8019, "tests": [
+        {"method": "GET", "path": "/", "expected_status": 200},
+        {"method": "GET", "path": "/users", "expected_status": 200},
+        {"method": "GET", "path": "/products", "expected_status": 200},
+        {"method": "GET", "path": "/orders", "expected_status": 200},
+        {"method": "GET", "path": "/performance", "expected_status": 200},
+        {"method": "GET", "path": "/chaos", "expected_status": 200},
+        {"method": "GET", "path": "/concurrent", "expected_status": 200},
+        {"method": "GET", "path": "/memory", "expected_status": 200},
+        {"method": "GET", "path": "/test-report", "expected_status": 200}
     ]}
 }
 

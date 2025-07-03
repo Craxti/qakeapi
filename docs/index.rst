@@ -9,9 +9,12 @@ QakeAPI is a lightweight ASGI web framework designed for building fast and moder
 
    installation
    quickstart
+   cli
    api-reference
    security
    middleware
+   live_reload
+   advanced_testing
    advanced/index
 
 Features
@@ -23,6 +26,7 @@ Features
 * Modern Python type hints
 * Easy-to-use API
 * Comprehensive documentation
+* Advanced testing framework
 
 Getting Started
 --------------

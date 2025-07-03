@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Live Reload Demo{% endblock %}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { background: #007bff; color: white; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .content { line-height: 1.6; }
+        .feature { background: #e9ecef; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .highlight { background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 5px; }
+        .code { background: #f8f9fa; padding: 10px; border-radius: 3px; font-family: monospace; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 QakeAPI Live Reload Demo</h1>
+            <p>Version {{ version }} - Template: {{ template_name }}</p>
+        </div>
+        
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+        
+        <div class="footer">
+            <p>🔄 Live reload is active! Try editing the template files and watch the browser refresh automatically.</p>
+            <p>Current time: {{ current_time }}</p>
+        </div>
+    </div>
+</body>
+</html>

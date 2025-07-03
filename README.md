@@ -33,6 +33,22 @@ A modern, lightweight, and fast ASGI web framework for building APIs in Python, 
 
 ## 🚀 Quick Start
 
+### Option 1: Using CLI (Recommended)
+
+```bash
+# Install QakeAPI
+pip install qakeapi
+
+# Create a new project with CLI
+python3 qakeapi_cli.py create my-api --template=api
+
+# Navigate to project and run
+cd my-api
+python app/main.py
+```
+
+### Option 2: Manual Setup
+
 ```bash
 pip install qakeapi
 ```
@@ -60,6 +76,40 @@ async def create_item(item: Item):
 if __name__ == "__main__":
     app.run()
 ```
+
+## 🛠️ CLI Tool
+
+QakeAPI comes with a powerful CLI tool for rapid project scaffolding:
+
+```bash
+# List available templates and features
+python3 qakeapi_cli.py list
+
+# Create projects with different templates
+python3 qakeapi_cli.py create my-api --template=api
+python3 qakeapi_cli.py create my-web --template=web --features=auth,templates
+python3 qakeapi_cli.py create my-microservice --template=microservice
+
+# Interactive mode
+python3 qakeapi_cli.py create my-app
+```
+
+**Available Templates:**
+- **Basic API** - Simple CRUD operations
+- **Full API** - Complete API with auth, database, cache
+- **Web Application** - Templates, static files, frontend
+- **Microservice** - Lightweight service with minimal dependencies
+
+**Available Features:**
+- Authentication (JWT)
+- Database integration (SQLAlchemy)
+- Caching (Redis)
+- Rate limiting
+- Templates (Jinja2)
+- WebSockets
+- Testing (pytest)
+- Docker support
+- Live reload for development
 
 ## 🌟 Key Features
 

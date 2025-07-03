@@ -31,7 +31,9 @@ APPS = [
     "csrf_app.py",
     "xss_app.py",
     "sql_injection_app.py",
-    "optimization_app.py"
+    "optimization_app.py",
+    "advanced_testing_app.py",
+    "live_reload_app.py"
 ]
 
 # Port mapping for each app
@@ -52,7 +54,9 @@ PORT_MAPPING = {
     "csrf_app.py": 8014,
     "xss_app.py": 8015,
     "sql_injection_app.py": 8016,
-    "optimization_app.py": 8017
+    "optimization_app.py": 8017,
+    "advanced_testing_app.py": 8018,
+    "live_reload_app.py": 8019
 }
 
 def check_port_available(port):

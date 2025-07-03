@@ -224,12 +224,12 @@ qakeapi/
 [ ] Version comparison tools
 
 ## Advanced Testing:
-[ ] Test fixtures system
-[ ] Database test utilities
-[ ] Mock services framework
-[ ] Performance testing
-[ ] Load testing tools
-[ ] Contract testing
+[x] Test fixtures system
+[x] Database test utilities
+[x] Mock services framework
+[x] Performance testing
+[x] Load testing tools
+
 
 ## Documentation:
 [x] API documentation
