@@ -27,11 +27,17 @@ setup(
             "pytest-asyncio>=0.18.0",
             "pytest-cov>=3.0.0",
             "httpx>=0.25.0",
+            "hypothesis>=6.75.0",
+            "watchdog>=3.0.0",
+            "memory-profiler>=0.61.0"
         ],
         "dev": [
             "black>=23.10.0",
             "isort>=5.12.0",
             "mypy>=1.6.0",
+            "hypothesis>=6.75.0",
+            "watchdog>=3.0.0",
+            "memory-profiler>=0.61.0"
         ],
         "docs": [
             "mkdocs>=1.3.0",
