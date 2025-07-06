@@ -4,7 +4,7 @@ import logging
 import asyncio
 from typing import Any, Callable, Dict, Optional, Pattern, Tuple
 
-from ..websockets import WebSocket
+from ..websockets import WebSocketConnection as WebSocket
 from .base import BaseRoute, BaseRouter
 
 logger = logging.getLogger(__name__)

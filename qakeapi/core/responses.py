@@ -1,6 +1,20 @@
 import json
+import asyncio
 from http.cookies import SimpleCookie
+from datetime import datetime
 from typing import Any, AsyncIterable, Dict, List, Optional, Tuple, Union
+
+
+class CustomJSONEncoder(json.JSONEncoder):
+    """Custom JSON encoder for handling datetime and other objects"""
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        elif hasattr(obj, '__dict__'):
+            return obj.__dict__
+        elif hasattr(obj, 'to_dict'):
+            return obj.to_dict()
+        return super().default(obj)
 
 
 class Response:
@@ -47,7 +61,7 @@ class Response:
             return self.content.encode()
         elif isinstance(self.content, dict):
             try:
-                return json.dumps(self.content).encode()
+                return json.dumps(self.content, cls=CustomJSONEncoder).encode()
             except (TypeError, ValueError):
                 # Convert to string representation if not JSON serializable
                 return json.dumps({"error": str(self.content)}).encode()
@@ -57,7 +71,7 @@ class Response:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to ASGI response dict"""
         if isinstance(self.content, dict):
-            body = json.dumps(self.content).encode()
+            body = json.dumps(self.content, cls=CustomJSONEncoder).encode()
             if not any(h[0] == b"content-type" for h in self._headers):
                 self._headers.append((b"content-type", b"application/json"))
         elif isinstance(self.content, str):
@@ -167,7 +181,7 @@ class Response:
         
         headers_list.append((b"content-type", b"application/json"))
         return cls(
-            json.dumps(content).encode(),
+            json.dumps(content, cls=CustomJSONEncoder).encode(),
             status_code=status_code,
             headers=headers_list
         )
@@ -294,6 +308,6 @@ class JSONResponse(Response):
     @property
     async def body(self) -> bytes:
         try:
-            return json.dumps(self.content).encode()
+            return json.dumps(self.content, cls=CustomJSONEncoder).encode()
         except (TypeError, ValueError):
             return json.dumps({"error": str(self.content)}).encode()

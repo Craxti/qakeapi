@@ -49,9 +49,25 @@ async def get_users(request):
         {"id": 2, "name": "Jane Smith", "email": "jane@example.com"}
     ]}
 
+@app.get("/")
+async def home(request):
+    """Home page."""
+    return {
+        "message": "Enhanced Testing Example API",
+        "version": "1.0.0",
+        "endpoints": {
+            "users": "/users",
+            "user_by_id": "/users/{id}",
+            "posts": "/posts"
+        }
+    }
+
 @app.get("/users/{user_id}")
-async def get_user(request, user_id: int):
+async def get_user(request):
     """Get user by ID."""
+    # Extract user_id from path parameters
+    user_id = int(request.path_params.get("user_id", 0))
+    
     users = {
         1: {"id": 1, "name": "John Doe", "email": "john@example.com"},
         2: {"id": 2, "name": "Jane Smith", "email": "jane@example.com"}
@@ -360,4 +376,12 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    import uvicorn
+    print("Starting Enhanced Testing Example API...")
+    print("Available endpoints:")
+    print("  GET /users - List users")
+    print("  GET /users/{id} - Get user by ID")
+    print("  POST /users - Create user")
+    print("  GET /posts - List posts")
+    
+    uvicorn.run("enhanced_testing_example:app", host="0.0.0.0", port=8026, reload=False) 

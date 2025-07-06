@@ -3,7 +3,7 @@
 from .core.application import Application
 from .core.requests import Request
 from .core.responses import Response
-from .core.websockets import WebSocket
+from .core.websockets import WebSocketConnection as WebSocket
 from .core.routing import (
     HTTPRouter,
     WebSocketRouter,

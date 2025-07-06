@@ -21,7 +21,7 @@ from qakeapi.core.openapi import (
     get_swagger_ui_html, get_redoc_html, get_webSocket_docs_html
 )
 from qakeapi.core.responses import Response
-from qakeapi.core.websockets import WebSocket
+from qakeapi.core.websockets import WebSocketConnection
 
 
 # Pydantic models for API documentation
@@ -183,25 +183,21 @@ user_counter = 1
 message_counter = 1
 
 
-@app.route("/", methods=["GET"])
-async def root():
+@app.get("/")
+async def root(request):
     """Root endpoint with API information"""
-    return Response(
-        content=json.dumps({
-            "message": "Enhanced Documentation API",
-            "version": "1.0.3",
-            "documentation": {
-                "swagger": "/docs",
-                "redoc": "/redoc",
-                "websocket_docs": "/websocket-docs"
-            }
-        }),
-        status_code=200,
-        headers=[(b"content-type", b"application/json")]
-    )
+    return Response.json({
+        "message": "Enhanced Documentation API",
+        "version": "1.0.3",
+        "documentation": {
+            "swagger": "/docs",
+            "redoc": "/redoc",
+            "websocket_docs": "/websocket-docs"
+        }
+    })
 
 
-@app.route("/users", methods=["POST"])
+@app.post("/users")
 async def create_user(request):
     """Create a new user"""
     # Parse request body
@@ -224,43 +220,27 @@ async def create_user(request):
     
     users_db[user_id] = user.dict()
     
-    return Response(
-        content=user.model_dump_json(),
-        status_code=201,
-        headers=[(b"content-type", b"application/json")]
-    )
+    return Response.json(user.dict(), status_code=201)
 
 
-@app.route("/users/{user_id}", methods=["GET"])
+@app.get("/users/{user_id}")
 async def get_user(request, user_id: int):
     """Get user by ID"""
     if user_id not in users_db:
-        return Response(
-            content=json.dumps({"detail": "User not found"}),
-            status_code=404,
-            headers=[(b"content-type", b"application/json")]
-        )
+        return Response.json({"detail": "User not found"}, status_code=404)
     
     user = users_db[user_id]
-    return Response(
-        content=json.dumps(user),
-        status_code=200,
-        headers=[(b"content-type", b"application/json")]
-    )
+    return Response.json(user)
 
 
-@app.route("/users", methods=["GET"])
+@app.get("/users")
 async def list_users(request):
     """List all users"""
     users = list(users_db.values())
-    return Response(
-        content=json.dumps(users),
-        status_code=200,
-        headers=[(b"content-type", b"application/json")]
-    )
+    return Response.json(users)
 
 
-@app.route("/messages", methods=["POST"])
+@app.post("/messages")
 async def create_message(request):
     """Create a new message"""
     body = await request.json()
@@ -279,26 +259,18 @@ async def create_message(request):
     
     messages_db[message_id] = message.dict()
     
-    return Response(
-        content=message.model_dump_json(),
-        status_code=201,
-        headers=[(b"content-type", b"application/json")]
-    )
+    return Response.json(message.dict(), status_code=201)
 
 
-@app.route("/messages", methods=["GET"])
+@app.get("/messages")
 async def list_messages(request):
     """List all messages"""
     messages = list(messages_db.values())
-    return Response(
-        content=json.dumps(messages),
-        status_code=200,
-        headers=[(b"content-type", b"application/json")]
-    )
+    return Response.json(messages)
 
 
 @app.websocket("/ws/chat")
-async def chat_websocket(websocket: WebSocket):
+async def chat_websocket(websocket: WebSocketConnection):
     """Real-time chat WebSocket endpoint"""
     await websocket.accept()
     
@@ -324,7 +296,7 @@ async def chat_websocket(websocket: WebSocket):
         await websocket.close()
 
 
-@app.route("/docs", methods=["GET"])
+@app.get("/docs")
 async def swagger_ui(request):
     """Serve Swagger UI"""
     html = get_swagger_ui_html(
@@ -332,14 +304,10 @@ async def swagger_ui(request):
         title="Enhanced API Documentation - Swagger UI",
         theme="default"
     )
-    return Response(
-        content=html,
-        status_code=200,
-        headers=[(b"content-type", b"text/html")]
-    )
+    return Response.html(html)
 
 
-@app.route("/docs/dark", methods=["GET"])
+@app.get("/docs/dark")
 async def swagger_ui_dark(request):
     """Serve Swagger UI with dark theme"""
     html = get_swagger_ui_html(
@@ -347,28 +315,20 @@ async def swagger_ui_dark(request):
         title="Enhanced API Documentation - Swagger UI (Dark)",
         theme="dark"
     )
-    return Response(
-        content=html,
-        status_code=200,
-        headers=[(b"content-type", b"text/html")]
-    )
+    return Response.html(html)
 
 
-@app.route("/redoc", methods=["GET"])
+@app.get("/redoc")
 async def redoc_ui(request):
     """Serve ReDoc UI"""
     html = get_redoc_html(
         openapi_url="/openapi.json",
         title="Enhanced API Documentation - ReDoc"
     )
-    return Response(
-        content=html,
-        status_code=200,
-        headers=[(b"content-type", b"text/html")]
-    )
+    return Response.html(html)
 
 
-@app.route("/websocket-docs", methods=["GET"])
+@app.get("/websocket-docs")
 async def websocket_docs(request):
     """Serve WebSocket documentation"""
     # Create WebSocket documentation
@@ -394,14 +354,10 @@ async def websocket_docs(request):
     )
     
     html = get_webSocket_docs_html([ws_doc])
-    return Response(
-        content=html,
-        status_code=200,
-        headers=[(b"content-type", b"text/html")]
-    )
+    return Response.html(html)
 
 
-@app.route("/openapi.json", methods=["GET"])
+@app.get("/openapi.json")
 async def openapi_schema(request):
     """Serve OpenAPI schema"""
     # Add paths to OpenAPI generator
@@ -515,11 +471,7 @@ async def openapi_schema(request):
     openapi_generator.add_webSocket_documentation(ws_doc)
     
     schema = openapi_generator.generate()
-    return Response(
-        content=json.dumps(schema, indent=2),
-        status_code=200,
-        headers=[(b"content-type", b"application/json")]
-    )
+    return Response.json(schema)
 
 
 if __name__ == "__main__":
@@ -528,12 +480,12 @@ if __name__ == "__main__":
     print("🚀 Enhanced Documentation API Example")
     print("=" * 50)
     print("Available endpoints:")
-    print("  📖 Swagger UI: http://localhost:8000/docs")
-    print("  🌙 Swagger UI (Dark): http://localhost:8000/docs/dark")
-    print("  📚 ReDoc: http://localhost:8000/redoc")
-    print("  🔌 WebSocket Docs: http://localhost:8000/websocket-docs")
-    print("  📋 OpenAPI Schema: http://localhost:8000/openapi.json")
-    print("  🏠 API Root: http://localhost:8000/")
+    print("  📖 Swagger UI: http://localhost:8022/docs")
+    print("  🌙 Swagger UI (Dark): http://localhost:8022/docs/dark")
+    print("  📚 ReDoc: http://localhost:8022/redoc")
+    print("  🔌 WebSocket Docs: http://localhost:8022/websocket-docs")
+    print("  📋 OpenAPI Schema: http://localhost:8022/openapi.json")
+    print("  🏠 API Root: http://localhost:8022/")
     print("=" * 50)
     
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+    uvicorn.run(app, host="0.0.0.0", port=8022) 

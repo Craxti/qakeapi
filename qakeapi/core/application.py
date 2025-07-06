@@ -12,7 +12,9 @@ from .openapi import OpenAPIGenerator, OpenAPIInfo, OpenAPIPath, get_swagger_ui_
 from .requests import Request
 from .responses import Response
 from .routing import HTTPRouter, WebSocketRouter, MiddlewareManager
-from .websockets import WebSocket, WebSocketState
+from .websockets import WebSocketConnection, WebSocketState
+from ..api.versioning import APIVersionManager, PathVersionStrategy
+from ..api.deprecation import DeprecationManager
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
@@ -38,6 +40,12 @@ class Application:
             OpenAPIInfo(title=title, version=version, description=description)
         )
         
+        # Initialize API versioning and deprecation
+        self.version_manager = APIVersionManager(
+            PathVersionStrategy(["v1", "v2"], "v1")
+        )
+        self.deprecation_manager = DeprecationManager()
+        
         # Startup and shutdown handlers
         self.startup_handlers: List[Callable] = []
         self.shutdown_handlers: List[Callable] = []
@@ -45,6 +53,9 @@ class Application:
         # Add default routes
         self.http_router.add_route("/docs", self.swagger_ui, ["GET"])
         self.http_router.add_route("/openapi.json", self.openapi_schema, ["GET"])
+        self.http_router.add_route("/api/versions", self.api_versions, ["GET"])
+        self.http_router.add_route("/api/changelog", self.api_changelog, ["GET"])
+        self.http_router.add_route("/api/deprecations", self.api_deprecations, ["GET"])
         
         logger.debug("Application initialized")
 
@@ -123,7 +134,7 @@ class Application:
     ) -> None:
         """Handle WebSocket connection."""
         try:
-            websocket = WebSocket(scope, receive, send)
+            websocket = WebSocketConnection(scope, receive, send)
             logger.debug(f"Handling WebSocket connection: {websocket.path}")
             
             # Handle WebSocket using WebSocket router
@@ -263,6 +274,42 @@ class Application:
         """Serve Swagger UI."""
         return Response.html(get_swagger_ui_html("/openapi.json", self.title))
 
+    async def api_versions(self, request: Request):
+        """Get API version information."""
+        return {
+            "current_version": self.version,
+            "supported_versions": self.version_manager.get_supported_versions(),
+            "default_version": self.version_manager.strategy.get_default_version(),
+            "version_info": {
+                version: {
+                    "deprecated": self.version_manager.is_version_deprecated(version),
+                    "info": self.version_manager.get_version_info(version)
+                }
+                for version in self.version_manager.get_supported_versions()
+            }
+        }
+    
+    async def api_changelog(self, request: Request):
+        """Get API changelog."""
+        return self.version_manager.generate_changelog()
+    
+    async def api_deprecations(self, request: Request):
+        """Get deprecation information."""
+        return {
+            "active_deprecations": [
+                {
+                    "feature": dep.feature,
+                    "version": dep.version,
+                    "deprecation_date": dep.deprecation_date.isoformat(),
+                    "sunset_date": dep.sunset_date.isoformat() if dep.sunset_date else None,
+                    "replacement": dep.replacement,
+                    "migration_guide": dep.migration_guide
+                }
+                for dep in self.deprecation_manager.get_active_deprecations()
+            ],
+            "sunset_features": self.deprecation_manager.get_sunset_features()
+        }
+    
     async def openapi_schema(self, request: Request):
         """Generate and return OpenAPI schema."""
         logger.debug("Generating OpenAPI schema")

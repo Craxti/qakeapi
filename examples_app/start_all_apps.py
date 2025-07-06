@@ -33,7 +33,14 @@ APPS = [
     "sql_injection_app.py",
     "optimization_app.py",
     "advanced_testing_app.py",
-    "live_reload_app.py"
+    "live_reload_app.py",
+    "api_versioning_app.py",
+    "websocket_enhanced_app.py",
+    "enhanced_documentation_app.py",
+    "security_examples_app.py",
+    "performance_examples_app.py",
+    "template_app.py",
+    "enhanced_testing_example.py"
 ]
 
 # Port mapping for each app
@@ -56,7 +63,14 @@ PORT_MAPPING = {
     "sql_injection_app.py": 8016,
     "optimization_app.py": 8017,
     "advanced_testing_app.py": 8018,
-    "live_reload_app.py": 8019
+    "live_reload_app.py": 8019,
+    "api_versioning_app.py": 8020,
+    "websocket_enhanced_app.py": 8021,
+    "enhanced_documentation_app.py": 8022,
+    "security_examples_app.py": 8023,
+    "performance_examples_app.py": 8024,
+    "template_app.py": 8025,
+    "enhanced_testing_example.py": 8026
 }
 
 def check_port_available(port):
@@ -73,7 +87,7 @@ def kill_process_on_port(port):
     """Kill process using specified port"""
     for proc in psutil.process_iter(['pid', 'name']):
         try:
-            connections = proc.connections()
+            connections = proc.net_connections()
             for conn in connections:
                 if hasattr(conn, 'laddr') and conn.laddr.port == port:
                     print(f"Killing process {proc.info['pid']} on port {port}")
@@ -93,12 +107,12 @@ def start_app(app_name):
         time.sleep(2)
     
     try:
-        # Start application
+        # Start application with nohup to keep it running
         process = subprocess.Popen(
             [sys.executable, app_name],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            preexec_fn=os.setsid  # Create new process group
         )
         
         # Wait a bit for startup
@@ -109,9 +123,7 @@ def start_app(app_name):
             print(f"✅ {app_name} started on port {port} (PID: {process.pid})")
             return process
         else:
-            stdout, stderr = process.communicate()
             print(f"❌ {app_name} failed to start on port {port}")
-            print(f"Error: {stderr}")
             return None
             
     except Exception as e:

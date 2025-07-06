@@ -7,7 +7,7 @@ from pathlib import Path
 
 from qakeapi import Application
 from qakeapi.templates.jinja2 import Jinja2TemplateEngine, render_template_string
-from qakeapi.templates.renderers import create_template_engine
+from qakeapi.templates.renderers import create_template_engine, render_template
 
 # Create a temporary directory for templates
 temp_dir = Path(tempfile.mkdtemp())
@@ -103,11 +103,11 @@ user_template.write_text("""
 # Create application
 app = Application(title="Template Example", version="1.0.3")
 
-# Create template engine with caching and debugging
+# Create template engine with caching (debug disabled to avoid recursion)
 template_engine = create_template_engine(
     template_dir=str(templates_dir),
     enable_cache=True,
-    enable_debug=True
+    enable_debug=False
 )
 
 # Add custom filters
@@ -182,8 +182,11 @@ async def index(request):
     )
 
 @app.get("/user/{user_id}")
-async def user_profile(request, user_id: int):
+async def user_profile(request):
     """User profile page."""
+    # Extract user_id from path parameters
+    user_id = int(request.path_params.get("user_id", 0))
+    
     user = next((u for u in users_data if u["id"] == user_id), None)
     
     if not user:
@@ -257,4 +260,4 @@ if __name__ == "__main__":
     print("  GET /cache/clear - Clear cache")
     print("  GET /users - List of users (JSON)")
     
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+    uvicorn.run("template_app:app", host="0.0.0.0", port=8025, reload=False) 

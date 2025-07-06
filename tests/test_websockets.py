@@ -1,6 +1,6 @@
 import pytest
 import pytest_asyncio
-from qakeapi.core.websockets import WebSocket, WebSocketState
+from qakeapi.core.websockets import WebSocketConnection, WebSocketState
 from qakeapi.core.application import Application
 
 
@@ -26,7 +26,7 @@ async def websocket_client():
         "path_params": {},
     }
 
-    return WebSocket(scope, mock_receive, mock_send)
+    return WebSocketConnection(scope, mock_receive, mock_send)
 
 
 class TestWebSocket:
@@ -69,7 +69,7 @@ class TestWebSocketRouting:
         received_messages = []
 
         @app.websocket("/ws/test")
-        async def websocket_handler(websocket: WebSocket):
+        async def websocket_handler(websocket: WebSocketConnection):
             await websocket.accept()
             async for message in websocket:
                 received_messages.append(message)
@@ -94,7 +94,7 @@ class TestWebSocketMiddleware:
     @pytest.mark.asyncio
     async def test_websocket_middleware(self, app):
         @app.websocket("/ws/test")
-        async def websocket_handler(websocket: WebSocket):
+        async def websocket_handler(websocket: WebSocketConnection):
             await websocket.accept()
 
         # Создаем тестовый клиент

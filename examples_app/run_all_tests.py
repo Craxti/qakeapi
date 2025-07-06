@@ -116,7 +116,7 @@ TEST_CONFIG = {
         {"method": "GET", "path": "/api/info", "expected_status": 200},
         {"method": "GET", "path": "/health", "expected_status": 200}
     ]},
-    "advanced_testing_app": {"port": 8019, "tests": [
+    "advanced_testing_app": {"port": 8018, "tests": [
         {"method": "GET", "path": "/", "expected_status": 200},
         {"method": "GET", "path": "/users", "expected_status": 200},
         {"method": "GET", "path": "/products", "expected_status": 200},
@@ -126,6 +126,54 @@ TEST_CONFIG = {
         {"method": "GET", "path": "/concurrent", "expected_status": 200},
         {"method": "GET", "path": "/memory", "expected_status": 200},
         {"method": "GET", "path": "/test-report", "expected_status": 200}
+    ]},
+    "api_versioning_app": {"port": 8020, "tests": [
+        {"method": "GET", "path": "/", "expected_status": 200},
+        {"method": "GET", "path": "/v1/users", "expected_status": 200},
+        {"method": "GET", "path": "/v2/users", "expected_status": 200},
+        {"method": "GET", "path": "/v3/users", "expected_status": 200},
+        {"method": "GET", "path": "/api/versions", "expected_status": 200},
+        {"method": "GET", "path": "/api/changelog", "expected_status": 200},
+        {"method": "GET", "path": "/api/deprecations", "expected_status": 200}
+    ]},
+    "websocket_enhanced_app": {"port": 8021, "tests": [
+        {"method": "GET", "path": "/", "expected_status": 200},
+        {"method": "GET", "path": "/api/connections", "expected_status": 200},
+        {"method": "GET", "path": "/api/broadcast", "expected_status": 200},
+        {"method": "GET", "path": "/api/rooms", "expected_status": 200}
+    ]},
+    "enhanced_documentation_app": {"port": 8022, "tests": [
+        {"method": "GET", "path": "/", "expected_status": 200},
+        {"method": "GET", "path": "/docs", "expected_status": 200},
+        {"method": "GET", "path": "/openapi.json", "expected_status": 200},
+        {"method": "GET", "path": "/users", "expected_status": 200},
+        {"method": "GET", "path": "/messages", "expected_status": 200}
+    ]},
+    "security_examples_app": {"port": 8023, "tests": [
+        {"method": "GET", "path": "/", "expected_status": 200},
+        {"method": "GET", "path": "/security-info", "expected_status": 200},
+        {"method": "GET", "path": "/validation-test", "expected_status": 200},
+        {"method": "GET", "path": "/encoding-test", "expected_status": 200}
+    ]},
+    "performance_examples_app": {"port": 8024, "tests": [
+        {"method": "GET", "path": "/", "expected_status": 200},
+        {"method": "GET", "path": "/performance-info", "expected_status": 200},
+        {"method": "GET", "path": "/cache-test", "expected_status": 200},
+        {"method": "GET", "path": "/async-test", "expected_status": 200},
+        {"method": "GET", "path": "/benchmark", "expected_status": 200}
+    ]},
+    "template_app": {"port": 8025, "tests": [
+        {"method": "GET", "path": "/", "expected_status": 200},
+        {"method": "GET", "path": "/users", "expected_status": 200},
+        {"method": "GET", "path": "/user/1", "expected_status": 200},
+        {"method": "GET", "path": "/string", "expected_status": 200},
+        {"method": "GET", "path": "/debug", "expected_status": 200}
+    ]},
+    "enhanced_testing_example": {"port": 8026, "tests": [
+        {"method": "GET", "path": "/", "expected_status": 200},
+        {"method": "GET", "path": "/users", "expected_status": 200},
+        {"method": "GET", "path": "/users/1", "expected_status": 200},
+        {"method": "GET", "path": "/posts", "expected_status": 200}
     ]}
 }
 
