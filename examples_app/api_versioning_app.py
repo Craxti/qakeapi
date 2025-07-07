@@ -4,7 +4,7 @@ API Versioning example with QakeAPI.
 """
 import sys
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Dict, List, Optional, Any
 
 # Add path to local QakeAPI
@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from qakeapi import Application, Request, Response
 from qakeapi.validation.models import validate_request_body, RequestModel
-from qakeapi.api.versioning import VersionInfo, PathVersionStrategy, HeaderVersionStrategy, APIVersionManager
+from qakeapi.api.versioning import VersionInfo, PathVersionStrategy, HeaderVersionStrategy, APIVersionManager, VersionStatus
 from qakeapi.api.deprecation import DeprecationWarning, DeprecationLevel
 from pydantic import BaseModel, Field
 
@@ -28,27 +28,30 @@ path_strategy = PathVersionStrategy(["v1", "v2", "v3"], "v1")
 app.version_manager = APIVersionManager(path_strategy)
 
 # Add version information
-app.version_manager.add_version_info("v1", VersionInfo(
+app.version_manager.register_version(VersionInfo(
     version="v1",
-    release_date=datetime(2024, 1, 1),
-    deprecated=False,
+    status=VersionStatus.ACTIVE,
+    release_date=date(2024, 1, 1),
+    description="Basic user management",
     new_features=["Basic user management", "Simple authentication"],
     bug_fixes=[]
 ))
 
-app.version_manager.add_version_info("v2", VersionInfo(
+app.version_manager.register_version(VersionInfo(
     version="v2", 
-    release_date=datetime(2024, 6, 1),
-    deprecated=False,
+    status=VersionStatus.ACTIVE,
+    release_date=date(2024, 6, 1),
+    description="Enhanced user management",
     breaking_changes=["User ID format changed", "Response structure updated"],
     new_features=["Advanced user management", "Role-based access control"],
     bug_fixes=["Fixed authentication bug", "Improved error handling"]
 ))
 
-app.version_manager.add_version_info("v3", VersionInfo(
+app.version_manager.register_version(VersionInfo(
     version="v3",
-    release_date=datetime(2024, 12, 1),
-    deprecated=False,
+    status=VersionStatus.ACTIVE,
+    release_date=date(2024, 12, 1),
+    description="Advanced API with GraphQL support",
     breaking_changes=["API response format changed", "New authentication required"],
     new_features=["GraphQL support", "Real-time notifications"],
     bug_fixes=["Performance improvements", "Security enhancements"]
@@ -211,6 +214,59 @@ async def get_old_users(request: Request):
     }
 
 # API information endpoints
+@app.get("/api/versions")
+async def get_versions(request: Request):
+    """Get version information."""
+    try:
+        versions_info = {}
+        for version in app.version_manager.get_all_versions():
+            info = app.version_manager.get_version_info(version)
+            if info:
+                versions_info[version] = {
+                    "status": info.status.value,
+                    "release_date": info.release_date.isoformat() if info.release_date else None,
+                    "description": info.description,
+                    "new_features": info.new_features,
+                    "breaking_changes": info.breaking_changes,
+                    "bug_fixes": info.bug_fixes
+                }
+        
+        return {
+            "versions": versions_info,
+            "total": len(versions_info),
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        return Response.json({"error": str(e)}, status_code=500)
+
+@app.get("/api/changelog")
+async def get_changelog(request: Request):
+    """Get API changelog."""
+    try:
+        changelog = []
+        for version in app.version_manager.get_all_versions():
+            info = app.version_manager.get_version_info(version)
+            if info:
+                changelog.append({
+                    "version": version,
+                    "release_date": info.release_date.isoformat() if info.release_date else None,
+                    "description": info.description,
+                    "new_features": info.new_features,
+                    "breaking_changes": info.breaking_changes,
+                    "bug_fixes": info.bug_fixes
+                })
+        
+        # Sort by release date (newest first)
+        changelog.sort(key=lambda x: x["release_date"] or "", reverse=True)
+        
+        return {
+            "changelog": changelog,
+            "total": len(changelog),
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        return Response.json({"error": str(e)}, status_code=500)
+
 @app.get("/api/deprecations")
 async def get_deprecations(request: Request):
     """Get deprecation information."""
@@ -241,7 +297,7 @@ async def root(request: Request):
     return {
         "message": "API Versioning Example",
         "current_version": app.version,
-        "supported_versions": app.version_manager.get_supported_versions(),
+        "supported_versions": app.version_manager.get_all_versions(),
         "endpoints": {
             "v1": "/v1/users - User management (v1)",
             "v2": "/v2/users - User management (v2)", 
@@ -260,7 +316,7 @@ async def health_check(request: Request):
         "status": "healthy",
         "version": app.version,
         "timestamp": datetime.now().isoformat(),
-        "supported_versions": app.version_manager.get_supported_versions()
+        "supported_versions": app.version_manager.get_all_versions()
     }
 
 if __name__ == "__main__":

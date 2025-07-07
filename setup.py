@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="qakeapi",
-    version="1.0.3",
+    version="1.1.0",
     description="A lightweight ASGI web framework for building fast web APIs with Python",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

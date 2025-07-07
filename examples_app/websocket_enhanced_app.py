@@ -13,6 +13,9 @@ from qakeapi.core.websockets import (
     WebSocketConnection
 )
 from qakeapi.core.responses import Response
+from qakeapi.security.websocket_auth import (
+    AuthConfig, AuthStatus, JWTAuthenticator, WebSocketAuthMiddleware, WebSocketAuthHandler
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -25,61 +28,18 @@ app = Application()
 ws_manager = InMemoryWebSocketManager()
 ws_handler = WebSocketHandler(ws_manager)
 
-# Add WebSocket middleware
-@app.middleware()
-class WebSocketMiddlewareWrapper:
-    """WebSocket middleware wrapper"""
-    
-    def __init__(self):
-        self.handler = ws_handler
-    
-    async def __call__(self, scope, receive, send):
-        if scope["type"] == "websocket":
-            websocket = WebSocketConnection(scope, receive, send)
-            await self.handler.handle_connection(websocket)
-        else:
-            # Pass through for HTTP requests
-            return await app(scope, receive, send)
+# --- WebSocket Authentication Setup ---
+AUTH_SECRET = "supersecretkey123"
+auth_config = AuthConfig(secret_key=AUTH_SECRET)
+jwt_authenticator = JWTAuthenticator(auth_config)
+ws_auth_middleware = WebSocketAuthMiddleware(jwt_authenticator, auth_config)
+ws_auth_handler = WebSocketAuthHandler(ws_auth_middleware)
+
+# WebSocket маршрут обрабатывается напрямую через @app.websocket("/ws")
 
 # WebSocket event handlers
-@ws_handler.on_connect
-async def handle_connect(websocket):
-    """Handle WebSocket connection."""
-    logger.info(f"Client {websocket.connection_id} connected")
-    
-    # Send welcome message
-    await websocket.send_json({
-        "type": "welcome",
-        "data": {
-            "message": "Welcome to Enhanced WebSocket Chat!",
-            "connection_id": websocket.connection_id,
-            "timestamp": datetime.now().isoformat()
-        }
-    })
-    
-    # Send current connection info
-    info = ws_manager.get_connection_info()
-    await websocket.send_json({
-        "type": "connection_info",
-        "data": info
-    })
+# WebSocket event handlers moved to inline processing in websocket_endpoint
 
-@ws_handler.on_disconnect
-async def handle_disconnect(websocket):
-    """Handle WebSocket disconnection."""
-    logger.info(f"Client {websocket.connection_id} disconnected")
-    
-    # Broadcast user left message
-    message = WebSocketMessage(
-        type="user_left",
-        data={
-            "connection_id": websocket.connection_id,
-            "timestamp": datetime.now().isoformat()
-        }
-    )
-    await ws_manager.broadcast(message)
-
-@ws_handler.on_message("chat")
 async def handle_chat_message(websocket, message):
     """Handle chat messages."""
     data = message.get("data", {})
@@ -111,7 +71,6 @@ async def handle_chat_message(websocket, message):
         }
     })
 
-@ws_handler.on_message("join_room")
 async def handle_join_room(websocket, message):
     """Handle room join requests."""
     data = message.get("data", {})
@@ -142,7 +101,6 @@ async def handle_join_room(websocket, message):
     )
     await ws_manager.broadcast(join_message, room)
 
-@ws_handler.on_message("leave_room")
 async def handle_leave_room(websocket, message):
     """Handle room leave requests."""
     data = message.get("data", {})
@@ -173,7 +131,6 @@ async def handle_leave_room(websocket, message):
     )
     await ws_manager.broadcast(leave_message, room)
 
-@ws_handler.on_message("private_message")
 async def handle_private_message(websocket, message):
     """Handle private messages."""
     data = message.get("data", {})
@@ -214,7 +171,6 @@ async def handle_private_message(websocket, message):
             }
         })
 
-@ws_handler.on_message("get_connections")
 async def handle_get_connections(websocket, message):
     """Handle connection info requests."""
     info = ws_manager.get_connection_info()
@@ -223,7 +179,54 @@ async def handle_get_connections(websocket, message):
         "data": info
     })
 
-@ws_handler.on_message("ping")
+async def handle_auth(websocket, message):
+    """Handle authentication messages."""
+    try:
+        auth_data = message.get("data", {})
+        result = await jwt_authenticator.authenticate(websocket, auth_data)
+        
+        if result.status == AuthStatus.AUTHENTICATED:
+            # Добавляем в аутентифицированные соединения
+            ws_auth_middleware._authenticated_connections[websocket.connection_id] = result
+            
+            await websocket.send_json({
+                "type": "auth_success",
+                "data": {
+                    "user_id": result.user_id,
+                    "user_data": result.user_data,
+                    "expires_at": result.expires_at.isoformat() if result.expires_at else None,
+                    "timestamp": datetime.now().isoformat()
+                }
+            })
+            
+            # Send current connection info after successful auth
+            info = ws_manager.get_connection_info()
+            await websocket.send_json({
+                "type": "connection_info",
+                "data": info
+            })
+            
+        else:
+            await websocket.send_json({
+                "type": "auth_error",
+                "data": {
+                    "error": result.error_message,
+                    "status": result.status.value,
+                    "timestamp": datetime.now().isoformat()
+                }
+            })
+            
+    except Exception as e:
+        logger.error(f"Authentication error: {e}")
+        await websocket.send_json({
+            "type": "auth_error",
+            "data": {
+                "error": "Authentication failed",
+                "status": "invalid",
+                "timestamp": datetime.now().isoformat()
+            }
+        })
+
 async def handle_ping(websocket, message):
     """Handle ping messages."""
     await websocket.send_json({
@@ -475,10 +478,106 @@ async def index(request):
     """
     return Response.html(html)
 
-@app.get("/ws")
-async def websocket_endpoint(request):
-    """WebSocket endpoint."""
-    return {"message": "WebSocket endpoint - use WebSocket connection"}
+@app.websocket("/ws")
+async def websocket_endpoint(websocket):
+    """WebSocket endpoint with authentication."""
+    try:
+        # Accept connection
+        await websocket.accept()
+        
+        # Add to manager
+        await ws_manager.add_connection(websocket)
+        
+        # Send welcome message
+        await websocket.send_json({
+            "type": "welcome",
+            "data": {
+                "message": "Welcome to Enhanced WebSocket Chat! Please authenticate.",
+                "connection_id": websocket.connection_id,
+                "timestamp": datetime.now().isoformat()
+            }
+        })
+        
+        # Send authentication required message
+        await websocket.send_json({
+            "type": "auth_required",
+            "data": {
+                "message": "Authentication required. Send auth message with token.",
+                "timestamp": datetime.now().isoformat()
+            }
+        })
+        
+        # Message loop
+        async for message_data in websocket:
+            try:
+                if isinstance(message_data, str):
+                    message = json.loads(message_data)
+                else:
+                    message = message_data
+                
+                message_type = message.get("type", "message")
+                
+                # Handle authentication
+                if message_type == "auth":
+                    await handle_auth(websocket, message)
+                # Handle other messages with authentication check
+                elif message_type in ["chat", "private_message"]:
+                    if not ws_auth_middleware.is_authenticated(websocket.connection_id):
+                        await websocket.send_json({
+                            "type": "error",
+                            "data": {
+                                "error": "Authentication required",
+                                "code": "AUTH_REQUIRED"
+                            }
+                        })
+                    else:
+                        if message_type == "chat":
+                            await handle_chat_message(websocket, message)
+                        elif message_type == "private_message":
+                            await handle_private_message(websocket, message)
+                # Handle non-protected messages
+                elif message_type == "join_room":
+                    await handle_join_room(websocket, message)
+                elif message_type == "leave_room":
+                    await handle_leave_room(websocket, message)
+                elif message_type == "get_connections":
+                    await handle_get_connections(websocket, message)
+                elif message_type == "ping":
+                    await handle_ping(websocket, message)
+                else:
+                    # Default message handler
+                    await websocket.send_json({
+                        "type": "error",
+                        "data": {
+                            "error": f"Unknown message type: {message_type}",
+                            "timestamp": datetime.now().isoformat()
+                        }
+                    })
+                    
+            except json.JSONDecodeError:
+                logger.warning(f"Invalid JSON from {websocket.connection_id}")
+                await websocket.send_json({
+                    "type": "error",
+                    "data": {
+                        "error": "Invalid JSON format",
+                        "timestamp": datetime.now().isoformat()
+                    }
+                })
+            except Exception as e:
+                logger.error(f"Error handling message: {e}")
+                await websocket.send_json({
+                    "type": "error",
+                    "data": {
+                        "error": "Internal server error",
+                        "timestamp": datetime.now().isoformat()
+                    }
+                })
+                    
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
+    finally:
+        # Remove from manager
+        await ws_manager.remove_connection(websocket)
 
 @app.get("/api/connections")
 async def get_connections(request):
@@ -520,6 +619,12 @@ async def get_rooms(request):
     except Exception as e:
         return Response.json({"error": str(e)}, status_code=500)
 
+@app.get("/api/generate-token")
+async def generate_token(request):
+    user_data = {"user_id": "demo_user", "name": "Demo User"}
+    token = await jwt_authenticator.create_token(user_data)
+    return {"token": token}
+
 if __name__ == "__main__":
     print("🚀 Starting Enhanced WebSocket Example...")
     print("📖 Available endpoints:")
@@ -528,6 +633,7 @@ if __name__ == "__main__":
     print("  - /api/connections - Connection statistics")
     print("  - /api/broadcast - Broadcast message")
     print("  - /api/rooms - Room information")
+    print("  - /api/generate-token - Generate a test token")
     print("  - /docs - API documentation")
     
     import uvicorn

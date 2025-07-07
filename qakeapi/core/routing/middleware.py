@@ -14,8 +14,9 @@ class MiddlewareManager:
     
     def add(self, middleware: Callable) -> None:
         """Add middleware to chain."""
+        name = getattr(middleware, '__name__', type(middleware).__name__)
         self._middleware.append(middleware)
-        logger.debug(f"Added middleware: {middleware.__name__}")
+        logger.debug(f"Added middleware: {name}")
     
     def apply(self, handler: Callable) -> Callable:
         """Apply middleware chain to handler."""

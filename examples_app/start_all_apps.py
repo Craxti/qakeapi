@@ -36,11 +36,15 @@ APPS = [
     "live_reload_app.py",
     "api_versioning_app.py",
     "websocket_enhanced_app.py",
+    "websocket_clustered_app.py",
     "enhanced_documentation_app.py",
     "security_examples_app.py",
     "performance_examples_app.py",
     "template_app.py",
-    "enhanced_testing_example.py"
+    "enhanced_testing_example.py",
+    "api_versioning_enhanced_app.py",
+    "graphql_app.py",
+    "event_driven_app.py"
 ]
 
 # Port mapping for each app
@@ -66,11 +70,15 @@ PORT_MAPPING = {
     "live_reload_app.py": 8019,
     "api_versioning_app.py": 8020,
     "websocket_enhanced_app.py": 8021,
-    "enhanced_documentation_app.py": 8022,
-    "security_examples_app.py": 8023,
-    "performance_examples_app.py": 8024,
-    "template_app.py": 8025,
-    "enhanced_testing_example.py": 8026
+    "websocket_clustered_app.py": 8022,
+    "enhanced_documentation_app.py": 8023,
+    "security_examples_app.py": 8024,
+    "performance_examples_app.py": 8025,
+    "template_app.py": 8026,
+    "enhanced_testing_example.py": 8027,
+    "api_versioning_enhanced_app.py": 8028,
+    "graphql_app.py": 8030,
+    "event_driven_app.py": 8040
 }
 
 def check_port_available(port):
@@ -104,31 +112,42 @@ def start_app(app_name):
     if not check_port_available(port):
         print(f"Port {port} is busy, killing existing process...")
         kill_process_on_port(port)
-        time.sleep(2)
+        time.sleep(5)  # Увеличенная задержка
     
-    try:
-        # Start application with nohup to keep it running
-        process = subprocess.Popen(
-            [sys.executable, app_name],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            preexec_fn=os.setsid  # Create new process group
-        )
-        
-        # Wait a bit for startup
-        time.sleep(3)
-        
-        # Check if process is still running
-        if process.poll() is None:
-            print(f"✅ {app_name} started on port {port} (PID: {process.pid})")
-            return process
-        else:
-            print(f"❌ {app_name} failed to start on port {port}")
-            return None
+    # Повторные попытки запуска
+    max_attempts = 3
+    for attempt in range(1, max_attempts + 1):
+        if not check_port_available(port):
+            print(f"[Attempt {attempt}] Port {port} still busy, waiting...")
+            time.sleep(2)
+            continue
+        try:
+            # Set environment variable for Python path
+            env = os.environ.copy()
+            qakeapi_path = os.path.join(os.path.dirname(__file__), '..')
+            if 'PYTHONPATH' in env:
+                env['PYTHONPATH'] = qakeapi_path + os.pathsep + env['PYTHONPATH']
+            else:
+                env['PYTHONPATH'] = qakeapi_path
             
-    except Exception as e:
-        print(f"❌ Error starting {app_name}: {e}")
-        return None
+            process = subprocess.Popen(
+                [sys.executable, app_name],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                env=env
+            )
+            time.sleep(3)
+            if process.poll() is None:
+                print(f"✅ {app_name} started on port {port} (PID: {process.pid})")
+                return process
+            else:
+                print(f"❌ {app_name} failed to start on port {port}")
+                return None
+        except Exception as e:
+            print(f"❌ Error starting {app_name}: {e}")
+            return None
+    print(f"❌ {app_name} could not start after {max_attempts} attempts (port {port} still busy)")
+    return None
 
 def stop_all_apps():
     """Stop all running applications"""

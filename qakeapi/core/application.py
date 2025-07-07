@@ -57,6 +57,8 @@ class Application:
         self.http_router.add_route("/api/changelog", self.api_changelog, ["GET"])
         self.http_router.add_route("/api/deprecations", self.api_deprecations, ["GET"])
         
+        self.asgi_mounts = {}  # path -> ASGI app
+        
         logger.debug("Application initialized")
 
     def route(self, path: str, methods: List[str] = None, name: Optional[str] = None):
@@ -88,7 +90,13 @@ class Application:
         send: Callable[[Dict[str, Any]], Awaitable[None]],
     ) -> None:
         """ASGI interface."""
+        # Проверяем, есть ли монтированное ASGI-приложение для пути
         if scope["type"] == "http":
+            path = scope.get("path", "")
+            for prefix, asgi_app in self.asgi_mounts.items():
+                if path.startswith(prefix):
+                    await asgi_app(scope, receive, send)
+                    return
             await self.handle_http(scope, receive, send)
         elif scope["type"] == "websocket":
             await self.handle_websocket(scope, receive, send)
@@ -386,3 +394,11 @@ class Application:
                 (b"cache-control", b"no-cache"),
             ],
         )
+
+    def add_middleware(self, middleware):
+        """Add middleware to the application (function or class)."""
+        self.middleware_manager.add(middleware)
+
+    def mount(self, path: str, asgi_app):
+        """Монтирует ASGI-приложение на указанный путь."""
+        self.asgi_mounts[path.rstrip("/")] = asgi_app
