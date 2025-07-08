@@ -135,7 +135,7 @@ class RedisClusterNode(ClusterNode):
         
         try:
             self.redis_client = redis.from_url(self.redis_url)
-            self.pubsub = await self.redis_client.pubsub()
+            self.pubsub = self.redis_client.pubsub()
             
             # Subscribe to cluster channel
             await self.pubsub.subscribe(self.cluster_channel)
