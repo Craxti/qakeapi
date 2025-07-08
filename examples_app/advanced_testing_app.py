@@ -51,14 +51,14 @@ async def get_users(request):
 @app.post("/users")
 async def create_user(request):
     """Create a user - for mutation testing."""
-    try:
-        user_data = await request.json()
+        try:
+            user_data = await request.json()
         return {
             "id": 1,
             "name": user_data.get("name", "test"),
             "email": user_data.get("email", "test@example.com")
         }
-    except:
+        except:
         return {"error": "No user data provided"}
 
 @app.get("/products")
@@ -69,15 +69,15 @@ async def get_products(request):
 @app.post("/products")
 async def create_product(request):
     """Create a product - for performance testing."""
-    try:
-        product_data = await request.json()
+        try:
+            product_data = await request.json()
         return {
             "id": 1,
             "name": product_data.get("name", "test"),
             "price": product_data.get("price", 0.0),
             "category": product_data.get("category", "test")
         }
-    except:
+        except:
         return {"error": "No product data provided"}
 
 @app.get("/orders")
@@ -88,16 +88,16 @@ async def get_orders(request):
 @app.post("/orders")
 async def create_order(request):
     """Create an order - for memory leak detection."""
-    try:
-        order_data = await request.json()
+        try:
+            order_data = await request.json()
         return {
             "id": 1,
             "user_id": order_data.get("user_id", 1),
             "product_id": order_data.get("product_id", 1),
             "quantity": order_data.get("quantity", 1),
             "total": order_data.get("total", 0.0),
-            "created_at": time.time()
-        }
+        "created_at": time.time()
+    }
     except:
         return {"error": "No order data provided"}
 

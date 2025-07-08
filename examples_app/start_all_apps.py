@@ -130,24 +130,24 @@ def start_app(app_name):
             else:
                 env['PYTHONPATH'] = qakeapi_path
             
-            process = subprocess.Popen(
-                [sys.executable, app_name],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+        process = subprocess.Popen(
+            [sys.executable, app_name],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
                 env=env
-            )
-            time.sleep(3)
-            if process.poll() is None:
-                print(f"✅ {app_name} started on port {port} (PID: {process.pid})")
-                return process
-            else:
-                print(f"❌ {app_name} failed to start on port {port}")
-                return None
-        except Exception as e:
-            print(f"❌ Error starting {app_name}: {e}")
+        )
+        time.sleep(3)
+        if process.poll() is None:
+            print(f"✅ {app_name} started on port {port} (PID: {process.pid})")
+            return process
+        else:
+            print(f"❌ {app_name} failed to start on port {port}")
+            return None
+    except Exception as e:
+        print(f"❌ Error starting {app_name}: {e}")
             return None
     print(f"❌ {app_name} could not start after {max_attempts} attempts (port {port} still busy)")
-    return None
+        return None
 
 def stop_all_apps():
     """Stop all running applications"""
