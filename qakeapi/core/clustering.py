@@ -22,6 +22,17 @@ except ImportError:
     REDIS_AVAILABLE = False
     logger.warning("Redis not available. Install with: pip install redis")
 
+# Export redis for testing purposes
+__all__ = [
+    'ClusterMessage',
+    'ClusterNode', 
+    'RedisClusterNode',
+    'ClusteredWebSocketManager',
+    'create_clustered_manager',
+    'redis',
+    'REDIS_AVAILABLE'
+]
+
 
 class ClusterMessage:
     """Message for inter-node communication."""
