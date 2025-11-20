@@ -12,7 +12,7 @@ class TestApplication:
         app = QakeAPI()
 
         # Add test route
-        @app.route("/")
+        @app.get("/")
         async def test_handler(request):
             return Response({"message": "Hello, World!"}, status_code=200)
 

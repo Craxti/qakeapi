@@ -105,11 +105,13 @@ class XSSProtection:
         if not isinstance(data, dict):
             return data
         return {
-            k: cls.sanitize_value(v)
-            if isinstance(v, (str, int, float, bool))
-            else cls.sanitize_dict(v)
-            if isinstance(v, dict)
-            else v
+            k: (
+                cls.sanitize_value(v)
+                if isinstance(v, (str, int, float, bool))
+                else cls.sanitize_dict(v)
+                if isinstance(v, dict)
+                else v
+            )
             for k, v in data.items()
         }
 

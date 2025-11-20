@@ -27,5 +27,9 @@ async def test_client(app):
     """Fixture for creating test client"""
     from httpx import AsyncClient
 
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    from httpx._transports.asgi import ASGITransport
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as client:
         yield client

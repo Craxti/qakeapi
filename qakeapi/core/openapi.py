@@ -278,9 +278,11 @@ class OpenAPIGenerator:
                             {
                                 "name": event.name,
                                 "description": event.description,
-                                "payload_schema": event.payload_schema.model_json_schema()
-                                if event.payload_schema
-                                else None,
+                                "payload_schema": (
+                                    event.payload_schema.model_json_schema()
+                                    if event.payload_schema
+                                    else None
+                                ),
                                 "examples": event.examples,
                             }
                             for event in ws.events

@@ -256,9 +256,11 @@ class WebSocketAuthMiddleware:
                         "type": "auth_success",
                         "data": {
                             "user_id": result.user_id,
-                            "expires_at": result.expires_at.isoformat()
-                            if result.expires_at
-                            else None,
+                            "expires_at": (
+                                result.expires_at.isoformat()
+                                if result.expires_at
+                                else None
+                            ),
                         },
                     }
                 )

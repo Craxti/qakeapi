@@ -171,12 +171,14 @@ class MetricsCollector:
                 "uptime_seconds": uptime,
                 "total_requests": self._total_requests,
                 "total_errors": self._total_errors,
-                "error_rate": (self._total_errors / self._total_requests * 100)
-                if self._total_requests > 0
-                else 0,
-                "requests_per_second": self._total_requests / uptime
-                if uptime > 0
-                else 0,
+                "error_rate": (
+                    (self._total_errors / self._total_requests * 100)
+                    if self._total_requests > 0
+                    else 0
+                ),
+                "requests_per_second": (
+                    self._total_requests / uptime if uptime > 0 else 0
+                ),
                 "status_codes": dict(self._status_codes),
                 "methods": dict(self._methods),
                 "top_paths": dict(

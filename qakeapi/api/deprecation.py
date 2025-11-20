@@ -136,9 +136,9 @@ class DeprecationManager:
                         "feature": feature,
                         "version": dep.version,
                         "deprecation_date": dep.deprecation_date.isoformat(),
-                        "sunset_date": dep.sunset_date.isoformat()
-                        if dep.sunset_date
-                        else None,
+                        "sunset_date": (
+                            dep.sunset_date.isoformat() if dep.sunset_date else None
+                        ),
                         "replacement": dep.replacement,
                         "migration_guide": dep.migration_guide,
                     }

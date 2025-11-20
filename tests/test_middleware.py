@@ -33,8 +33,9 @@ def app():
 def client(app):
     """Создать тестовый клиент"""
     from httpx import AsyncClient
+    from httpx._transports.asgi import ASGITransport
 
-    return AsyncClient(app=app, base_url="http://testserver")
+    return AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver")
 
 
 class TestCORSMiddleware:
@@ -52,7 +53,11 @@ class TestCORSMiddleware:
 
         from httpx import AsyncClient
 
-        async with AsyncClient(app=app, base_url="http://testserver") as client:
+        from httpx._transports.asgi import ASGITransport
+
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://testserver"
+        ) as client:
             response = await client.get("/", headers={"Origin": "http://example.com"})
 
             assert response.status_code == 200
@@ -79,7 +84,11 @@ class TestCORSMiddleware:
 
         from httpx import AsyncClient
 
-        async with AsyncClient(app=app, base_url="http://testserver") as client:
+        from httpx._transports.asgi import ASGITransport
+
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://testserver"
+        ) as client:
             response = await client.options(
                 "/",
                 headers={
@@ -107,7 +116,11 @@ class TestCORSMiddleware:
 
         from httpx import AsyncClient
 
-        async with AsyncClient(app=app, base_url="http://testserver") as client:
+        from httpx._transports.asgi import ASGITransport
+
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://testserver"
+        ) as client:
             response = await client.get("/", headers={"Origin": "http://example.com"})
 
             assert response.status_code == 200
@@ -135,7 +148,11 @@ class TestAuthMiddleware:
 
         from httpx import AsyncClient
 
-        async with AsyncClient(app=app, base_url="http://testserver") as client:
+        from httpx._transports.asgi import ASGITransport
+
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://testserver"
+        ) as client:
             # Публичный endpoint должен работать без токена
             response = await client.get("/")
             assert response.status_code == 200
@@ -165,7 +182,11 @@ class TestAuthMiddleware:
         from httpx import AsyncClient
         import base64
 
-        async with AsyncClient(app=app, base_url="http://testserver") as client:
+        from httpx._transports.asgi import ASGITransport
+
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://testserver"
+        ) as client:
             # Публичный endpoint
             response = await client.get("/")
             assert response.status_code == 200
@@ -211,7 +232,11 @@ class TestAuthMiddleware:
 
         from httpx import AsyncClient
 
-        async with AsyncClient(app=app, base_url="http://testserver") as client:
+        from httpx._transports.asgi import ASGITransport
+
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://testserver"
+        ) as client:
             # Публичный endpoint
             response = await client.get("/")
             assert response.status_code == 200
@@ -256,7 +281,11 @@ class TestLoggingMiddleware:
 
         from httpx import AsyncClient
 
-        async with AsyncClient(app=app, base_url="http://testserver") as client:
+        from httpx._transports.asgi import ASGITransport
+
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://testserver"
+        ) as client:
             response = await client.get("/")
             assert response.status_code == 200
 
