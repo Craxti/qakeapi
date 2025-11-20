@@ -4,7 +4,7 @@ setup(
     name="qakeapi",
     version="1.1.0",
     description="A lightweight ASGI web framework for building fast web APIs with Python",
-    long_description=open("README.md").read(),
+    long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     author="Aleksandr",
     author_email="fetis.dev@gmail.com",
