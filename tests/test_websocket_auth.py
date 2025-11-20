@@ -315,9 +315,9 @@ class TestWebSocketAuthMiddleware:
     ):
         """Test maximum authentication attempts."""
         # Set up max attempts
-        middleware._auth_attempts[
-            mock_websocket.connection_id
-        ] = middleware.config.max_auth_attempts
+        middleware._auth_attempts[mock_websocket.connection_id] = (
+            middleware.config.max_auth_attempts
+        )
 
         result = await middleware.authenticate_connection(mock_websocket)
 
@@ -444,9 +444,9 @@ class TestWebSocketAuthHandler:
         """Test optional_auth decorator with authenticated user."""
         # Add to authenticated connections
         auth_result = AuthResult(status=AuthStatus.AUTHENTICATED, user_id="user123")
-        middleware._authenticated_connections[
-            mock_websocket.connection_id
-        ] = auth_result
+        middleware._authenticated_connections[mock_websocket.connection_id] = (
+            auth_result
+        )
 
         # Create test handler
         @handler.optional_auth
