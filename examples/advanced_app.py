@@ -1,6 +1,7 @@
 """
 Продвинутый пример использования QakeAPI с аутентификацией, валидацией и WebSocket
 """
+
 from typing import List, Optional
 from pydantic import BaseModel, Field
 from qakeapi import QakeAPI, Request, JSONResponse, Depends, WebSocket

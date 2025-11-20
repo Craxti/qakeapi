@@ -1,6 +1,7 @@
 """
 Пример веб-приложения с шаблонами и статическими файлами
 """
+
 from qakeapi import QakeAPI, Request
 from qakeapi.utils.templates import Jinja2Templates, SimpleTemplates
 from qakeapi.utils.static import mount_static

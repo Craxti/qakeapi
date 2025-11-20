@@ -333,6 +333,7 @@ def get_swagger_ui_html(
         custom_styles += custom_css
 
     return f"""
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -424,6 +425,7 @@ def get_redoc_html(
     theme_config = theme or default_theme
 
     return f"""
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -499,6 +501,7 @@ def get_webSocket_docs_html(ws_docs: List[WebSocketDocumentation]) -> str:
         """
 
     return f"""
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

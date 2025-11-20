@@ -1,6 +1,7 @@
 """
 Cache implementation for QakeAPI with support for both in-memory and Redis caching.
 """
+
 from typing import Any, Optional, Union
 from datetime import datetime, timedelta
 import json

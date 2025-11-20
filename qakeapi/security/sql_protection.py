@@ -1,4 +1,5 @@
 """SQL injection protection module."""
+
 import re
 from typing import Any, Dict, List, Optional, Union
 

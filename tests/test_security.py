@@ -1,6 +1,7 @@
 """
 Тесты системы безопасности
 """
+
 import pytest
 import asyncio
 from unittest.mock import Mock, patch

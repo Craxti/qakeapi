@@ -3,6 +3,7 @@ QakeAPI Database Connection Pooling Example
 
 This example demonstrates how to use database connection pooling with QakeAPI.
 """
+
 from qakeapi import QakeAPI, Request
 from qakeapi.database.pool import ConnectionPool, DatabaseConfig
 

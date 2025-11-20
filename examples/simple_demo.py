@@ -1,6 +1,7 @@
 """
 Упрощенная демонстрация QakeAPI без сложных зависимостей
 """
+
 from qakeapi import QakeAPI, Request, JSONResponse
 from qakeapi.middleware.compression import CompressionMiddleware
 from qakeapi.caching.middleware import CacheMiddleware

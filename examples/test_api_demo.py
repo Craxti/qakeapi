@@ -1,6 +1,7 @@
 """
 Демонстрационное приложение для тестирования API эндпоинтов
 """
+
 import asyncio
 import json
 from qakeapi import QakeAPI, Request, JSONResponse, HTTPException

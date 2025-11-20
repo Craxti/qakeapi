@@ -1,6 +1,7 @@
 """
 Базовые тесты для QakeAPI
 """
+
 import pytest
 import asyncio
 from qakeapi import QakeAPI, Request, JSONResponse

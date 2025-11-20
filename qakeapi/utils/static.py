@@ -1,6 +1,7 @@
 """
 Utilities for working with static files
 """
+
 import os
 import mimetypes
 from typing import Optional, Dict, Any

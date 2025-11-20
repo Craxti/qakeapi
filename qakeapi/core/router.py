@@ -1,6 +1,7 @@
 """
 Routing system for QakeAPI
 """
+
 import re
 from typing import Any, Callable, Dict, List, Optional, Pattern, Tuple, Union
 from enum import Enum

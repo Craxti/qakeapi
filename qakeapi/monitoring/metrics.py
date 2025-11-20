@@ -1,6 +1,7 @@
 """
 Сandстема метрandк for QakeAPI
 """
+
 import time
 import threading
 from collections import defaultdict, deque

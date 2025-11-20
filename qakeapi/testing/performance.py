@@ -1,6 +1,7 @@
 """
 Performance testing framework with benchmarks for QakeAPI.
 """
+
 import asyncio
 import time
 import statistics

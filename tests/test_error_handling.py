@@ -1,6 +1,7 @@
 """
 Тесты улучшенной системы обработки ошибок
 """
+
 import pytest
 import logging
 from unittest.mock import Mock, patch

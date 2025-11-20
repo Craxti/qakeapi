@@ -1,6 +1,7 @@
 """
 Тесты для утилит QakeAPI
 """
+
 import pytest
 import os
 import tempfile

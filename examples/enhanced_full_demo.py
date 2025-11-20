@@ -1,6 +1,7 @@
 """
 Полнофункциональная демонстрация всех возможностей QakeAPI
 """
+
 import asyncio
 from qakeapi import (
     QakeAPI,

@@ -1,6 +1,7 @@
 """
 Logging middleware for QakeAPI
 """
+
 import time
 import logging
 from typing import Callable, Optional, Set

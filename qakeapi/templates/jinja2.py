@@ -1,6 +1,7 @@
 """
 Jinja2 template engine integration for QakeAPI.
 """
+
 import os
 import logging
 from abc import ABC, abstractmethod

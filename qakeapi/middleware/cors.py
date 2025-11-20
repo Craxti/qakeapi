@@ -1,6 +1,7 @@
 """
 CORS (Cross-Origin Resource Sharing) middleware
 """
+
 from typing import List, Optional, Union, Callable
 import re
 

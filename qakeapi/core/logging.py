@@ -1,6 +1,7 @@
 """
 Модуль логирования для QakeAPI.
 """
+
 import logging
 import json
 from datetime import datetime
@@ -149,6 +150,7 @@ class StructuredLogger:
 
 # Example usage:
 """
+
 # Setup logging
 logger = setup_logging(
     level="DEBUG",

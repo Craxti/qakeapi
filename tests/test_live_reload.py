@@ -1,6 +1,7 @@
 """
 Tests for live reload functionality in QakeAPI.
 """
+
 import asyncio
 import tempfile
 import time

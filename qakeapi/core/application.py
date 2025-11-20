@@ -1,6 +1,7 @@
 """
 Main QakeAPI application class
 """
+
 import traceback
 from typing import Any, Callable, Dict, List, Optional, Sequence, Union
 import logging

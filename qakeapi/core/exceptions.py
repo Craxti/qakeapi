@@ -1,6 +1,7 @@
 """
 Exceptions for QakeAPI framework
 """
+
 from typing import Any, Dict, Optional, Union
 
 

@@ -1,6 +1,7 @@
 """
 Utilities for data validation in QakeAPI
 """
+
 import re
 from typing import Any, Dict, List, Optional, Union, Type, get_type_hints
 from datetime import datetime, date

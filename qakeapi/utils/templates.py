@@ -1,6 +1,7 @@
 """
 Utilities for working with templates
 """
+
 import os
 from typing import Any, Dict, Optional, Union
 from pathlib import Path

@@ -1,6 +1,7 @@
 """
 Глаinный CLI andнтерфейс QakeAPI
 """
+
 import os
 import sys
 import click

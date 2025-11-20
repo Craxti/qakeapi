@@ -2,6 +2,7 @@
 Live reload functionality for QakeAPI templates.
 Provides automatic template reloading during development.
 """
+
 import asyncio
 import logging
 import os
@@ -182,6 +183,7 @@ class LiveReloadMiddleware:
     def _generate_live_reload_script(self) -> str:
         """Generate live reload JavaScript code."""
         return f"""
+
 <script>
 (function() {{
     var script = document.createElement('script');

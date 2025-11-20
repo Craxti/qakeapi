@@ -1,6 +1,7 @@
 """
 Команда созданandя ноinого проекта
 """
+
 import os
 import shutil
 from pathlib import Path

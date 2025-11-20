@@ -1,6 +1,7 @@
 """
 Mock services and external API testing for QakeAPI.
 """
+
 import asyncio
 import json
 import logging

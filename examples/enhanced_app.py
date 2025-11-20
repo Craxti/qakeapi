@@ -1,6 +1,7 @@
 """
 Улучшенный пример QakeAPI со всеми новыми возможностями
 """
+
 import os
 from typing import List, Optional
 from pydantic import BaseModel, Field

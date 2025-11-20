@@ -1,6 +1,7 @@
 """
 Тесты новых возможностей QakeAPI
 """
+
 import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch

@@ -1,6 +1,7 @@
 """
 Test fixtures and factories system for QakeAPI.
 """
+
 import random
 import string
 import uuid

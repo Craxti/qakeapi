@@ -1,6 +1,7 @@
 """
 Пример использования валидации данных в QakeAPI
 """
+
 from qakeapi import (
     QakeAPI,
     Request,

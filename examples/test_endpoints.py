@@ -1,6 +1,7 @@
 """
 Скрипт для тестирования API эндпоинтов
 """
+
 import asyncio
 import json
 import sys

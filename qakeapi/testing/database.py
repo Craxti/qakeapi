@@ -1,6 +1,7 @@
 """
 Database testing utilities with test isolation for QakeAPI.
 """
+
 import asyncio
 import tempfile
 import sqlite3
@@ -168,6 +169,7 @@ class DatabaseTestUtils:
 
 # Common database schemas
 USERS_TABLE_SCHEMA = """
+
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
@@ -180,6 +182,7 @@ CREATE TABLE IF NOT EXISTS users (
 """
 
 POSTS_TABLE_SCHEMA = """
+
 CREATE TABLE IF NOT EXISTS posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
@@ -193,6 +196,7 @@ CREATE TABLE IF NOT EXISTS posts (
 """
 
 COMMENTS_TABLE_SCHEMA = """
+
 CREATE TABLE IF NOT EXISTS comments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     content TEXT NOT NULL,
@@ -207,6 +211,7 @@ CREATE TABLE IF NOT EXISTS comments (
 """
 
 PRODUCTS_TABLE_SCHEMA = """
+
 CREATE TABLE IF NOT EXISTS products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,

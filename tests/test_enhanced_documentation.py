@@ -1,6 +1,7 @@
 """
 Tests for enhanced API documentation features.
 """
+
 import json
 import pytest
 from pydantic import BaseModel, Field

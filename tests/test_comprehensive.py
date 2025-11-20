@@ -1,6 +1,7 @@
 """
 Комплексные тесты QakeAPI для расширенного покрытия
 """
+
 import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock

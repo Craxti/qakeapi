@@ -1,6 +1,7 @@
 """
 Тесты для WebSocket функциональности
 """
+
 import pytest
 import asyncio
 from qakeapi import QakeAPI, WebSocket

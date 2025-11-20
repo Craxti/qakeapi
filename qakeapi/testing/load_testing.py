@@ -1,6 +1,7 @@
 """
 Load testing integration for QakeAPI.
 """
+
 import asyncio
 import time
 import statistics

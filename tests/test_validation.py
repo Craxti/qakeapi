@@ -1,6 +1,7 @@
 """
 Тесты для системы валидации данных
 """
+
 import pytest
 from qakeapi.utils.validation import (
     StringValidator,

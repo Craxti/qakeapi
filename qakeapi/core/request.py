@@ -1,6 +1,7 @@
 """
 Request class for QakeAPI
 """
+
 import json
 from typing import Any, Dict, List, Optional, Union, AsyncGenerator
 from urllib.parse import parse_qs, unquote_plus

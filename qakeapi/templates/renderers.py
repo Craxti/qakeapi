@@ -1,6 +1,7 @@
 """
 Template renderers and utilities for QakeAPI.
 """
+
 import logging
 import time
 from functools import wraps

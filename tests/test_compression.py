@@ -1,6 +1,7 @@
 """
 Тесты middleware компрессии
 """
+
 import pytest
 import gzip
 import zlib

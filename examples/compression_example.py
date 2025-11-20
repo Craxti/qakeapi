@@ -3,6 +3,7 @@ QakeAPI Compression Middleware Example
 
 This example demonstrates how to use compression middleware to reduce response sizes.
 """
+
 from qakeapi import QakeAPI, Request
 
 app = QakeAPI(

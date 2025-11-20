@@ -3,6 +3,7 @@ QakeAPI Complete API Example
 
 This is a comprehensive example showing all major features of QakeAPI working together.
 """
+
 from typing import List, Optional
 from pydantic import BaseModel, Field
 from qakeapi import QakeAPI, Request, Depends, WebSocket

@@ -1,6 +1,7 @@
 """
 Тесты для working_demo.py приложения
 """
+
 import pytest
 import sys
 import os

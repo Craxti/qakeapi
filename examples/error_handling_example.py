@@ -3,6 +3,7 @@ QakeAPI Error Handling Example
 
 This example demonstrates comprehensive error handling in QakeAPI.
 """
+
 from qakeapi import QakeAPI, Request, JSONResponse
 from qakeapi.core.exceptions import (
     HTTPException,

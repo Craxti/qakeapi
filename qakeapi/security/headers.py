@@ -1,4 +1,5 @@
 """Security headers module."""
+
 from typing import Dict, List, Optional
 
 

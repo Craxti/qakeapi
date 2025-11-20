@@ -1,4 +1,5 @@
 """WebSocket routing implementation."""
+
 import re
 import logging
 import asyncio

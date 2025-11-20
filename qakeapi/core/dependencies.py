@@ -1,6 +1,7 @@
 """
 Dependency Injection system for QakeAPI
 """
+
 import inspect
 from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 from functools import wraps

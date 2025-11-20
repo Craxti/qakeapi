@@ -1,6 +1,7 @@
 """
 Authentication middleware for QakeAPI
 """
+
 import base64
 import hashlib
 import hmac

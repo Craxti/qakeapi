@@ -2,6 +2,7 @@
 
 This module provides XSS protection middleware and utilities for QakeAPI framework.
 """
+
 from typing import Any, Dict, Optional, Union
 import html
 import re

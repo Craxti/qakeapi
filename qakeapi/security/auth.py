@@ -1,6 +1,7 @@
 """
 Enhanced authentication system with secure JWT and password hashing
 """
+
 import os
 import warnings
 import hashlib

@@ -1,6 +1,7 @@
 """
 Tests for template system.
 """
+
 import pytest
 import tempfile
 import os

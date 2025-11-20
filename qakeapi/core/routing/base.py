@@ -1,4 +1,5 @@
 """Base classes for routing."""
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Pattern, Union

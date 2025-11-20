@@ -1,6 +1,7 @@
 """
 Модуль валидации данных для QakeAPI.
 """
+
 from typing import Any, Optional, Type, TypeVar
 from datetime import datetime
 import re
@@ -179,6 +180,7 @@ def validate_model(model: Type[T], data: Any) -> T:
 
 # Example usage:
 """
+
 @app.post("/users/")
 async def create_user(user_data: CreateUser):
     # Data is already validated

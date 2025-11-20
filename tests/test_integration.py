@@ -1,6 +1,7 @@
 """
 Интеграционные тесты для всех улучшений QakeAPI
 """
+
 import pytest
 import pytest_asyncio
 import asyncio

@@ -1,6 +1,7 @@
 """
 Enhanced error handling system for QakeAPI
 """
+
 import traceback
 import logging
 import uuid

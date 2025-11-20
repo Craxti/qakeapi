@@ -1,6 +1,7 @@
 """
 Простой тест основного функционала QakeAPI
 """
+
 from qakeapi import QakeAPI, JSONResponse
 
 # Создаем приложение

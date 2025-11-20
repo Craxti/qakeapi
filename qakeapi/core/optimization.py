@@ -1,6 +1,7 @@
 """
 Performance optimization utilities for QakeAPI.
 """
+
 from typing import Optional, Dict, Any, List
 import time
 import asyncio

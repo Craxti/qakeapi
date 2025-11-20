@@ -1,6 +1,7 @@
 """
 Тесты для middleware
 """
+
 import pytest
 from qakeapi import QakeAPI
 from qakeapi.middleware.cors import CORSMiddleware

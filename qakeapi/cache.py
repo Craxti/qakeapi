@@ -2,6 +2,7 @@
 """
 Cache module for QakeAPI.
 """
+
 from typing import Any, Optional, Union
 from functools import wraps
 import json
