@@ -54,25 +54,23 @@ async def root():
 async def get_users():
     """
     Get all users from database
-    
+
     This endpoint uses connection pooling for efficient database access.
     """
     if not db_pool:
         from qakeapi.core.exceptions import HTTPException
         from qakeapi.utils.status import status
+
         raise HTTPException(status.SERVICE_UNAVAILABLE, "Database not available")
-    
+
     async with db_pool.get_connection() as conn:
         # Example query (SQLite syntax)
         # In production, use proper ORM or query builder
         cursor = await conn.execute("SELECT * FROM users LIMIT 10")
         rows = await cursor.fetchall()
-        
+
         return {
-            "users": [
-                {"id": row[0], "name": row[1], "email": row[2]}
-                for row in rows
-            ]
+            "users": [{"id": row[0], "name": row[1], "email": row[2]} for row in rows]
         }
 
 
@@ -80,16 +78,17 @@ async def get_users():
 async def create_user(request: Request):
     """
     Create a new user in database
-    
+
     This endpoint demonstrates transaction handling with connection pooling.
     """
     if not db_pool:
         from qakeapi.core.exceptions import HTTPException
         from qakeapi.utils.status import status
+
         raise HTTPException(status.SERVICE_UNAVAILABLE, "Database not available")
-    
+
     data = await request.json()
-    
+
     async with db_pool.transaction() as conn:
         # Example insert (SQLite syntax)
         # In production, use proper ORM or query builder
@@ -98,7 +97,7 @@ async def create_user(request: Request):
             (data.get("name"), data.get("email")),
         )
         user_id = cursor.lastrowid
-        
+
         return {"id": user_id, **data}
 
 
@@ -107,7 +106,7 @@ async def db_stats():
     """Get database pool statistics"""
     if not db_pool:
         return {"status": "not_initialized"}
-    
+
     stats = db_pool.get_stats()
     return {
         "status": "active",
@@ -119,10 +118,9 @@ async def db_stats():
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     # Note: For this example to work, you need to create the database and table first
     # You can do this with a migration script or manually
     print("⚠️  Note: Make sure to create the database and 'users' table before running")
-    
-    uvicorn.run(app, host="0.0.0.0", port=8000)
 
+    uvicorn.run(app, host="0.0.0.0", port=8000)

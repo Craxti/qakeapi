@@ -12,15 +12,11 @@ import psutil
 
 logger = logging.getLogger(__name__)
 
+
 class ConnectionPool:
     """Generic connection pool implementation."""
-    
-    def __init__(
-        self,
-        min_size: int = 5,
-        max_size: int = 20,
-        timeout: float = 30.0
-    ):
+
+    def __init__(self, min_size: int = 5, max_size: int = 20, timeout: float = 30.0):
         self._min_size = min_size
         self._max_size = max_size
         self._timeout = timeout
@@ -37,13 +33,13 @@ class ConnectionPool:
                 if await self._is_connection_valid(conn):
                     self._in_use[conn] = time.time()
                     return conn
-            
+
             # Create new connection if below max_size
             if len(self._in_use) < self._max_size:
                 conn = await self._create_connection()
                 self._in_use[conn] = time.time()
                 return conn
-            
+
             # Wait for a connection to become available
             while True:
                 # Check for timed out connections
@@ -52,12 +48,12 @@ class ConnectionPool:
                     if current_time - start_time > self._timeout:
                         await self._close_connection(conn)
                         del self._in_use[conn]
-                
+
                 if len(self._in_use) < self._max_size:
                     conn = await self._create_connection()
                     self._in_use[conn] = time.time()
                     return conn
-                
+
                 await asyncio.sleep(0.1)
 
     async def release(self, conn: Any) -> None:
@@ -82,23 +78,24 @@ class ConnectionPool:
         """Check if connection is valid. Override in subclass."""
         return True
 
+
 class RequestProfiler:
     """Профилировщик запросов."""
-    
+
     def __init__(self):
         """Инициализация профилировщика."""
         self.stats: Dict[str, List[float]] = {}
         self.detailed_stats: Dict[str, List[Dict]] = {}
-    
+
     def profile_endpoint(self, func):
         """Декоратор для профилирования эндпоинта."""
         endpoint_name = func.__name__
-        
+
         @wraps(func)
         async def wrapper(*args, **kwargs):
             start_time = time.time()
             start_memory = psutil.Process().memory_info().rss
-            
+
             try:
                 result = await func(*args, **kwargs)
                 success = True
@@ -110,69 +107,70 @@ class RequestProfiler:
                 end_memory = psutil.Process().memory_info().rss
                 duration = (end_time - start_time) * 1000  # в миллисекундах
                 memory_used = end_memory - start_memory
-                
+
                 # Сохраняем статистику
                 if endpoint_name not in self.stats:
                     self.stats[endpoint_name] = []
                 self.stats[endpoint_name].append(duration)
-                
+
                 if endpoint_name not in self.detailed_stats:
                     self.detailed_stats[endpoint_name] = []
-                self.detailed_stats[endpoint_name].append({
-                    'timestamp': time.time(),
-                    'duration_ms': duration,
-                    'memory_bytes': memory_used,
-                    'success': success
-                })
-                
+                self.detailed_stats[endpoint_name].append(
+                    {
+                        "timestamp": time.time(),
+                        "duration_ms": duration,
+                        "memory_bytes": memory_used,
+                        "success": success,
+                    }
+                )
+
                 # Логируем информацию о запросе
                 logger.info(
                     f"Request profiling: {endpoint_name}",
                     extra={
-                        'endpoint': endpoint_name,
-                        'duration_ms': duration,
-                        'memory_bytes': memory_used,
-                        'success': success
-                    }
+                        "endpoint": endpoint_name,
+                        "duration_ms": duration,
+                        "memory_bytes": memory_used,
+                        "success": success,
+                    },
                 )
-            
+
             return result
+
         return wrapper
-    
+
     def get_stats(self, endpoint_name: Optional[str] = None) -> Dict:
         """
         Получение статистики профилирования.
-        
+
         Args:
             endpoint_name: Имя эндпоинта (если None, возвращает статистику по всем эндпоинтам)
         """
         if endpoint_name:
             if endpoint_name not in self.stats:
                 return {}
-                
+
             durations = self.stats[endpoint_name]
             detailed = self.detailed_stats[endpoint_name]
-            
+
             return {
-                'count': len(durations),
-                'avg_duration_ms': statistics.mean(durations),
-                'min_duration_ms': min(durations),
-                'max_duration_ms': max(durations),
-                'median_duration_ms': statistics.median(durations),
-                'success_rate': sum(1 for d in detailed if d['success']) / len(detailed),
-                'total_memory_bytes': sum(d['memory_bytes'] for d in detailed)
+                "count": len(durations),
+                "avg_duration_ms": statistics.mean(durations),
+                "min_duration_ms": min(durations),
+                "max_duration_ms": max(durations),
+                "median_duration_ms": statistics.median(durations),
+                "success_rate": sum(1 for d in detailed if d["success"])
+                / len(detailed),
+                "total_memory_bytes": sum(d["memory_bytes"] for d in detailed),
             }
-        
+
         # Статистика по всем эндпоинтам
-        return {
-            name: self.get_stats(name)
-            for name in self.stats.keys()
-        }
-    
+        return {name: self.get_stats(name) for name in self.stats.keys()}
+
     def reset_stats(self, endpoint_name: Optional[str] = None) -> None:
         """
         Сброс статистики профилирования.
-        
+
         Args:
             endpoint_name: Имя эндпоинта (если None, сбрасывает статистику по всем эндпоинтам)
         """
@@ -184,13 +182,17 @@ class RequestProfiler:
             self.stats.clear()
             self.detailed_stats.clear()
 
+
 def profile_endpoint(profiler: RequestProfiler):
     """Decorator for profiling endpoint execution."""
+
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             request_id = str(time.time())
             with profiler.profile(request_id):
                 return await func(*args, **kwargs)
+
         return wrapper
-    return decorator 
+
+    return decorator

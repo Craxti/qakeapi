@@ -23,6 +23,7 @@ app = QakeAPI(
 # Create error handler
 error_handler = ErrorHandler(debug=True)
 
+
 # Register custom exception handlers
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc: HTTPException):
@@ -45,7 +46,7 @@ async def validation_error_handler(request: Request, exc: ValidationException):
         status_code=400,
         content={
             "error": "Validation Error",
-            "message": str(exc.detail) if hasattr(exc, 'detail') else str(exc),
+            "message": str(exc.detail) if hasattr(exc, "detail") else str(exc),
             "details": getattr(exc, "errors", None) or [],
         },
     )
@@ -107,18 +108,22 @@ async def generic_error():
 async def validate_data(request: Request):
     """Validate request data"""
     data = await request.json()
-    
+
     # Simple validation
     if "name" not in data:
         raise ValidationException("Name is required", errors=["name field is missing"])
-    
+
     if "email" not in data:
-        raise ValidationException("Email is required", errors=["email field is missing"])
-    
+        raise ValidationException(
+            "Email is required", errors=["email field is missing"]
+        )
+
     # Email validation
     if "@" not in data.get("email", ""):
-        raise ValidationException("Invalid email format", errors=["email must contain @"])
-    
+        raise ValidationException(
+            "Invalid email format", errors=["email must contain @"]
+        )
+
     return {"status": "valid", "data": data}
 
 
@@ -137,5 +142,5 @@ async def error_chain():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8004)
 
+    uvicorn.run(app, host="0.0.0.0", port=8004)

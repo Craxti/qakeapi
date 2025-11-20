@@ -7,12 +7,13 @@ from typing import Any, AsyncIterable, Dict, List, Optional, Tuple, Union
 
 class CustomJSONEncoder(json.JSONEncoder):
     """Custom JSON encoder for handling datetime and other objects"""
+
     def default(self, obj):
         if isinstance(obj, datetime):
             return obj.isoformat()
-        elif hasattr(obj, '__dict__'):
+        elif hasattr(obj, "__dict__"):
             return obj.__dict__
-        elif hasattr(obj, 'to_dict'):
+        elif hasattr(obj, "to_dict"):
             return obj.to_dict()
         return super().default(obj)
 
@@ -20,15 +21,22 @@ class CustomJSONEncoder(json.JSONEncoder):
 class Response:
     """HTTP Response"""
 
-    def __init__(self, content: Any = None, status_code: int = 200,
-                 headers: Optional[Union[Dict[str, str], List[Tuple[bytes, bytes]]]] = None,
-                 media_type: Optional[str] = None, is_stream: bool = False):
+    def __init__(
+        self,
+        content: Any = None,
+        status_code: int = 200,
+        headers: Optional[Union[Dict[str, str], List[Tuple[bytes, bytes]]]] = None,
+        media_type: Optional[str] = None,
+        is_stream: bool = False,
+    ):
         self._content = content if content is not None else {}
         self.status_code = status_code
         self._headers = []
         if headers:
             if isinstance(headers, dict):
-                self._headers.extend((k.encode(), v.encode()) for k, v in headers.items())
+                self._headers.extend(
+                    (k.encode(), v.encode()) for k, v in headers.items()
+                )
             else:
                 self._headers.extend(headers)
         self.is_stream = is_stream
@@ -121,7 +129,11 @@ class Response:
         if self._media_type is not None:
             return self._media_type
         if self.is_stream:
-            return self._headers[0][1].decode() if self._headers else "application/octet-stream"
+            return (
+                self._headers[0][1].decode()
+                if self._headers
+                else "application/octet-stream"
+            )
         elif isinstance(self.content, bytes):
             return "application/octet-stream"
         elif isinstance(self.content, str):
@@ -169,21 +181,23 @@ class Response:
         cls,
         content: dict,
         status_code: int = 200,
-        headers: Optional[Union[Dict[str, str], List[Tuple[bytes, bytes]]]] = None
+        headers: Optional[Union[Dict[str, str], List[Tuple[bytes, bytes]]]] = None,
     ) -> "Response":
         """Create JSON response"""
         headers_list = []
         if headers:
             if isinstance(headers, dict):
-                headers_list.extend((k.encode(), v.encode()) for k, v in headers.items())
+                headers_list.extend(
+                    (k.encode(), v.encode()) for k, v in headers.items()
+                )
             else:
                 headers_list.extend(headers)
-        
+
         headers_list.append((b"content-type", b"application/json"))
         return cls(
             json.dumps(content, cls=CustomJSONEncoder).encode(),
             status_code=status_code,
-            headers=headers_list
+            headers=headers_list,
         )
 
     @classmethod
@@ -191,7 +205,7 @@ class Response:
         cls,
         content: str,
         status_code: int = 200,
-        headers: Optional[Dict[str, str]] = None
+        headers: Optional[Dict[str, str]] = None,
     ) -> "Response":
         """Create text response"""
         headers_list = []
@@ -201,7 +215,7 @@ class Response:
             content,
             status_code=status_code,
             headers=headers_list,
-            media_type="text/plain"
+            media_type="text/plain",
         )
 
     @classmethod
@@ -209,24 +223,17 @@ class Response:
         cls,
         content: str,
         status_code: int = 200,
-        headers: Optional[Dict[str, str]] = None
+        headers: Optional[Dict[str, str]] = None,
     ) -> "Response":
         """Create HTML response"""
         headers_list = [(b"content-type", b"text/html; charset=utf-8")]
         if headers:
             headers_list.extend((k.encode(), v.encode()) for k, v in headers.items())
-        return cls(
-            content=content,
-            status_code=status_code,
-            headers=headers_list
-        )
+        return cls(content=content, status_code=status_code, headers=headers_list)
 
     @classmethod
     def redirect(
-        cls,
-        url: str,
-        status_code: int = 302,
-        headers: Optional[Dict[str, str]] = None
+        cls, url: str, status_code: int = 302, headers: Optional[Dict[str, str]] = None
     ) -> "Response":
         """Create redirect response"""
         headers_list = [(b"location", url.encode())]
@@ -292,6 +299,7 @@ class Response:
 
 class JSONResponse(Response):
     """JSON Response"""
+
     def __init__(
         self,
         content: Any,
@@ -302,7 +310,7 @@ class JSONResponse(Response):
             content=content,
             status_code=status_code,
             headers=headers,
-            media_type="application/json"
+            media_type="application/json",
         )
 
     @property

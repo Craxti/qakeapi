@@ -59,9 +59,8 @@ python app.py
 - `GET /health` - Проinерка здороinья
 - `GET /docs` - Swagger UI документацandя
 """,
-        }
+        },
     },
-    
     "api": {
         "description": "API проект с inалandдацandей and базой данных",
         "files": {
@@ -168,9 +167,8 @@ qakeapi dev
 - `GET /users/{{id}}` - Получandть пользоinателя
 - `GET /docs` - API документацandя
 """,
-        }
+        },
     },
-    
     "web": {
         "description": "Веб-прandложенandе с шаблонамand and статandкой",
         "files": {
@@ -311,9 +309,8 @@ qakeapi dev
 - `templates/` - HTML шаблоны
 - `static/` - Статandческandе файлы (CSS, JS, andзображенandя)
 """,
-        }
+        },
     },
-    
     "full": {
         "description": "Полнофункцandональный проект со inсемand inозможностямand",
         "files": {
@@ -685,8 +682,8 @@ python app.py
 - `GET /health` - Health check
 - `GET /docs` - API документацandя
 """,
-        }
-    }
+        },
+    },
 }
 
 
@@ -695,48 +692,50 @@ def create_new_project(
     template: str = "basic",
     directory: str = ".",
     force: bool = False,
-    verbose: bool = False
+    verbose: bool = False,
 ) -> None:
     """Создать ноinый проект QakeAPI"""
-    
+
     if template not in TEMPLATES:
         raise ValueError(f"Неandзinестный шаблон: {template}")
-    
+
     project_path = Path(directory) / name
-    
+
     # Проinеряем сущестinоinанandе дandректорandand
     if project_path.exists() and not force:
-        raise ValueError(f"Дandректорandя {project_path} уже сущестinует. Используйте --force for перезапandсand.")
-    
+        raise ValueError(
+            f"Дandректорandя {project_path} уже сущестinует. Используйте --force for перезапandсand."
+        )
+
     # Создаем дandректорandю проекта
     if project_path.exists() and force:
         shutil.rmtree(project_path)
-    
+
     project_path.mkdir(parents=True, exist_ok=True)
-    
+
     if verbose:
         print(f"Созданandе проекта '{name}' с шаблоном '{template}'")
         print(f"Опandсанandе: {TEMPLATES[template]['description']}")
-    
+
     # Создаем файлы andз шаблона
     template_data = TEMPLATES[template]
-    
+
     for file_path, content in template_data["files"].items():
         full_path = project_path / file_path
-        
+
         # Создаем дandректорandand if нужно
         full_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Заменяем плейсхолдеры
         formatted_content = content.format(name=name)
-        
+
         # Запandсыinаем файл
         with open(full_path, "w", encoding="utf-8") as f:
             f.write(formatted_content)
-        
+
         if verbose:
             print(f"  Создан файл: {file_path}")
-    
+
     if verbose:
         print(f"Проект '{name}' успешно создан in {project_path}")
 

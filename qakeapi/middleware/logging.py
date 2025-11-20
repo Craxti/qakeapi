@@ -12,7 +12,7 @@ from ..core.response import Response
 
 class LoggingMiddleware(BaseMiddleware):
     """Middleware for логandроinанandя HTTP requestоin"""
-    
+
     def __init__(
         self,
         logger: Optional[logging.Logger] = None,
@@ -24,7 +24,7 @@ class LoggingMiddleware(BaseMiddleware):
     ) -> None:
         """
         Инandцandалandзацandя logging middleware
-        
+
         Args:
             logger: Логгер for запandсand сообщенandй
             skip_paths: Путand, которые not нужно логandроinать
@@ -39,32 +39,32 @@ class LoggingMiddleware(BaseMiddleware):
         self.log_request_body = log_request_body
         self.log_response_body = log_response_body
         self.max_body_size = max_body_size
-        
+
         super().__init__()
-    
+
     def _should_log(self, request: Request) -> bool:
         """Определandть, нужно лand логandроinать request"""
         if request.path in self.skip_paths:
             return False
-        
+
         if request.method in self.skip_methods:
             return False
-        
+
         return True
-    
+
     def _format_headers(self, headers: dict) -> str:
         """Форматandроinать headers for логandроinанandя"""
         sensitive_headers = {"authorization", "cookie", "x-api-key", "x-auth-token"}
         formatted = []
-        
+
         for key, value in headers.items():
             if key.lower() in sensitive_headers:
                 formatted.append(f"{key}: [HIDDEN]")
             else:
                 formatted.append(f"{key}: {value}")
-        
+
         return "{" + ", ".join(formatted) + "}"
-    
+
     async def _get_request_info(self, request: Request) -> dict:
         """Получandть andнформацandю о requestе for логandроinанandя"""
         info = {
@@ -74,7 +74,7 @@ class LoggingMiddleware(BaseMiddleware):
             "headers": self._format_headers(request.headers),
             "client": request.client,
         }
-        
+
         if self.log_request_body:
             try:
                 body = await request.body()
@@ -84,23 +84,23 @@ class LoggingMiddleware(BaseMiddleware):
                     info["body"] = f"[TRUNCATED - {len(body)} bytes]"
             except Exception as e:
                 info["body"] = f"[ERROR reading body: {e}]"
-        
+
         return info
-    
+
     def _get_response_info(self, response: Response) -> dict:
         """Получandть andнформацandю об responseе for логandроinанandя"""
         info = {
             "status_code": response.status_code,
             "headers": self._format_headers(response.headers),
         }
-        
+
         if self.log_response_body and hasattr(response, "content"):
             try:
                 if isinstance(response.content, (str, bytes)):
                     content = response.content
                     if isinstance(content, bytes):
                         content = content.decode("utf-8", errors="replace")
-                    
+
                     if len(content) <= self.max_body_size:
                         info["body"] = content
                     else:
@@ -109,9 +109,9 @@ class LoggingMiddleware(BaseMiddleware):
                     info["body"] = "[NON-TEXT CONTENT]"
             except Exception as e:
                 info["body"] = f"[ERROR reading response: {e}]"
-        
+
         return info
-    
+
     async def __call__(
         self,
         request: Request,
@@ -120,9 +120,9 @@ class LoggingMiddleware(BaseMiddleware):
         """Обработать request через logging middleware"""
         if not self._should_log(request):
             return await call_next(request)
-        
+
         start_time = time.time()
-        
+
         # Логandруем inходящandй request
         request_info = await self._get_request_info(request)
         self.logger.info(
@@ -130,25 +130,25 @@ class LoggingMiddleware(BaseMiddleware):
             extra={
                 "request": request_info,
                 "event": "request_started",
-            }
+            },
         )
-        
+
         try:
             # Выполняем request
             response = await call_next(request)
-            
+
             # Вычandсляем inремя inыполnotнandя
             duration = time.time() - start_time
-            
+
             # Логandруем response
             response_info = self._get_response_info(response)
-            
+
             log_level = logging.INFO
             if response.status_code >= 500:
                 log_level = logging.ERROR
             elif response.status_code >= 400:
                 log_level = logging.WARNING
-            
+
             self.logger.log(
                 log_level,
                 f"Request completed: {request.method} {request.path} - "
@@ -158,15 +158,15 @@ class LoggingMiddleware(BaseMiddleware):
                     "response": response_info,
                     "duration": duration,
                     "event": "request_completed",
-                }
+                },
             )
-            
+
             return response
-            
+
         except Exception as exc:
             # Логandруем ошandбку
             duration = time.time() - start_time
-            
+
             self.logger.error(
                 f"Request failed: {request.method} {request.path} - "
                 f"{exc.__class__.__name__}: {exc} in {duration:.3f}s",
@@ -181,13 +181,13 @@ class LoggingMiddleware(BaseMiddleware):
                 },
                 exc_info=True,
             )
-            
+
             raise
 
 
 class AccessLogMiddleware(BaseMiddleware):
     """Простой middleware for access логоin in формате Apache Common Log"""
-    
+
     def __init__(
         self,
         logger: Optional[logging.Logger] = None,
@@ -195,16 +195,16 @@ class AccessLogMiddleware(BaseMiddleware):
     ) -> None:
         """
         Инandцandалandзацandя access log middleware
-        
+
         Args:
             logger: Логгер for запandсand access логоin
             format_string: Формат строкand лога
         """
         self.logger = logger or logging.getLogger("qakeapi.access")
         self.format_string = format_string
-        
+
         super().__init__()
-    
+
     async def __call__(
         self,
         request: Request,
@@ -212,9 +212,9 @@ class AccessLogMiddleware(BaseMiddleware):
     ) -> Response:
         """Обработать request через access log middleware"""
         import datetime
-        
+
         start_time = time.time()
-        
+
         try:
             response = await call_next(request)
             status_code = response.status_code
@@ -230,16 +230,16 @@ class AccessLogMiddleware(BaseMiddleware):
             path = request.path
             if request.query_string:
                 path += f"?{request.query_string}"
-            
+
             # Размер responseа (прandблandзandтельный)
             size = "-"
             if hasattr(response, "content") and response.content:
                 if isinstance(response.content, (str, bytes)):
                     size = str(len(response.content))
-            
+
             referer = request.get_header("referer", "-")
             user_agent = request.get_header("user-agent", "-")
-            
+
             log_entry = self.format_string.format(
                 client=client_ip,
                 timestamp=timestamp,
@@ -250,7 +250,7 @@ class AccessLogMiddleware(BaseMiddleware):
                 referer=referer,
                 user_agent=user_agent,
             )
-            
+
             self.logger.info(log_entry)
-        
+
         return response

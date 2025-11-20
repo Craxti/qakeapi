@@ -7,7 +7,7 @@ from .health import HealthChecker, HealthCheckMiddleware
 
 __all__ = [
     "MetricsCollector",
-    "MetricsMiddleware", 
+    "MetricsMiddleware",
     "HealthChecker",
     "HealthCheckMiddleware",
 ]

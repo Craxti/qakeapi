@@ -47,51 +47,96 @@ from .middleware.compression import CompressionMiddleware
 try:
     from .monitoring.metrics import MetricsCollector, MetricsMiddleware
     from .monitoring.health import (
-        HealthChecker, HealthCheckMiddleware,
-        DatabaseHealthCheck, RedisHealthCheck, 
-        DiskSpaceHealthCheck, MemoryHealthCheck
+        HealthChecker,
+        HealthCheckMiddleware,
+        DatabaseHealthCheck,
+        RedisHealthCheck,
+        DiskSpaceHealthCheck,
+        MemoryHealthCheck,
     )
+
     MONITORING_AVAILABLE = True
 except ImportError:
     MONITORING_AVAILABLE = False
+
     # Stubs
-    class MetricsCollector: pass
-    class MetricsMiddleware: pass
-    class HealthChecker: pass
-    class HealthCheckMiddleware: pass
-    class DatabaseHealthCheck: pass
-    class RedisHealthCheck: pass
-    class DiskSpaceHealthCheck: pass
-    class MemoryHealthCheck: pass
+    class MetricsCollector:
+        pass
+
+    class MetricsMiddleware:
+        pass
+
+    class HealthChecker:
+        pass
+
+    class HealthCheckMiddleware:
+        pass
+
+    class DatabaseHealthCheck:
+        pass
+
+    class RedisHealthCheck:
+        pass
+
+    class DiskSpaceHealthCheck:
+        pass
+
+    class MemoryHealthCheck:
+        pass
+
 
 # Security (optional)
 try:
     from .security.auth import JWTManager, PasswordManager, SecurityConfig
     from .security.rate_limiting import RateLimiter, RateLimitMiddleware, RateLimitRule
     from .security.validation import SecurityValidator
+
     SECURITY_AVAILABLE = True
 except ImportError:
     SECURITY_AVAILABLE = False
+
     # Stubs
-    class JWTManager: pass
-    class PasswordManager: pass
-    class SecurityConfig: pass
-    class RateLimiter: pass
-    class RateLimitMiddleware: pass
-    class RateLimitRule: pass
-    class SecurityValidator: pass
+    class JWTManager:
+        pass
+
+    class PasswordManager:
+        pass
+
+    class SecurityConfig:
+        pass
+
+    class RateLimiter:
+        pass
+
+    class RateLimitMiddleware:
+        pass
+
+    class RateLimitRule:
+        pass
+
+    class SecurityValidator:
+        pass
+
 
 # Caching (optional)
 try:
     from .caching.cache import CacheManager, InMemoryCache
     from .caching.middleware import CacheMiddleware
+
     CACHING_AVAILABLE = True
 except ImportError:
     CACHING_AVAILABLE = False
+
     # Stubs
-    class CacheManager: pass
-    class InMemoryCache: pass
-    class CacheMiddleware: pass
+    class CacheManager:
+        pass
+
+    class InMemoryCache:
+        pass
+
+    class CacheMiddleware:
+        pass
+
 
 # Utils
 from .utils.status import status
@@ -114,12 +159,18 @@ from .utils.templates import TemplateRenderer
 # Error handling (опцandонально)
 try:
     from .core.error_handling import ErrorHandler, create_error_handler
+
     ERROR_HANDLING_AVAILABLE = True
 except ImportError:
     ERROR_HANDLING_AVAILABLE = False
+
     # Stubs
-    class ErrorHandler: pass
-    def create_error_handler(*args, **kwargs): return ErrorHandler()
+    class ErrorHandler:
+        pass
+
+    def create_error_handler(*args, **kwargs):
+        return ErrorHandler()
+
 
 __version__ = "0.1.0"
 __author__ = "QakeAPI Team"
@@ -131,7 +182,7 @@ __all__ = [
     "QakeAPI",
     "Request",
     "Response",
-    "JSONResponse", 
+    "JSONResponse",
     "HTMLResponse",
     "PlainTextResponse",
     "RedirectResponse",
@@ -141,14 +192,12 @@ __all__ = [
     "QakeAPIException",
     "Depends",
     "WebSocket",
-    
     # Middleware
     "CORSMiddleware",
     "LoggingMiddleware",
     "AccessLogMiddleware",
     "AuthMiddleware",
     "CompressionMiddleware",
-    
     # Monitoring
     "MetricsCollector",
     "MetricsMiddleware",
@@ -158,23 +207,19 @@ __all__ = [
     "RedisHealthCheck",
     "DiskSpaceHealthCheck",
     "MemoryHealthCheck",
-    
     # Security
     "JWTManager",
     "PasswordManager",
     "RateLimiter",
     "RateLimitMiddleware",
     "SecurityValidator",
-    
     # Caching
     "CacheManager",
     "CacheMiddleware",
-    
     # Utils
     "status",
     "StaticFiles",
     "TemplateRenderer",
-    
     # Валandдацandя
     "DataValidator",
     "StringValidator",
@@ -187,7 +232,6 @@ __all__ = [
     "ListValidator",
     "DictValidator",
     "validate_json",
-    
     # Error handling
     "ErrorHandler",
     "create_error_handler",

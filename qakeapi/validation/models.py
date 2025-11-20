@@ -17,7 +17,11 @@ def validate_request_body(model: Type[BaseModel]):
         @wraps(handler)
         async def wrapper(request: Request, *args: Any, **kwargs: Any) -> Response:
             # Only validate for methods with body
-            if getattr(request, 'method', 'POST').upper() not in ("POST", "PUT", "PATCH"):
+            if getattr(request, "method", "POST").upper() not in (
+                "POST",
+                "PUT",
+                "PATCH",
+            ):
                 return await handler(request, *args, **kwargs)
             try:
                 body = await request.json()

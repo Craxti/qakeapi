@@ -365,54 +365,51 @@ fake_users = [
     {"id": 4, "name": "Дэвид Козлов", "email": "david@example.com", "active": True},
 ]
 
+
 # Маршруты
 @app.get("/")
 async def home():
     """Главная страница"""
     content = templates.render("index.html", {})
-    return HTMLResponse(templates.render("base.html", {
-        "title": "Главная",
-        "content": content
-    }))
+    return HTMLResponse(
+        templates.render("base.html", {"title": "Главная", "content": content})
+    )
 
 
 @app.get("/about")
 async def about():
     """Страница о нас"""
     content = templates.render("about.html", {})
-    return HTMLResponse(templates.render("base.html", {
-        "title": "О нас",
-        "content": content
-    }))
+    return HTMLResponse(
+        templates.render("base.html", {"title": "О нас", "content": content})
+    )
 
 
 @app.get("/contact")
 async def contact_get():
     """Страница контактов (GET)"""
     content = templates.render("contact.html", {"message": ""})
-    return HTMLResponse(templates.render("base.html", {
-        "title": "Контакты",
-        "content": content
-    }))
+    return HTMLResponse(
+        templates.render("base.html", {"title": "Контакты", "content": content})
+    )
 
 
 @app.post("/contact")
 async def contact_post(request: Request):
     """Обработка формы контактов (POST)"""
     form_data = await request.form()
-    
+
     # Здесь можно добавить логику отправки email
     print(f"Получено сообщение от {form_data.get('name')} ({form_data.get('email')})")
     print(f"Тема: {form_data.get('subject')}")
     print(f"Сообщение: {form_data.get('message')}")
-    
+
     message = '<div class="alert alert-success">Спасибо за ваше сообщение! Мы свяжемся с вами в ближайшее время.</div>'
     content = templates.render("contact.html", {"message": message})
-    
-    return HTMLResponse(templates.render("base.html", {
-        "title": "Контакты",
-        "content": content
-    }))
+
+    return HTMLResponse(
+        templates.render("base.html", {"title": "Контакты", "content": content})
+    )
 
 
 @app.get("/users")
@@ -430,12 +427,11 @@ async def users_list():
             <td style="padding: 0.75rem; border-bottom: 1px solid #dee2e6; color: {status_color};">{status}</td>
         </tr>
         """
-    
+
     content = templates.render("users.html", {"users_rows": users_rows})
-    return HTMLResponse(templates.render("base.html", {
-        "title": "Пользователи",
-        "content": content
-    }))
+    return HTMLResponse(
+        templates.render("base.html", {"title": "Пользователи", "content": content})
+    )
 
 
 @app.get("/users/new")
@@ -466,27 +462,28 @@ async def new_user_form():
         </form>
     </div>
     """
-    
-    return HTMLResponse(templates.render("base.html", {
-        "title": "Новый пользователь",
-        "content": form_html
-    }))
+
+    return HTMLResponse(
+        templates.render(
+            "base.html", {"title": "Новый пользователь", "content": form_html}
+        )
+    )
 
 
 @app.post("/users/new")
 async def create_user(request: Request):
     """Создание нового пользователя"""
     form_data = await request.form()
-    
+
     new_user = {
         "id": len(fake_users) + 1,
         "name": form_data.get("name"),
         "email": form_data.get("email"),
-        "active": bool(form_data.get("active"))
+        "active": bool(form_data.get("active")),
     }
-    
+
     fake_users.append(new_user)
-    
+
     return RedirectResponse(url="/users", status_code=303)
 
 
@@ -501,21 +498,22 @@ async def api_users():
 async def api_create_user(request: Request):
     """API для создания пользователя"""
     data = await request.json()
-    
+
     new_user = {
         "id": len(fake_users) + 1,
         "name": data.get("name"),
         "email": data.get("email"),
-        "active": data.get("active", True)
+        "active": data.get("active", True),
     }
-    
+
     fake_users.append(new_user)
-    
+
     return {"message": "Пользователь создан", "user": new_user}
 
 
 if __name__ == "__main__":
     import uvicorn
+
     print("🚀 Запуск QakeAPI веб-приложения...")
     print("📂 Статические файлы: /static/")
     print("🎨 Шаблоны: templates/")

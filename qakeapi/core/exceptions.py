@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional, Union
 
 class QakeAPIException(Exception):
     """Base exception for QakeAPI"""
-    
+
     def __init__(self, message: str = "Internal Server Error") -> None:
         self.message = message
         super().__init__(self.message)
@@ -14,7 +14,7 @@ class QakeAPIException(Exception):
 
 class HTTPException(QakeAPIException):
     """HTTP exception with status code"""
-    
+
     def __init__(
         self,
         status_code: int,
@@ -24,17 +24,17 @@ class HTTPException(QakeAPIException):
         self.status_code = status_code
         self.detail = detail
         self.headers = headers or {}
-        
+
         message = f"HTTP {status_code}"
         if isinstance(detail, str):
             message += f": {detail}"
-        
+
         super().__init__(message)
 
 
 class ValidationException(HTTPException):
     """Data validation exception"""
-    
+
     def __init__(
         self,
         detail: Union[str, Dict[str, Any]] = "Validation Error",
@@ -45,7 +45,7 @@ class ValidationException(HTTPException):
 
 class AuthenticationException(HTTPException):
     """Authentication exception"""
-    
+
     def __init__(
         self,
         detail: str = "Authentication required",
@@ -56,7 +56,7 @@ class AuthenticationException(HTTPException):
 
 class AuthorizationException(HTTPException):
     """Authorization exception"""
-    
+
     def __init__(
         self,
         detail: str = "Insufficient permissions",
@@ -67,7 +67,7 @@ class AuthorizationException(HTTPException):
 
 class NotFoundException(HTTPException):
     """Not found exception"""
-    
+
     def __init__(
         self,
         detail: str = "Not Found",
@@ -78,7 +78,7 @@ class NotFoundException(HTTPException):
 
 class MethodNotAllowedException(HTTPException):
     """Method not allowed exception"""
-    
+
     def __init__(
         self,
         detail: str = "Method Not Allowed",
@@ -89,7 +89,7 @@ class MethodNotAllowedException(HTTPException):
 
 class RateLimitException(HTTPException):
     """Rate limit exceeded exception"""
-    
+
     def __init__(
         self,
         detail: str = "Rate limit exceeded",
@@ -100,7 +100,7 @@ class RateLimitException(HTTPException):
 
 class WebSocketException(QakeAPIException):
     """Exception for WebSocket connections"""
-    
+
     def __init__(
         self,
         code: int = 1000,

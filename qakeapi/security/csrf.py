@@ -3,6 +3,7 @@ from typing import List, Optional, Callable
 from ..core.requests import Request
 from ..core.responses import Response
 
+
 class CSRFMiddleware:
     def __init__(
         self,
@@ -34,7 +35,7 @@ class CSRFMiddleware:
             return Response.json(
                 {"detail": "CSRF token missing or invalid"},
                 status_code=403,
-                headers=[(b"content-type", b"application/json")]
+                headers=[(b"content-type", b"application/json")],
             )
 
         if isinstance(cookie_token, str):
@@ -46,7 +47,7 @@ class CSRFMiddleware:
             return Response.json(
                 {"detail": "CSRF token missing or invalid"},
                 status_code=403,
-                headers=[(b"content-type", b"application/json")]
+                headers=[(b"content-type", b"application/json")],
             )
 
         response = await handler(request)
@@ -73,16 +74,17 @@ class CSRFMiddleware:
 
     def _set_csrf_cookie(self, response: Response) -> Response:
         token = self._generate_token()
-        cookie_value = f"{self.cookie_name}={token}; Path=/; SameSite={self.cookie_samesite}"
-        
+        cookie_value = (
+            f"{self.cookie_name}={token}; Path=/; SameSite={self.cookie_samesite}"
+        )
+
         if self.cookie_httponly:
             cookie_value += "; HttpOnly"
-        
+
         if self.cookie_secure:
             cookie_value += "; Secure"
-        
-        response.headers.extend([
-            (b"set-cookie", cookie_value.encode()),
-            (b"x-csrf-token", token.encode())
-        ])
-        return response 
+
+        response.headers.extend(
+            [(b"set-cookie", cookie_value.encode()), (b"x-csrf-token", token.encode())]
+        )
+        return response

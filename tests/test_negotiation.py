@@ -61,7 +61,9 @@ def test_content_negotiator_type():
     assert str(result) == "application/json"
 
     # Test with q-value preference
-    result = negotiator.negotiate_type("application/xml; q=0.5, application/json; q=0.8")
+    result = negotiator.negotiate_type(
+        "application/xml; q=0.5, application/json; q=0.8"
+    )
     assert result is not None
     assert str(result) == "application/json"
 
@@ -125,7 +127,7 @@ def test_content_negotiator_encoding():
 
 def test_content_negotiator_empty():
     negotiator = ContentNegotiator()
-    
+
     assert negotiator.negotiate_type("") is None
     assert negotiator.negotiate_language("") is None
     assert negotiator.negotiate_encoding("") is None
@@ -149,4 +151,4 @@ def test_media_type_parse_with_invalid_q():
         assert media_type.q == 1.0
     except ValueError:
         # If implementation throws exception for invalid q, that's also acceptable
-        pass 
+        pass

@@ -69,7 +69,9 @@ def requires_auth(permission: Permission) -> Callable:
         @wraps(handler)
         async def wrapper(request: Request, *args: Any, **kwargs: Any) -> Response:
             try:
-                logger.debug(f"Checking permission {permission.__class__.__name__} for request: {request}")
+                logger.debug(
+                    f"Checking permission {permission.__class__.__name__} for request: {request}"
+                )
                 user = getattr(request, "user", None)
                 logger.debug(f"User from request: {user}")
 
@@ -90,14 +92,20 @@ def requires_auth(permission: Permission) -> Callable:
                 except Exception as e:
                     logger.error(f"Error in handler: {e}")
                     import traceback
+
                     logger.error(traceback.format_exc())
-                    return Response.json({"detail": "Internal server error"}, status_code=500)
+                    return Response.json(
+                        {"detail": "Internal server error"}, status_code=500
+                    )
 
             except Exception as e:
                 logger.error(f"Error checking permissions: {e}")
                 import traceback
+
                 logger.error(traceback.format_exc())
-                return Response.json({"detail": "Internal server error"}, status_code=500)
+                return Response.json(
+                    {"detail": "Internal server error"}, status_code=500
+                )
 
         return wrapper
 

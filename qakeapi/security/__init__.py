@@ -8,11 +8,9 @@ from .validation import SecurityValidator
 
 __all__ = [
     "JWTManager",
-    "PasswordManager", 
+    "PasswordManager",
     "SecurityConfig",
     "RateLimiter",
     "RateLimitMiddleware",
     "SecurityValidator",
 ]
-
-

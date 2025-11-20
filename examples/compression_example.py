@@ -33,7 +33,7 @@ async def root():
 async def small_response():
     """
     Small response (won't be compressed)
-    
+
     This response is too small to be compressed.
     """
     return {"message": "This is a small response"}
@@ -43,13 +43,15 @@ async def small_response():
 async def large_response():
     """
     Large response (will be compressed)
-    
+
     This response is large enough to be compressed automatically.
     """
     # Generate large response
     data = {
         "message": "This is a large response",
-        "items": [{"id": i, "name": f"Item {i}", "data": "x" * 100} for i in range(100)],
+        "items": [
+            {"id": i, "name": f"Item {i}", "data": "x" * 100} for i in range(100)
+        ],
     }
     return data
 
@@ -58,7 +60,7 @@ async def large_response():
 async def json_response():
     """
     JSON response (will be compressed if large enough)
-    
+
     JSON responses are automatically compressed if they meet the size threshold.
     """
     return {
@@ -74,11 +76,11 @@ async def json_response():
 async def text_response():
     """
     Text response (will be compressed if large enough)
-    
+
     Text responses can also be compressed.
     """
     from qakeapi.core.response import PlainTextResponse
-    
+
     large_text = "This is a large text response. " * 100
     return PlainTextResponse(large_text)
 
@@ -96,5 +98,5 @@ async def compression_info():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8005)
 
+    uvicorn.run(app, host="0.0.0.0", port=8005)

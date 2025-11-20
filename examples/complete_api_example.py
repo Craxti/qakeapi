@@ -13,10 +13,19 @@ from qakeapi.middleware.auth import BearerTokenMiddleware
 from qakeapi.core.exceptions import HTTPException
 from qakeapi.utils.status import status
 from qakeapi.monitoring.metrics import MetricsCollector, MetricsMiddleware
-from qakeapi.monitoring.health import HealthChecker, HealthCheckMiddleware, MemoryHealthCheck
+from qakeapi.monitoring.health import (
+    HealthChecker,
+    HealthCheckMiddleware,
+    MemoryHealthCheck,
+)
 from qakeapi.caching.cache import InMemoryCache, CacheManager
 from qakeapi.caching.middleware import CacheMiddleware
-from qakeapi.security.rate_limiting import RateLimiter, RateLimitRule, RateLimitMiddleware
+from qakeapi.security.rate_limiting import (
+    RateLimiter,
+    RateLimitRule,
+    RateLimitMiddleware,
+)
+
 
 # Data Models
 class User(BaseModel):
@@ -28,7 +37,7 @@ class User(BaseModel):
 
 class UserCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
-    email: str = Field(..., pattern=r'^[^@]+@[^@]+\.[^@]+$')
+    email: str = Field(..., pattern=r"^[^@]+@[^@]+\.[^@]+$")
     password: str = Field(..., min_length=8)
 
 
@@ -65,7 +74,9 @@ rate_limiter = RateLimiter()
 rate_limiter.add_rule("/api/*", RateLimitRule(requests=100, window=60))
 
 # Add middleware (order matters!)
-app.add_middleware(CORSMiddleware(allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]))
+app.add_middleware(
+    CORSMiddleware(allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+)
 app.add_middleware(LoggingMiddleware())
 app.add_middleware(CompressionMiddleware(minimum_size=500))
 app.add_middleware(MetricsMiddleware(collector=metrics))
@@ -87,7 +98,15 @@ app.add_middleware(
 app.add_middleware(
     BearerTokenMiddleware(
         secret_key="your-secret-key-change-in-production",
-        skip_paths={"/", "/login", "/register", "/health", "/docs", "/redoc", "/openapi.json"},
+        skip_paths={
+            "/",
+            "/login",
+            "/register",
+            "/health",
+            "/docs",
+            "/redoc",
+            "/openapi.json",
+        },
     )
 )
 
@@ -115,14 +134,14 @@ async def get_current_user(request: Request) -> dict:
 async def register(user_data: UserCreate):
     """Register a new user"""
     global user_counter
-    
+
     # Check if username or email already exists
     for user in users_db.values():
         if user.username == user_data.username:
             raise HTTPException(status.BAD_REQUEST, "Username already exists")
         if user.email == user_data.email:
             raise HTTPException(status.BAD_REQUEST, "Email already exists")
-    
+
     user_counter += 1
     user = User(
         id=user_counter,
@@ -130,7 +149,7 @@ async def register(user_data: UserCreate):
         email=user_data.email,
     )
     users_db[user.id] = user
-    
+
     return {"message": "User registered successfully", "user_id": user.id}
 
 
@@ -140,20 +159,20 @@ async def login(request: Request):
     data = await request.json()
     username = data.get("username")
     password = data.get("password")
-    
+
     # Find user (in production, verify password hash)
     user = None
     for u in users_db.values():
         if u.username == username:
             user = u
             break
-    
+
     if not user:
         raise HTTPException(status.UNAUTHORIZED, "Invalid credentials")
-    
+
     # In production, generate real JWT token
     token = f"fake-jwt-token-for-{user.id}"
-    
+
     return {"access_token": token, "token_type": "bearer", "user_id": user.id}
 
 
@@ -194,17 +213,17 @@ async def create_product(
 ):
     """Create new product (requires auth, invalidates cache)"""
     global product_counter
-    
+
     product_counter += 1
     product = Product(
         id=product_counter,
         **product_data.dict(),
     )
     products_db[product.id] = product
-    
+
     # Invalidate cache
     await cache_manager.delete("GET:/products/")
-    
+
     return product
 
 
@@ -217,14 +236,14 @@ async def update_product(
     """Update product (requires auth, invalidates cache)"""
     if product_id not in products_db:
         raise HTTPException(status.NOT_FOUND, "Product not found")
-    
+
     product = Product(id=product_id, **product_data.dict())
     products_db[product_id] = product
-    
+
     # Invalidate cache
     await cache_manager.delete(f"GET:/products/{product_id}")
     await cache_manager.delete("GET:/products/")
-    
+
     return product
 
 
@@ -236,13 +255,13 @@ async def delete_product(
     """Delete product (requires auth, invalidates cache)"""
     if product_id not in products_db:
         raise HTTPException(status.NOT_FOUND, "Product not found")
-    
+
     del products_db[product_id]
-    
+
     # Invalidate cache
     await cache_manager.delete(f"GET:/products/{product_id}")
     await cache_manager.delete("GET:/products/")
-    
+
     return {"message": "Product deleted"}
 
 
@@ -252,25 +271,29 @@ async def websocket_endpoint(websocket: WebSocket):
     """WebSocket endpoint for real-time updates"""
     await websocket.accept()
     websocket_clients.add(websocket)
-    
+
     try:
-        await websocket.send_json({
-            "type": "connection",
-            "message": "Connected to QakeAPI",
-            "clients_count": len(websocket_clients),
-        })
-        
+        await websocket.send_json(
+            {
+                "type": "connection",
+                "message": "Connected to QakeAPI",
+                "clients_count": len(websocket_clients),
+            }
+        )
+
         async for message in websocket.iter_json():
             # Broadcast message to all clients
             for client in websocket_clients.copy():
                 try:
-                    await client.send_json({
-                        "type": "broadcast",
-                        "data": message,
-                    })
+                    await client.send_json(
+                        {
+                            "type": "broadcast",
+                            "data": message,
+                        }
+                    )
                 except:
                     websocket_clients.discard(client)
-    
+
     except Exception as e:
         print(f"WebSocket error: {e}")
     finally:
@@ -284,7 +307,10 @@ async def health():
     results = await health_checker.check_all()
     return {
         "status": "healthy" if all(r.is_healthy for r in results) else "unhealthy",
-        "checks": [{"name": r.name, "status": "healthy" if r.is_healthy else "unhealthy"} for r in results],
+        "checks": [
+            {"name": r.name, "status": "healthy" if r.is_healthy else "unhealthy"}
+            for r in results
+        ],
     }
 
 
@@ -326,5 +352,5 @@ async def shutdown():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
 
+    uvicorn.run(app, host="0.0.0.0", port=8000)

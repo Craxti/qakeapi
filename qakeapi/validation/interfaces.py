@@ -77,7 +77,5 @@ class ValidationFactory:
                     raise ValueError("model_class must be a subclass of BaseModel")
                 return PydanticValidator(kwargs["model_class"])
             except ImportError:
-                raise ImportError(
-                    "pydantic must be installed to use PydanticValidator"
-                )
+                raise ImportError("pydantic must be installed to use PydanticValidator")
         raise ValueError(f"Unknown validator type: {validator_type}")

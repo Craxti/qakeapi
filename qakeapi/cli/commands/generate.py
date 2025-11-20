@@ -44,9 +44,8 @@ class {name}Model:
     def __repr__(self):
         return f"{name}Model({{self.to_dict()}})"
 """,
-        "default_file": "models/{name_lower}.py"
+        "default_file": "models/{name_lower}.py",
     },
-    
     "route": {
         "template": """\"\"\"
 Маршруты for {name}
@@ -155,9 +154,8 @@ async def delete_{name_lower}(item_id: str):
         detail=f"{name} not found"
     )
 """,
-        "default_file": "routes/{name_lower}.py"
+        "default_file": "routes/{name_lower}.py",
     },
-    
     "middleware": {
         "template": """\"\"\"
 {name} Middleware
@@ -207,9 +205,8 @@ class {name}Middleware(BaseMiddleware):
         
         return response
 """,
-        "default_file": "middleware/{name_lower}.py"
+        "default_file": "middleware/{name_lower}.py",
     },
-    
     "test": {
         "template": """\"\"\"
 Тесты for {name}
@@ -272,8 +269,8 @@ def mock_{name_lower}_app():
     
     return app
 """,
-        "default_file": "tests/test_{name_lower}.py"
-    }
+        "default_file": "tests/test_{name_lower}.py",
+    },
 }
 
 
@@ -282,30 +279,29 @@ def generate_code(
     name: str,
     output: Optional[str] = None,
     template: Optional[str] = None,
-    verbose: bool = False
+    verbose: bool = False,
 ) -> Dict[str, Any]:
     """Геnotрandроinать code"""
-    
+
     if code_type not in TEMPLATES:
         raise ValueError(f"Неandзinестный type codeа: {code_type}")
-    
+
     # Подготаinлandinаем data for шаблона
     name_lower = name.lower()
     name_title = name.title()
-    
+
     template_data = TEMPLATES[code_type]
-    
+
     # Определяем inыходной файл
     if output is None:
         output = template_data["default_file"].format(
-            name_lower=name_lower,
-            name=name_title
+            name_lower=name_lower, name=name_title
         )
-    
+
     # Создаем дandректорandю if нужно
     output_path = Path(output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     # Геnotрandруем code andз шаблона
     if template and os.path.exists(template):
         # Используем кастомный шаблон
@@ -314,27 +310,25 @@ def generate_code(
     else:
         # Используем inстроенный шаблон
         template_content = template_data["template"]
-    
+
     # Заменяем плейсхолдеры
     generated_code = template_content.format(
-        name=name_title,
-        name_lower=name_lower,
-        NAME_UPPER=name.upper()
+        name=name_title, name_lower=name_lower, NAME_UPPER=name.upper()
     )
-    
+
     # Запandсыinаем файл
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(generated_code)
-    
+
     if verbose:
         print(f"Сгеnotрandроinан {code_type}: {output}")
         print(f"Размер: {len(generated_code)} сandмinолоin")
-    
+
     return {
         "type": code_type,
         "name": name,
         "file": str(output_path),
-        "size": len(generated_code)
+        "size": len(generated_code),
     }
 
 

@@ -13,7 +13,7 @@ T = TypeVar("T")
 
 class DependencyMarker:
     """Dependency marker"""
-    
+
     def __init__(self, dependency: Callable[..., Any], use_cache: bool = True) -> None:
         self.dependency = dependency
         self.use_cache = use_cache
@@ -22,7 +22,7 @@ class DependencyMarker:
 def Depends(dependency: Callable[..., Any], *, use_cache: bool = True) -> Any:
     """
     Dependency marker for injection into handler functions
-    
+
     Args:
         dependency: Function or class for creating dependency
         use_cache: Whether to cache dependency result within request scope
@@ -32,11 +32,11 @@ def Depends(dependency: Callable[..., Any], *, use_cache: bool = True) -> Any:
 
 class DependencyResolver:
     """Dependency resolver"""
-    
+
     def __init__(self) -> None:
         self._cache: Dict[str, Any] = {}
         self._resolving: set = set()
-    
+
     async def resolve_dependencies(
         self,
         func: Callable[..., Any],
@@ -45,19 +45,19 @@ class DependencyResolver:
     ) -> Dict[str, Any]:
         """
         Resolve all dependencies for function
-        
+
         Args:
             func: Handler function
             request: HTTP request
             path_params: Path parameters
-            
+
         Returns:
             Dictionary with resolved dependencies
         """
         signature = inspect.signature(func)
         resolved_params = {}
         path_params = path_params or {}
-        
+
         for param_name, param in signature.parameters.items():
             if param_name in ["request", "req"]:
                 # Automatically inject request object
@@ -68,13 +68,15 @@ class DependencyResolver:
             elif isinstance(param.default, DependencyMarker):
                 # Dependency marked through Depends()
                 dependency_key = f"{param.default.dependency.__name__}_{id(param.default.dependency)}"
-                
+
                 if param.default.use_cache and dependency_key in self._cache:
                     resolved_params[param_name] = self._cache[dependency_key]
                 else:
                     if dependency_key in self._resolving:
-                        raise ValidationException(f"Circular dependency detected: {param.default.dependency.__name__}")
-                    
+                        raise ValidationException(
+                            f"Circular dependency detected: {param.default.dependency.__name__}"
+                        )
+
                     self._resolving.add(dependency_key)
                     try:
                         resolved_value = await self._resolve_dependency(
@@ -110,9 +112,9 @@ class DependencyResolver:
                         except Exception:
                             # If failed to resolve, skip
                             pass
-        
+
         return resolved_params
-    
+
     async def _resolve_dependency(
         self,
         dependency: Callable[..., Any],
@@ -121,12 +123,12 @@ class DependencyResolver:
     ) -> Any:
         """
         Resolve specific dependency
-        
+
         Args:
             dependency: Function or class dependency
             request: HTTP request
             path_params: Path parameters
-            
+
         Returns:
             Resolved dependency
         """
@@ -153,7 +155,7 @@ class DependencyResolver:
         else:
             # Return as is
             return dependency
-    
+
     def clear_cache(self) -> None:
         """Clear dependency cache"""
         self._cache.clear()
@@ -161,6 +163,7 @@ class DependencyResolver:
 
 
 # Common dependencies
+
 
 async def get_request_body(request: Request) -> bytes:
     """Get request body"""
@@ -197,6 +200,7 @@ def inject_dependencies(func: Callable[..., Any]) -> Callable[..., Any]:
     """
     Decorator for automatic dependency injection
     """
+
     @wraps(func)
     async def wrapper(*args, **kwargs):
         # Look for request object in arguments
@@ -205,24 +209,24 @@ def inject_dependencies(func: Callable[..., Any]) -> Callable[..., Any]:
             if isinstance(arg, Request):
                 request = arg
                 break
-        
+
         if request is None:
             # If request not found, call function as is
             if inspect.iscoroutinefunction(func):
                 return await func(*args, **kwargs)
             else:
                 return func(*args, **kwargs)
-        
+
         # Resolve dependencies
         resolver = DependencyResolver()
         dependencies = await resolver.resolve_dependencies(func, request)
-        
+
         # Merge with existing kwargs
         final_kwargs = {**kwargs, **dependencies}
-        
+
         if inspect.iscoroutinefunction(func):
             return await func(*args, **final_kwargs)
         else:
             return func(*args, **final_kwargs)
-    
+
     return wrapper

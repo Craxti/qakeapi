@@ -12,15 +12,18 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
+
 class WebSocketState(Enum):
     CONNECTING = "CONNECTING"
     CONNECTED = "CONNECTED"
     DISCONNECTED = "DISCONNECTED"
     RECONNECTING = "RECONNECTING"
 
+
 @dataclass
 class WebSocketMessage:
     """WebSocket message with metadata."""
+
     type: str
     data: Any
     timestamp: datetime = field(default_factory=datetime.now)
@@ -28,9 +31,10 @@ class WebSocketMessage:
     sender_id: Optional[str] = None
     room: Optional[str] = None
 
+
 class WebSocketConnection:
     """Enhanced WebSocket connection with reconnect support."""
-    
+
     def __init__(self, scope: Dict, receive: Any, send: Any, connection_id: str = None):
         self.scope = scope
         self.receive = receive
@@ -189,44 +193,50 @@ class WebSocketConnection:
                 logger.error(f"Error receiving message: {e}")
                 break
 
+
 class WebSocketManager(ABC):
     """Abstract WebSocket manager interface."""
-    
+
     @abstractmethod
     async def add_connection(self, connection: WebSocketConnection) -> None:
         """Add a WebSocket connection."""
         pass
-    
+
     @abstractmethod
     async def remove_connection(self, connection: WebSocketConnection) -> None:
         """Remove a WebSocket connection."""
         pass
-    
+
     @abstractmethod
-    async def broadcast(self, message: WebSocketMessage, room: Optional[str] = None) -> None:
+    async def broadcast(
+        self, message: WebSocketMessage, room: Optional[str] = None
+    ) -> None:
         """Broadcast message to all connections or room."""
         pass
-    
+
     @abstractmethod
-    async def send_to_connection(self, connection_id: str, message: WebSocketMessage) -> None:
+    async def send_to_connection(
+        self, connection_id: str, message: WebSocketMessage
+    ) -> None:
         """Send message to specific connection."""
         pass
 
+
 class InMemoryWebSocketManager(WebSocketManager):
     """In-memory WebSocket manager implementation."""
-    
+
     def __init__(self):
         self.connections: Dict[str, WebSocketConnection] = {}
         self.rooms: Dict[str, Set[str]] = {}
         self.message_history: List[WebSocketMessage] = []
         self.max_history = 1000
         logger.debug("Initialized InMemoryWebSocketManager")
-    
+
     async def add_connection(self, connection: WebSocketConnection) -> None:
         """Add a WebSocket connection."""
         self.connections[connection.connection_id] = connection
         logger.info(f"Added connection {connection.connection_id}")
-    
+
     async def remove_connection(self, connection: WebSocketConnection) -> None:
         """Remove a WebSocket connection."""
         connection_id = connection.connection_id
@@ -237,50 +247,62 @@ class InMemoryWebSocketManager(WebSocketManager):
                 if connection_id in self.rooms[room]:
                     self._remove_from_room(connection_id, room)
             logger.info(f"Removed connection {connection_id}")
-    
-    async def broadcast(self, message: WebSocketMessage, room: Optional[str] = None) -> None:
+
+    async def broadcast(
+        self, message: WebSocketMessage, room: Optional[str] = None
+    ) -> None:
         """Broadcast message to all connections or room."""
         self._add_to_history(message)
-        
+
         if room:
             # Send to room
             room_connections = self.rooms.get(room, set())
             for connection_id in room_connections:
                 await self.send_to_connection(connection_id, message)
-            logger.debug(f"Broadcasted to room {room}: {len(room_connections)} connections")
+            logger.debug(
+                f"Broadcasted to room {room}: {len(room_connections)} connections"
+            )
         else:
             # Send to all connections
             for connection in self.connections.values():
                 if connection.state == WebSocketState.CONNECTED:
                     try:
-                        await connection.send_json({
-                            "type": message.type,
-                            "data": message.data,
-                            "timestamp": message.timestamp.isoformat(),
-                            "message_id": message.message_id,
-                            "sender_id": message.sender_id
-                        })
+                        await connection.send_json(
+                            {
+                                "type": message.type,
+                                "data": message.data,
+                                "timestamp": message.timestamp.isoformat(),
+                                "message_id": message.message_id,
+                                "sender_id": message.sender_id,
+                            }
+                        )
                     except Exception as e:
-                        logger.error(f"Error broadcasting to {connection.connection_id}: {e}")
+                        logger.error(
+                            f"Error broadcasting to {connection.connection_id}: {e}"
+                        )
             logger.debug(f"Broadcasted to all: {len(self.connections)} connections")
-    
-    async def send_to_connection(self, connection_id: str, message: WebSocketMessage) -> None:
+
+    async def send_to_connection(
+        self, connection_id: str, message: WebSocketMessage
+    ) -> None:
         """Send message to specific connection."""
         connection = self.connections.get(connection_id)
         if connection and connection.state == WebSocketState.CONNECTED:
             try:
-                await connection.send_json({
-                    "type": message.type,
-                    "data": message.data,
-                    "timestamp": message.timestamp.isoformat(),
-                    "message_id": message.message_id,
-                    "sender_id": message.sender_id
-                })
+                await connection.send_json(
+                    {
+                        "type": message.type,
+                        "data": message.data,
+                        "timestamp": message.timestamp.isoformat(),
+                        "message_id": message.message_id,
+                        "sender_id": message.sender_id,
+                    }
+                )
             except Exception as e:
                 logger.error(f"Error sending to {connection_id}: {e}")
         else:
             logger.warning(f"Connection {connection_id} not found or not connected")
-    
+
     def join_room(self, connection_id: str, room: str) -> None:
         """Join connection to a room."""
         if room not in self.rooms:
@@ -289,81 +311,86 @@ class InMemoryWebSocketManager(WebSocketManager):
         if connection_id in self.connections:
             self.connections[connection_id].join_room(room)
         logger.debug(f"Connection {connection_id} joined room {room}")
-    
+
     def leave_room(self, connection_id: str, room: str) -> None:
         """Remove connection from a room."""
         self._remove_from_room(connection_id, room)
         if connection_id in self.connections:
             self.connections[connection_id].leave_room(room)
         logger.debug(f"Connection {connection_id} left room {room}")
-    
+
     def _remove_from_room(self, connection_id: str, room: str) -> None:
         """Remove connection from room."""
         if room in self.rooms:
             self.rooms[room].discard(connection_id)
             if not self.rooms[room]:
                 del self.rooms[room]
-    
+
     def _add_to_history(self, message: WebSocketMessage) -> None:
         """Add message to history."""
         self.message_history.append(message)
         if len(self.message_history) > self.max_history:
             self.message_history.pop(0)
-    
+
     def get_connection_count(self) -> int:
         """Get number of active connections."""
         return len(self.connections)
-    
+
     def get_room_connections(self, room: str) -> int:
         """Get number of connections in a room."""
         return len(self.rooms.get(room, set()))
-    
+
     def get_connection_info(self) -> Dict[str, Any]:
         """Get connection statistics."""
         return {
             "total_connections": len(self.connections),
-            "rooms": {room: len(connections) for room, connections in self.rooms.items()},
-            "message_history_count": len(self.message_history)
+            "rooms": {
+                room: len(connections) for room, connections in self.rooms.items()
+            },
+            "message_history_count": len(self.message_history),
         }
+
 
 class WebSocketHandler:
     """WebSocket handler with enhanced features."""
-    
+
     def __init__(self, manager: WebSocketManager = None):
         self.manager = manager or InMemoryWebSocketManager()
         self.handlers: Dict[str, Callable] = {}
         logger.debug("Initialized WebSocketHandler")
-    
+
     def on_connect(self, handler: Callable) -> Callable:
         """Decorator for connection event handler."""
         self.handlers["connect"] = handler
         return handler
-    
+
     def on_disconnect(self, handler: Callable) -> Callable:
         """Decorator for disconnection event handler."""
         self.handlers["disconnect"] = handler
         return handler
-    
+
     def on_message(self, message_type: str = "message") -> Callable:
         """Decorator for message event handler."""
+
         def decorator(handler: Callable) -> Callable:
             self.handlers[message_type] = handler
             return handler
+
         return decorator
-    
+
     async def handle_connection(self, websocket: WebSocketConnection) -> None:
         """Handle WebSocket connection lifecycle."""
         try:
             # Add to manager
             await self.manager.add_connection(websocket)
-            
+
             # Call connect handler
             if "connect" in self.handlers:
                 await self.handlers["connect"](websocket)
-            
+
             # Accept connection
             await websocket.accept()
-            
+
             # Message loop
             async for message_data in websocket:
                 try:
@@ -371,54 +398,52 @@ class WebSocketHandler:
                         message = json.loads(message_data)
                     else:
                         message = message_data
-                    
+
                     message_type = message.get("type", "message")
-                    
+
                     if message_type in self.handlers:
                         await self.handlers[message_type](websocket, message)
                     else:
                         # Default message handler
                         await self._handle_default_message(websocket, message)
-                        
+
                 except json.JSONDecodeError:
                     logger.warning(f"Invalid JSON from {websocket.connection_id}")
                 except Exception as e:
                     logger.error(f"Error handling message: {e}")
-                    
+
         except Exception as e:
             logger.error(f"WebSocket error: {e}")
         finally:
             # Call disconnect handler
             if "disconnect" in self.handlers:
                 await self.handlers["disconnect"](websocket)
-            
+
             # Remove from manager
             await self.manager.remove_connection(websocket)
-    
-    async def _handle_default_message(self, websocket: WebSocketConnection, message: Dict) -> None:
+
+    async def _handle_default_message(
+        self, websocket: WebSocketConnection, message: Dict
+    ) -> None:
         """Handle default message types."""
         message_type = message.get("type")
-        
+
         if message_type == "join_room":
             room = message.get("room")
             if room:
                 self.manager.join_room(websocket.connection_id, room)
-                await websocket.send_json({
-                    "type": "room_joined",
-                    "room": room,
-                    "success": True
-                })
-        
+                await websocket.send_json(
+                    {"type": "room_joined", "room": room, "success": True}
+                )
+
         elif message_type == "leave_room":
             room = message.get("room")
             if room:
                 self.manager.leave_room(websocket.connection_id, room)
-                await websocket.send_json({
-                    "type": "room_left",
-                    "room": room,
-                    "success": True
-                })
-        
+                await websocket.send_json(
+                    {"type": "room_left", "room": room, "success": True}
+                )
+
         elif message_type == "broadcast":
             data = message.get("data")
             room = message.get("room")
@@ -427,13 +452,14 @@ class WebSocketHandler:
                     type="broadcast",
                     data=data,
                     sender_id=websocket.connection_id,
-                    room=room
+                    room=room,
                 )
                 await self.manager.broadcast(ws_message, room)
 
+
 class WebSocketMiddleware:
     """WebSocket middleware for ASGI applications."""
-    
+
     def __init__(self, app: Any, handler: WebSocketHandler):
         self.app = app
         self.handler = handler

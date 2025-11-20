@@ -4,7 +4,11 @@ QakeAPI Rate Limiting Example
 This example demonstrates how to use rate limiting to protect your API.
 """
 from qakeapi import QakeAPI, Request
-from qakeapi.security.rate_limiting import RateLimiter, RateLimitRule, RateLimitMiddleware
+from qakeapi.security.rate_limiting import (
+    RateLimiter,
+    RateLimitRule,
+    RateLimitMiddleware,
+)
 
 app = QakeAPI(
     title="Rate Limiting Example",
@@ -21,7 +25,7 @@ rate_limiter.add_rule(
     RateLimitRule(
         requests=10,  # 10 requests
         window=60,  # per 60 seconds
-    )
+    ),
 )
 
 rate_limiter.add_rule(
@@ -29,7 +33,7 @@ rate_limiter.add_rule(
     RateLimitRule(
         requests=100,  # 100 requests
         window=60,  # per 60 seconds
-    )
+    ),
 )
 
 # Add rate limiting middleware
@@ -51,7 +55,7 @@ async def root():
 async def public_endpoint():
     """
     Public API endpoint (rate limited: 10 requests per minute)
-    
+
     Try making more than 10 requests in a minute to see rate limiting in action.
     """
     return {
@@ -64,7 +68,7 @@ async def public_endpoint():
 async def premium_endpoint():
     """
     Premium API endpoint (rate limited: 100 requests per minute)
-    
+
     This endpoint has a higher rate limit for premium users.
     """
     return {
@@ -87,5 +91,5 @@ async def rate_limit_stats():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8003)
 
+    uvicorn.run(app, host="0.0.0.0", port=8003)

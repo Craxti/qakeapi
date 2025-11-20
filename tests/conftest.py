@@ -3,13 +3,13 @@ import asyncio
 import pytest
 from pytest_asyncio.plugin import event_loop_policy
 
-from qakeapi.core.application import Application
+from qakeapi import QakeAPI
 
 
 @pytest.fixture
 def app():
     """Fixture for creating test application"""
-    return Application(
+    return QakeAPI(
         title="Test API", version="1.0.3", description="Test API Description"
     )
 

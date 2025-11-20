@@ -62,7 +62,7 @@ async def health():
     """Health check endpoint"""
     results = await health_checker.check_all()
     overall_status = "healthy" if all(r.is_healthy for r in results) else "unhealthy"
-    
+
     return {
         "status": overall_status,
         "checks": [
@@ -80,6 +80,7 @@ async def health():
 async def slow_endpoint():
     """Slow endpoint for testing metrics"""
     import asyncio
+
     await asyncio.sleep(0.5)  # Simulate slow operation
     return {"message": "This was a slow request"}
 
@@ -92,5 +93,5 @@ async def error_endpoint():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8001)
 
+    uvicorn.run(app, host="0.0.0.0", port=8001)

@@ -6,7 +6,7 @@ from .settings import Settings, DatabaseConfig, CacheConfig, SecurityConfig
 
 __all__ = [
     "Settings",
-    "DatabaseConfig", 
-    "CacheConfig", 
+    "DatabaseConfig",
+    "CacheConfig",
     "SecurityConfig",
 ]

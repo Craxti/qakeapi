@@ -1,12 +1,12 @@
 import pytest
 import pytest_asyncio
 from qakeapi.core.websockets import WebSocketConnection, WebSocketState
-from qakeapi.core.application import Application
+from qakeapi import QakeAPI
 
 
 @pytest_asyncio.fixture
 async def app():
-    return Application()
+    return QakeAPI()
 
 
 @pytest_asyncio.fixture
@@ -78,14 +78,14 @@ class TestWebSocketRouting:
         # Проверяем, что маршрут был зарегистрирован
         # В новой архитектуре роутеры находятся внутри приложения
         assert len(app.ws_router.routes) > 0
-        
+
         # Проверяем, что есть маршрут с нужным путем
         found_route = None
         for route in app.ws_router.routes:
             if route.path == "/ws/test":
                 found_route = route
                 break
-        
+
         assert found_route is not None
         assert found_route.handler == websocket_handler
 

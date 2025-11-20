@@ -20,11 +20,13 @@ app = QakeAPI(
 )
 
 # Add middleware
-app.add_middleware(CORSMiddleware(
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-))
+app.add_middleware(
+    CORSMiddleware(
+        allow_origins=["*"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+)
 app.add_middleware(LoggingMiddleware())
 
 
@@ -80,4 +82,5 @@ async def shutdown():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -10,6 +10,7 @@ from qakeapi.middleware.auth import BearerTokenMiddleware, APIKeyMiddleware
 from qakeapi.core.exceptions import HTTPException
 from qakeapi.utils.status import status
 
+
 # Модели данных
 class User(BaseModel):
     id: int
@@ -20,7 +21,7 @@ class User(BaseModel):
 
 class UserCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
-    email: str = Field(..., regex=r'^[^@]+@[^@]+\.[^@]+$')
+    email: str = Field(..., regex=r"^[^@]+@[^@]+\.[^@]+$")
     password: str = Field(..., min_length=8)
 
 
@@ -47,12 +48,14 @@ app = QakeAPI(
 )
 
 # Добавляем middleware
-app.add_middleware(CORSMiddleware(
-    allow_origins=["http://localhost:3000", "https://myapp.com"],
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["*"],
-    allow_credentials=True,
-))
+app.add_middleware(
+    CORSMiddleware(
+        allow_origins=["http://localhost:3000", "https://myapp.com"],
+        allow_methods=["GET", "POST", "PUT", "DELETE"],
+        allow_headers=["*"],
+        allow_credentials=True,
+    )
+)
 app.add_middleware(LoggingMiddleware())
 
 # Аутентификация
@@ -62,10 +65,19 @@ API_KEYS = {
     "readonly-key": {"name": "Read Only Client", "permissions": ["read"]},
 }
 
-app.add_middleware(BearerTokenMiddleware(
-    secret_key=SECRET_KEY,
-    skip_paths={"/", "/docs", "/redoc", "/openapi.json", "/auth/login", "/public/*"},
-))
+app.add_middleware(
+    BearerTokenMiddleware(
+        secret_key=SECRET_KEY,
+        skip_paths={
+            "/",
+            "/docs",
+            "/redoc",
+            "/openapi.json",
+            "/auth/login",
+            "/public/*",
+        },
+    )
+)
 
 # Фиктивная база данных
 fake_users_db = {
@@ -74,22 +86,33 @@ fake_users_db = {
 }
 
 fake_items_db = {
-    1: Item(id=1, title="Ноутбук", description="Мощный ноутбук", price=50000.0, owner_id=1),
-    2: Item(id=2, title="Мышь", description="Беспроводная мышь", price=1500.0, owner_id=1),
-    3: Item(id=3, title="Клавиатура", description="Механическая клавиатура", price=5000.0, owner_id=2),
+    1: Item(
+        id=1, title="Ноутбук", description="Мощный ноутбук", price=50000.0, owner_id=1
+    ),
+    2: Item(
+        id=2, title="Мышь", description="Беспроводная мышь", price=1500.0, owner_id=1
+    ),
+    3: Item(
+        id=3,
+        title="Клавиатура",
+        description="Механическая клавиатура",
+        price=5000.0,
+        owner_id=2,
+    ),
 }
+
 
 # Зависимости
 async def get_current_user(request: Request) -> User:
     """Получить текущего пользователя из токена"""
-    user_info = getattr(request, '_user', None)
+    user_info = getattr(request, "_user", None)
     if not user_info:
         raise HTTPException(status.UNAUTHORIZED, "Not authenticated")
-    
-    user_id = user_info.get('user_id')
+
+    user_id = user_info.get("user_id")
     if not user_id or user_id not in fake_users_db:
         raise HTTPException(status.UNAUTHORIZED, "User not found")
-    
+
     return fake_users_db[user_id]
 
 
@@ -98,7 +121,7 @@ def get_api_key_info(request: Request) -> dict:
     api_key = request.get_header("x-api-key")
     if not api_key or api_key not in API_KEYS:
         raise HTTPException(status.UNAUTHORIZED, "Invalid API key")
-    
+
     return API_KEYS[api_key]
 
 
@@ -113,8 +136,8 @@ async def root():
             "Валидация данных с Pydantic",
             "WebSocket поддержка",
             "Middleware система",
-            "Автоматическая документация API"
-        ]
+            "Автоматическая документация API",
+        ],
     }
 
 
@@ -137,21 +160,21 @@ async def login(request: Request):
     import hmac
     import hashlib
     import time
-    
+
     data = await request.json()
     email = data.get("email")
     password = data.get("password")
-    
+
     # Простая проверка (в реальном приложении используйте хеширование паролей)
     user = None
     for u in fake_users_db.values():
         if u.email == email:
             user = u
             break
-    
+
     if not user or password != "password123":  # Простая проверка
         raise HTTPException(status.UNAUTHORIZED, "Invalid credentials")
-    
+
     # Создаем JWT токен
     header = {"alg": "HS256", "typ": "JWT"}
     payload = {
@@ -159,17 +182,25 @@ async def login(request: Request):
         "email": user.email,
         "exp": int(time.time()) + 3600,  # 1 час
     }
-    
-    header_b64 = base64.urlsafe_b64encode(json.dumps(header).encode()).decode().rstrip("=")
-    payload_b64 = base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
-    
+
+    header_b64 = (
+        base64.urlsafe_b64encode(json.dumps(header).encode()).decode().rstrip("=")
+    )
+    payload_b64 = (
+        base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
+    )
+
     message = f"{header_b64}.{payload_b64}"
-    signature = base64.urlsafe_b64encode(
-        hmac.new(SECRET_KEY.encode(), message.encode(), hashlib.sha256).digest()
-    ).decode().rstrip("=")
-    
+    signature = (
+        base64.urlsafe_b64encode(
+            hmac.new(SECRET_KEY.encode(), message.encode(), hashlib.sha256).digest()
+        )
+        .decode()
+        .rstrip("=")
+    )
+
     token = f"{message}.{signature}"
-    
+
     return {
         "access_token": token,
         "token_type": "bearer",
@@ -191,7 +222,9 @@ async def get_users(current_user: User = Depends(get_current_user)):
 
 
 @app.post("/users", response_model=User)
-async def create_user(user_data: UserCreate, current_user: User = Depends(get_current_user)):
+async def create_user(
+    user_data: UserCreate, current_user: User = Depends(get_current_user)
+):
     """Создать нового пользователя"""
     new_id = max(fake_users_db.keys()) + 1
     new_user = User(
@@ -206,13 +239,11 @@ async def create_user(user_data: UserCreate, current_user: User = Depends(get_cu
 # Маршруты для работы с элементами
 @app.get("/items", response_model=List[Item])
 async def get_items(
-    skip: int = 0,
-    limit: int = 10,
-    current_user: User = Depends(get_current_user)
+    skip: int = 0, limit: int = 10, current_user: User = Depends(get_current_user)
 ):
     """Получить список элементов"""
     items = list(fake_items_db.values())
-    return items[skip:skip + limit]
+    return items[skip : skip + limit]
 
 
 @app.get("/items/{item_id}", response_model=Item)
@@ -225,8 +256,7 @@ async def get_item(item_id: int, current_user: User = Depends(get_current_user))
 
 @app.post("/items", response_model=Item)
 async def create_item(
-    item_data: ItemCreate,
-    current_user: User = Depends(get_current_user)
+    item_data: ItemCreate, current_user: User = Depends(get_current_user)
 ):
     """Создать новый элемент"""
     new_id = max(fake_items_db.keys()) + 1
@@ -243,22 +273,20 @@ async def create_item(
 
 @app.put("/items/{item_id}", response_model=Item)
 async def update_item(
-    item_id: int,
-    item_data: ItemCreate,
-    current_user: User = Depends(get_current_user)
+    item_id: int, item_data: ItemCreate, current_user: User = Depends(get_current_user)
 ):
     """Обновить элемент"""
     if item_id not in fake_items_db:
         raise HTTPException(status.NOT_FOUND, "Item not found")
-    
+
     item = fake_items_db[item_id]
     if item.owner_id != current_user.id:
         raise HTTPException(status.FORBIDDEN, "Not enough permissions")
-    
+
     item.title = item_data.title
     item.description = item_data.description
     item.price = item_data.price
-    
+
     return item
 
 
@@ -267,11 +295,11 @@ async def delete_item(item_id: int, current_user: User = Depends(get_current_use
     """Удалить элемент"""
     if item_id not in fake_items_db:
         raise HTTPException(status.NOT_FOUND, "Item not found")
-    
+
     item = fake_items_db[item_id]
     if item.owner_id != current_user.id:
         raise HTTPException(status.FORBIDDEN, "Not enough permissions")
-    
+
     del fake_items_db[item_id]
     return {"message": "Item deleted successfully"}
 
@@ -282,7 +310,7 @@ async def get_api_stats(api_key_info: dict = Depends(get_api_key_info)):
     """Получить статистику API (требует API ключ)"""
     if "read" not in api_key_info.get("permissions", []):
         raise HTTPException(status.FORBIDDEN, "Insufficient permissions")
-    
+
     return {
         "total_users": len(fake_users_db),
         "total_items": len(fake_items_db),
@@ -293,56 +321,65 @@ async def get_api_stats(api_key_info: dict = Depends(get_api_key_info)):
 # WebSocket
 connected_clients = set()
 
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     """WebSocket соединение для чата"""
     await websocket.accept()
     connected_clients.add(websocket)
-    
+
     try:
-        await websocket.send_json({
-            "type": "connection",
-            "message": "Подключено к чату!",
-            "clients_count": len(connected_clients)
-        })
-        
+        await websocket.send_json(
+            {
+                "type": "connection",
+                "message": "Подключено к чату!",
+                "clients_count": len(connected_clients),
+            }
+        )
+
         # Уведомляем других клиентов о новом подключении
         for client in connected_clients:
             if client != websocket:
                 try:
-                    await client.send_json({
-                        "type": "user_joined",
-                        "message": "Новый пользователь присоединился к чату",
-                        "clients_count": len(connected_clients)
-                    })
+                    await client.send_json(
+                        {
+                            "type": "user_joined",
+                            "message": "Новый пользователь присоединился к чату",
+                            "clients_count": len(connected_clients),
+                        }
+                    )
                 except:
                     pass
-        
+
         async for message in websocket.iter_json():
             # Пересылаем сообщение всем подключенным клиентам
             for client in connected_clients.copy():
                 try:
-                    await client.send_json({
-                        "type": "message",
-                        "data": message,
-                        "timestamp": int(time.time())
-                    })
+                    await client.send_json(
+                        {
+                            "type": "message",
+                            "data": message,
+                            "timestamp": int(time.time()),
+                        }
+                    )
                 except:
                     connected_clients.discard(client)
-    
+
     except Exception as e:
         print(f"WebSocket error: {e}")
     finally:
         connected_clients.discard(websocket)
-        
+
         # Уведомляем других клиентов об отключении
         for client in connected_clients.copy():
             try:
-                await client.send_json({
-                    "type": "user_left",
-                    "message": "Пользователь покинул чат",
-                    "clients_count": len(connected_clients)
-                })
+                await client.send_json(
+                    {
+                        "type": "user_left",
+                        "message": "Пользователь покинул чат",
+                        "clients_count": len(connected_clients),
+                    }
+                )
             except:
                 connected_clients.discard(client)
 
@@ -356,8 +393,8 @@ async def not_found_handler(request: Request, exc: HTTPException):
         content={
             "error": "Страница не найдена",
             "message": f"Путь '{request.path}' не существует",
-            "suggestion": "Проверьте URL или обратитесь к документации API"
-        }
+            "suggestion": "Проверьте URL или обратитесь к документации API",
+        },
     )
 
 
@@ -369,11 +406,12 @@ async def internal_error_handler(request: Request, exc: Exception):
         content={
             "error": "Внутренняя ошибка сервера",
             "message": "Что-то пошло не так. Попробуйте позже.",
-            "request_id": id(request)  # В реальном приложении используйте UUID
-        }
+            "request_id": id(request),  # В реальном приложении используйте UUID
+        },
     )
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

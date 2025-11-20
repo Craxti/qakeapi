@@ -8,6 +8,7 @@ from urllib.parse import parse_qs
 from .files import UploadFile
 from .interfaces import UserProtocol
 
+
 class Request:
     """HTTP Request"""
 
@@ -224,11 +225,12 @@ class Request:
 
     def _parse_query_string(self) -> Dict[str, Any]:
         """Parse query string into dictionary."""
-        query_string = self.scope.get('query_string', b'').decode()
+        query_string = self.scope.get("query_string", b"").decode()
         if not query_string:
             return {}
-        return {k: v[0] if len(v) == 1 else v 
-                for k, v in parse_qs(query_string).items()}
+        return {
+            k: v[0] if len(v) == 1 else v for k, v in parse_qs(query_string).items()
+        }
 
     async def json(self) -> Dict[str, Any]:
         """Parse JSON body."""

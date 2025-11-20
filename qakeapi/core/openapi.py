@@ -9,6 +9,7 @@ from pydantic import BaseModel, create_model
 
 class SecuritySchemeType(str, Enum):
     """Security scheme types"""
+
     HTTP = "http"
     API_KEY = "apiKey"
     OAUTH2 = "oauth2"
@@ -18,6 +19,7 @@ class SecuritySchemeType(str, Enum):
 @dataclass
 class SecurityScheme:
     """Security scheme definition"""
+
     type: SecuritySchemeType
     name: str
     description: str = ""
@@ -30,6 +32,7 @@ class SecurityScheme:
 @dataclass
 class WebSocketEvent:
     """WebSocket event documentation"""
+
     name: str
     description: str = ""
     payload_schema: Optional[BaseModel] = None
@@ -39,6 +42,7 @@ class WebSocketEvent:
 @dataclass
 class WebSocketDocumentation:
     """WebSocket endpoint documentation"""
+
     path: str
     description: str = ""
     events: List[WebSocketEvent] = field(default_factory=list)
@@ -48,6 +52,7 @@ class WebSocketDocumentation:
 @dataclass
 class OpenAPIInfo:
     """Enhanced OpenAPI information"""
+
     title: str = "QakeAPI"
     version: str = "1.0.3"
     description: str = ""
@@ -60,6 +65,7 @@ class OpenAPIInfo:
 @dataclass
 class OpenAPIPath:
     """Enhanced OpenAPI path information"""
+
     path: str
     method: str
     summary: str = ""
@@ -86,7 +92,7 @@ class OpenAPIGenerator:
             "securitySchemes": {},
             "examples": {},
             "parameters": {},
-            "responses": {}
+            "responses": {},
         }
         self.tags: List[Dict[str, str]] = []
         self.webSocket_docs: List[WebSocketDocumentation] = []
@@ -95,12 +101,9 @@ class OpenAPIGenerator:
     def add_security_scheme(self, name: str, scheme: SecurityScheme):
         """Add security scheme to OpenAPI schema"""
         self.security_schemes[name] = scheme
-        
-        scheme_data = {
-            "type": scheme.type.value,
-            "description": scheme.description
-        }
-        
+
+        scheme_data = {"type": scheme.type.value, "description": scheme.description}
+
         if scheme.type == SecuritySchemeType.HTTP:
             scheme_data["scheme"] = scheme.scheme
             if scheme.bearer_format:
@@ -108,32 +111,35 @@ class OpenAPIGenerator:
         elif scheme.type == SecuritySchemeType.API_KEY:
             scheme_data["name"] = scheme.name
             scheme_data["in"] = scheme.in_
-        elif scheme.type in [SecuritySchemeType.OAUTH2, SecuritySchemeType.OPENID_CONNECT]:
+        elif scheme.type in [
+            SecuritySchemeType.OAUTH2,
+            SecuritySchemeType.OPENID_CONNECT,
+        ]:
             if scheme.flows:
                 scheme_data["flows"] = scheme.flows
-        
+
         self.components["securitySchemes"][name] = scheme_data
-    
+
     def add_tag(self, name: str, description: str = ""):
         """Add tag to OpenAPI schema"""
         self.tags.append({"name": name, "description": description})
-    
+
     def add_example(self, name: str, summary: str, description: str, value: Any):
         """Add example to OpenAPI schema"""
         self.components["examples"][name] = {
             "summary": summary,
             "description": description,
-            "value": value
+            "value": value,
         }
-    
+
     def add_parameter(self, name: str, parameter_data: Dict[str, Any]):
         """Add reusable parameter to OpenAPI schema"""
         self.components["parameters"][name] = parameter_data
-    
+
     def add_response(self, name: str, response_data: Dict[str, Any]):
         """Add reusable response to OpenAPI schema"""
         self.components["responses"][name] = response_data
-    
+
     def add_path(self, path_info: OpenAPIPath):
         """Add enhanced path to OpenAPI schema"""
         if path_info.path not in self.paths:
@@ -147,7 +153,8 @@ class OpenAPIGenerator:
             "tags": path_info.tags,
             "deprecated": path_info.deprecated,
             "parameters": path_info.parameters,
-            "responses": path_info.responses or {
+            "responses": path_info.responses
+            or {
                 "200": {
                     "description": "Successful response",
                 },
@@ -159,11 +166,14 @@ class OpenAPIGenerator:
                                 "type": "object",
                                 "properties": {
                                     "detail": {"type": "string"},
-                                    "errors": {"type": "array", "items": {"type": "object"}}
-                                }
+                                    "errors": {
+                                        "type": "array",
+                                        "items": {"type": "object"},
+                                    },
+                                },
                             }
                         }
-                    }
+                    },
                 },
                 "401": {
                     "description": "Unauthorized",
@@ -171,12 +181,10 @@ class OpenAPIGenerator:
                         "application/json": {
                             "schema": {
                                 "type": "object",
-                                "properties": {
-                                    "detail": {"type": "string"}
-                                }
+                                "properties": {"detail": {"type": "string"}},
                             }
                         }
-                    }
+                    },
                 },
                 "500": {
                     "description": "Internal server error",
@@ -184,19 +192,17 @@ class OpenAPIGenerator:
                         "application/json": {
                             "schema": {
                                 "type": "object",
-                                "properties": {
-                                    "detail": {"type": "string"}
-                                }
+                                "properties": {"detail": {"type": "string"}},
                             }
                         }
-                    }
-                }
-            }
+                    },
+                },
+            },
         }
-        
+
         if path_info.operation_id:
             path_data["operationId"] = path_info.operation_id
-        
+
         if path_info.security:
             path_data["security"] = path_info.security
 
@@ -207,9 +213,9 @@ class OpenAPIGenerator:
                 "content": {
                     "application/json": {
                         "schema": path_info.request_model.model_json_schema(),
-                        "examples": path_info.examples if path_info.examples else {}
+                        "examples": path_info.examples if path_info.examples else {},
                     }
-                }
+                },
             }
 
         # Add response schema if present
@@ -222,7 +228,7 @@ class OpenAPIGenerator:
                 }
 
         self.paths[path_info.path][method] = path_data
-    
+
     def add_webSocket_documentation(self, ws_doc: WebSocketDocumentation):
         """Add WebSocket documentation"""
         self.webSocket_docs.append(ws_doc)
@@ -240,25 +246,25 @@ class OpenAPIGenerator:
             "components": self.components,
             "tags": self.tags,
         }
-        
+
         if self.info.terms_of_service:
             schema["info"]["termsOfService"] = self.info.terms_of_service
-        
+
         if self.info.contact:
             schema["info"]["contact"] = self.info.contact
-        
+
         if self.info.license:
             schema["info"]["license"] = self.info.license
-        
+
         if self.info.servers:
             schema["servers"] = self.info.servers
-        
+
         # Add global security if any schemes are defined
         if self.security_schemes:
             schema["security"] = [{"bearerAuth": []}]
-        
+
         return schema
-    
+
     def generate_webSocket_docs(self) -> Dict[str, Any]:
         """Generate WebSocket documentation"""
         return {
@@ -272,11 +278,13 @@ class OpenAPIGenerator:
                             {
                                 "name": event.name,
                                 "description": event.description,
-                                "payload_schema": event.payload_schema.model_json_schema() if event.payload_schema else None,
-                                "examples": event.examples
+                                "payload_schema": event.payload_schema.model_json_schema()
+                                if event.payload_schema
+                                else None,
+                                "examples": event.examples,
                             }
                             for event in ws.events
-                        ]
+                        ],
                     }
                     for ws in self.webSocket_docs
                 ]
@@ -285,30 +293,30 @@ class OpenAPIGenerator:
 
 
 def get_swagger_ui_html(
-    openapi_url: str, 
+    openapi_url: str,
     title: str = "API Documentation",
     theme: str = "default",
     custom_css: Optional[str] = None,
-    custom_js: Optional[str] = None
+    custom_js: Optional[str] = None,
 ) -> str:
     """Generate enhanced Swagger UI HTML with customization options"""
-    
+
     # Theme configurations
     themes = {
         "default": {
             "css": "https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css",
             "bundle": "https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js",
-            "standalone": "https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js"
+            "standalone": "https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js",
         },
         "dark": {
             "css": "https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css",
             "bundle": "https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js",
-            "standalone": "https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js"
-        }
+            "standalone": "https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js",
+        },
     }
-    
+
     theme_config = themes.get(theme, themes["default"])
-    
+
     custom_styles = ""
     if theme == "dark":
         custom_styles = """
@@ -320,10 +328,10 @@ def get_swagger_ui_html(
         .swagger-ui .opblock { background-color: #2d2d2d !important; border-color: #444444 !important; }
         .swagger-ui .opblock .opblock-summary-description { color: #cccccc !important; }
         """
-    
+
     if custom_css:
         custom_styles += custom_css
-    
+
     return f"""
 <!DOCTYPE html>
 <html lang="en">
@@ -399,31 +407,22 @@ def get_swagger_ui_html(
 
 
 def get_redoc_html(
-    openapi_url: str, 
-    title: str = "API Documentation",
-    theme: Dict[str, Any] = None
+    openapi_url: str, title: str = "API Documentation", theme: Dict[str, Any] = None
 ) -> str:
     """Generate ReDoc HTML with customization options"""
-    
+
     default_theme = {
-        "colors": {
-            "primary": {
-                "main": "#32329f"
-            }
-        },
+        "colors": {"primary": {"main": "#32329f"}},
         "typography": {
             "fontSize": "14px",
             "lineHeight": "1.5em",
             "fontFamily": "Roboto, sans-serif",
-            "headings": {
-                "fontFamily": "Roboto, sans-serif",
-                "fontWeight": "400"
-            }
-        }
+            "headings": {"fontFamily": "Roboto, sans-serif", "fontWeight": "400"},
+        },
     }
-    
+
     theme_config = theme or default_theme
-    
+
     return f"""
 <!DOCTYPE html>
 <html lang="en">
@@ -469,7 +468,7 @@ def get_redoc_html(
 
 def get_webSocket_docs_html(ws_docs: List[WebSocketDocumentation]) -> str:
     """Generate WebSocket documentation HTML"""
-    
+
     ws_html = ""
     for ws in ws_docs:
         events_html = ""
@@ -480,7 +479,7 @@ def get_webSocket_docs_html(ws_docs: List[WebSocketDocumentation]) -> str:
                 for i, example in enumerate(event.examples):
                     examples_html += f"<li><strong>Example {i+1}:</strong><pre>{json.dumps(example, indent=2)}</pre></li>"
                 examples_html += "</ul>"
-            
+
             events_html += f"""
             <div class="event">
                 <h3>{event.name}</h3>
@@ -488,7 +487,7 @@ def get_webSocket_docs_html(ws_docs: List[WebSocketDocumentation]) -> str:
                 {examples_html}
             </div>
             """
-        
+
         ws_html += f"""
         <div class="websocket-endpoint">
             <h2>WebSocket: {ws.path}</h2>
@@ -498,7 +497,7 @@ def get_webSocket_docs_html(ws_docs: List[WebSocketDocumentation]) -> str:
             </div>
         </div>
         """
-    
+
     return f"""
 <!DOCTYPE html>
 <html lang="en">

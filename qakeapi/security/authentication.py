@@ -28,7 +28,9 @@ class Credentials(BaseModel):
 
 
 class User(UserProtocol):
-    def __init__(self, username: str, roles: List[str], metadata: Dict[str, Any] = None):
+    def __init__(
+        self, username: str, roles: List[str], metadata: Dict[str, Any] = None
+    ):
         self._username = username
         self._roles = roles
         self._metadata = metadata or {}
@@ -82,7 +84,7 @@ class BasicAuthBackend(AuthenticationBackend):
         try:
             logger.debug(f"Authenticating with credentials: {credentials}")
             logger.debug(f"Available users: {self.users}")
-            
+
             username = credentials.get("username")
             password = credentials.get("password")
 
@@ -96,7 +98,7 @@ class BasicAuthBackend(AuthenticationBackend):
             if not user_data:
                 logger.debug(f"User not found: {username}")
                 return None
-                
+
             logger.debug(f"Found user data: {user_data}")
             logger.debug(f"Comparing passwords: {password} == {user_data['password']}")
 
@@ -107,7 +109,7 @@ class BasicAuthBackend(AuthenticationBackend):
             return User(
                 username=username,
                 roles=user_data["roles"],
-                metadata=user_data.get("metadata")
+                metadata=user_data.get("metadata"),
             )
         except Exception as e:
             logger.error(f"Error during authentication: {e}")
@@ -123,9 +125,9 @@ class BasicAuthBackend(AuthenticationBackend):
                 return None
 
             user = User(
-                username=user_id, 
-                roles=user_data["roles"], 
-                metadata=user_data.get("metadata", {})
+                username=user_id,
+                roles=user_data["roles"],
+                metadata=user_data.get("metadata", {}),
             )
             logger.debug(f"Found user: {user}")
             return user
@@ -162,7 +164,9 @@ class JWTAuthBackend(AuthenticationBackend):
     def create_access_token(self, data: Dict[str, Any]) -> str:
         """Create JWT access token"""
         try:
-            encoded_jwt = jwt.encode(data, self.config.secret_key, algorithm=self.config.algorithm)
+            encoded_jwt = jwt.encode(
+                data, self.config.secret_key, algorithm=self.config.algorithm
+            )
             return encoded_jwt
         except Exception as e:
             logger.error(f"Error creating access token: {e}")
@@ -184,7 +188,7 @@ class JWTAuthBackend(AuthenticationBackend):
             return User(
                 username=username,
                 roles=user_data["roles"],
-                metadata=user_data.get("metadata")
+                metadata=user_data.get("metadata"),
             )
         except Exception as e:
             logger.error(f"Error during authentication: {e}")
@@ -193,7 +197,9 @@ class JWTAuthBackend(AuthenticationBackend):
     async def get_current_user(self, token: str) -> Optional[UserProtocol]:
         """Get current user from JWT token"""
         try:
-            payload = jwt.decode(token, self.config.secret_key, algorithms=[self.config.algorithm])
+            payload = jwt.decode(
+                token, self.config.secret_key, algorithms=[self.config.algorithm]
+            )
             username = payload.get("sub")
             if not username:
                 return None
@@ -215,7 +221,7 @@ class JWTAuthBackend(AuthenticationBackend):
             return User(
                 username=user_id,
                 roles=user_data["roles"],
-                metadata=user_data.get("metadata", {})
+                metadata=user_data.get("metadata", {}),
             )
         except Exception as e:
             logger.error(f"Error getting user: {e}")

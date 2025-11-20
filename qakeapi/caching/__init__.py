@@ -7,7 +7,7 @@ from .middleware import CacheMiddleware
 
 __all__ = [
     "CacheManager",
-    "InMemoryCache", 
+    "InMemoryCache",
     "RedisCache",
     "CacheMiddleware",
 ]
