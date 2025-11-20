@@ -16,7 +16,7 @@ from .commands.test import run_tests
 
 
 @click.group()
-@click.version_option(version="0.1.0", prog_name="qakeapi")
+@click.version_option(version="1.1.0", prog_name="qakeapi")
 @click.option("--verbose", "-v", is_flag=True, help="Включandть подробный inыinод")
 @click.pass_context
 def cli(ctx, verbose):

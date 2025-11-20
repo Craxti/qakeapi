@@ -14,7 +14,7 @@ TEMPLATES = {
         "files": {
             "app.py": """from qakeapi import QakeAPI
 
-app = QakeAPI(title="{name}", version="0.1.0")
+app = QakeAPI(title="{name}", version="1.1.0")
 
 
 @app.get("/")
@@ -71,7 +71,7 @@ from qakeapi.utils.validation import DataValidator, StringValidator, IntegerVali
 app = QakeAPI(
     title="{name} API",
     description="REST API на QakeAPI",
-    version="0.1.0"
+    version="1.1.0"
 )
 
 # Валandдаторы
@@ -177,7 +177,7 @@ qakeapi dev
 from qakeapi.utils.templates import TemplateRenderer
 from qakeapi.utils.static import StaticFiles
 
-app = QakeAPI(title="{name}", version="0.1.0")
+app = QakeAPI(title="{name}", version="1.1.0")
 
 # Настройка шаблоноin and статandкand
 templates = TemplateRenderer(directory="templates")
@@ -326,7 +326,7 @@ from routes import api_router, web_router
 app = QakeAPI(
     title="{name}",
     description="Полнофункцandональное прandложенandе на QakeAPI",
-    version="0.1.0",
+    version="1.1.0",
     debug=True
 )
 

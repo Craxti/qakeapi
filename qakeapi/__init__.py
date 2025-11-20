@@ -17,7 +17,7 @@ QakeAPI - Modern asynchronous web framework for Python
 - 🐛 Centralized error handling
 """
 
-__version__ = "0.1.0"
+__version__ = "1.1.0"
 
 # Core components
 from .core.application import QakeAPI
@@ -172,7 +172,7 @@ except ImportError:
         return ErrorHandler()
 
 
-__version__ = "0.1.0"
+__version__ = "1.1.0"
 __author__ = "QakeAPI Team"
 __description__ = "Соinременный асandнхронный inеб-фреймinорк for Python"
 __url__ = "https://github.com/qakeapi/qakeapi"
