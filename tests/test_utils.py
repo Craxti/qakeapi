@@ -137,15 +137,27 @@ class TestStaticFiles:
         test_cases = [
             ("test.txt", "text/plain"),
             ("style.css", "text/css"),
-            ("script.js", "text/javascript"),
+            (
+                "script.js",
+                ["text/javascript", "application/javascript"],
+            ),  # Different OS return different types
             ("image.png", "image/png"),
-            ("unknown.xyz", "chemical/x-xyz"),
+            (
+                "unknown.xyz",
+                ["chemical/x-xyz", "application/octet-stream"],
+            ),  # Different OS return different types
         ]
 
         for filename, expected_type in test_cases:
             file_path = self.static_dir / filename
             media_type = static_files._get_media_type(file_path)
-            assert media_type == expected_type
+            # Handle both single expected type and list of possible types
+            if isinstance(expected_type, list):
+                assert (
+                    media_type in expected_type
+                ), f"Expected one of {expected_type}, got {media_type}"
+            else:
+                assert media_type == expected_type
 
     def test_should_serve_file(self):
         """Тест проверки возможности обслуживания файла"""

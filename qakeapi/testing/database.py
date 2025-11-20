@@ -50,8 +50,34 @@ class TestDatabase:
             self.connection = None
 
         # Remove file if it exists
+        # On Windows, we need to wait a bit for the file to be released
         if self.db_path != ":memory:" and Path(self.db_path).exists():
-            Path(self.db_path).unlink()
+            import time
+            import os
+
+            # Try to remove the file, with retries on Windows
+            max_retries = 5
+            for attempt in range(max_retries):
+                try:
+                    Path(self.db_path).unlink()
+                    break
+                except (PermissionError, OSError) as e:
+                    if attempt < max_retries - 1:
+                        await asyncio.sleep(0.1)
+                    else:
+                        # Last attempt failed, try to force close any remaining connections
+                        try:
+                            # Force garbage collection to close any remaining file handles
+                            import gc
+
+                            gc.collect()
+                            await asyncio.sleep(0.2)
+                            Path(self.db_path).unlink()
+                        except (PermissionError, OSError):
+                            # If still failing, log warning but don't raise
+                            logger.warning(
+                                f"Could not remove database file {self.db_path}: {e}"
+                            )
 
         logger.debug("Test database teardown complete")
 
