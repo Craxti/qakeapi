@@ -95,7 +95,16 @@ async def client(enhanced_app):
     """Создать тестовый клиент"""
     from httpx import AsyncClient
 
-    async with AsyncClient(app=enhanced_app, base_url="http://testserver") as client:
+    from httpx import AsyncClient
+
+    try:
+        from httpx import ASGITransport
+    except ImportError:
+        from httpx._transports.asgi import ASGITransport
+
+    async with AsyncClient(
+        transport=ASGITransport(app=enhanced_app), base_url="http://testserver"
+    ) as client:
         yield client
 
 

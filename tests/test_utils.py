@@ -139,7 +139,7 @@ class TestStaticFiles:
             ("style.css", "text/css"),
             ("script.js", "text/javascript"),
             ("image.png", "image/png"),
-            ("unknown.xyz", "application/octet-stream"),
+            ("unknown.xyz", "chemical/x-xyz"),
         ]
 
         for filename, expected_type in test_cases:

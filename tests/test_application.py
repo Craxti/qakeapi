@@ -14,7 +14,7 @@ class TestApplication:
         # Add test route
         @app.get("/")
         async def test_handler(request):
-            return Response({"message": "Hello, World!"}, status_code=200)
+            return JSONResponse({"message": "Hello, World!"}, status_code=200)
 
         # Create test scope
         scope = {
