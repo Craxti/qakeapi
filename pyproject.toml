@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qakeapi"
-version = "0.1.0"
+version = "1.1.0"
 description = "Modern asynchronous web framework for Python with built-in monitoring, caching, and CLI tools"
 authors = [
     {name = "QakeAPI Team", email = "team@qakeapi.dev"}

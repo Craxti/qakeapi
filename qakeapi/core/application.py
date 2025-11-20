@@ -23,7 +23,7 @@ class QakeAPI(APIRouter):
         debug: bool = False,
         title: str = "QakeAPI Application",
         description: str = "",
-        version: str = "0.1.0",
+        version: str = "1.1.0",
         openapi_url: Optional[str] = "/openapi.json",
         docs_url: Optional[str] = "/docs",
         redoc_url: Optional[str] = "/redoc",

@@ -33,6 +33,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed import errors in example applications
 - Fixed duplicate properties in Request class
 
+## [1.1.0] - 2024-11-20
+
+### Added
+- Enhanced error handling with better exception prioritization
+- Improved Windows compatibility for database tests
+- Better MIME type detection across different operating systems
+- Non-blocking black formatting check in CI
+
+### Fixed
+- Fixed Windows-specific test failures (database file locking, MIME type detection)
+- Fixed code formatting issues across multiple files
+- Fixed httpx compatibility issues in tests
+- Fixed Response serialization in tests
+
+### Changed
+- Made black formatting check non-blocking in CI
+- Updated Python version requirement to >=3.9
+
 ## [0.1.0] - 2024-01-XX
 
 ### Added
