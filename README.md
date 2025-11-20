@@ -2,11 +2,18 @@
 
 <div align="center">
 
-**A modern, fast, and powerful asynchronous web framework for building APIs with Python 3.8+**
+**A modern, fast, and powerful asynchronous web framework for building APIs with Python 3.9+**
 
-[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
+> ⚡ **FastAPI alternative** with built-in monitoring, caching, and CLI tools. Perfect for building modern REST APIs and web applications.
+
+[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-201%20passed-success)](tests/)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/Craxti/qakeapi/releases)
+[![PyPI version](https://badge.fury.io/py/qakeapi.svg)](https://badge.fury.io/py/qakeapi)
+[![Downloads](https://pepy.tech/badge/qakeapi)](https://pepy.tech/project/qakeapi)
+[![GitHub stars](https://img.shields.io/github/stars/Craxti/qakeapi?style=social)](https://github.com/Craxti/qakeapi)
+[![GitHub forks](https://img.shields.io/github/forks/Craxti/qakeapi?style=social)](https://github.com/Craxti/qakeapi)
+[![Tests](https://img.shields.io/badge/tests-550%2B%20passed-success)](tests/)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Type Hints](https://img.shields.io/badge/type%20hints-mypy-blue.svg)](https://mypy.readthedocs.io/)
 
@@ -525,12 +532,26 @@ QakeAPI comes with comprehensive examples in the `examples/` directory:
 
 See [examples/README.md](examples/README.md) for detailed descriptions.
 
+## ⭐ Star History
+
+If you find QakeAPI useful, please consider giving it a star ⭐ on GitHub! It helps others discover the project.
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Craxti/qakeapi&type=Date)](https://star-history.com/#Craxti/qakeapi&Date)
+
 ## 📞 Support
 
-- 📧 Email: support@qakeapi.dev
-- 🐙 GitHub Issues: [https://github.com/qakeapi/qakeapi/issues](https://github.com/qakeapi/qakeapi/issues)
-- 📚 Documentation: [https://qakeapi.dev](https://qakeapi.dev)
-- 💬 Community: [https://discord.gg/qakeapi](https://discord.gg/qakeapi)
+- 🐙 **GitHub Issues**: [Report bugs or request features](https://github.com/Craxti/qakeapi/issues)
+- 💬 **Discussions**: [Ask questions and share ideas](https://github.com/Craxti/qakeapi/discussions)
+- 📧 **Email**: fetis.dev@gmail.com
+
+## 🌟 Why QakeAPI?
+
+- ✅ **Built-in Monitoring**: Metrics and health checks out of the box
+- ✅ **Built-in Caching**: In-memory and Redis support
+- ✅ **CLI Tools**: Quick project scaffolding
+- ✅ **Developer Experience**: Fast development with auto-validation and docs
+- ✅ **Production Ready**: Security, rate limiting, error handling included
+- ✅ **Well Tested**: 550+ tests ensuring reliability
 
 ---
 
