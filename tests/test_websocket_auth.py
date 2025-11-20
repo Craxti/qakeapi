@@ -404,9 +404,9 @@ class TestWebSocketAuthHandler:
         """Test require_auth decorator with authenticated user."""
         # Add to authenticated connections
         auth_result = AuthResult(status=AuthStatus.AUTHENTICATED, user_id="user123")
-        middleware._authenticated_connections[mock_websocket.connection_id] = (
-            auth_result
-        )
+        middleware._authenticated_connections[
+            mock_websocket.connection_id
+        ] = auth_result
 
         # Create test handler
         @handler.require_auth
@@ -444,9 +444,9 @@ class TestWebSocketAuthHandler:
         """Test optional_auth decorator with authenticated user."""
         # Add to authenticated connections
         auth_result = AuthResult(status=AuthStatus.AUTHENTICATED, user_id="user123")
-        middleware._authenticated_connections[mock_websocket.connection_id] = (
-            auth_result
-        )
+        middleware._authenticated_connections[
+            mock_websocket.connection_id
+        ] = auth_result
 
         # Create test handler
         @handler.optional_auth
