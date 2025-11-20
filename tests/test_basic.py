@@ -38,9 +38,8 @@ def app():
 def client(app):
     """Создать тестовый клиент"""
     from httpx import AsyncClient
-    from httpx._transports.asgi import ASGITransport
 
-    return AsyncClient(transport=ASGITransport(app=app), base_url="http://testserver")
+    return AsyncClient(app=app, base_url="http://testserver")
 
 
 class TestBasicRoutes:
