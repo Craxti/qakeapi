@@ -1,6 +1,7 @@
 """
 Базовая демонстрация QakeAPI
 """
+
 from qakeapi import QakeAPI
 
 # Создаем приложение
