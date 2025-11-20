@@ -1,5 +1,7 @@
 import json
+import os
 import asyncio
+from pathlib import Path
 from http.cookies import SimpleCookie
 from datetime import datetime
 from typing import Any, AsyncIterable, Dict, List, Optional, Tuple, Union
@@ -319,3 +321,175 @@ class JSONResponse(Response):
             return json.dumps(self.content, cls=CustomJSONEncoder).encode()
         except (TypeError, ValueError):
             return json.dumps({"error": str(self.content)}).encode()
+
+
+class HTMLResponse(Response):
+    """HTML Response"""
+
+    def __init__(
+        self,
+        content: str = "",
+        status_code: int = 200,
+        headers: Optional[Union[Dict[str, str], List[Tuple[bytes, bytes]]]] = None,
+    ) -> None:
+        super().__init__(
+            content=content,
+            status_code=status_code,
+            headers=headers,
+            media_type="text/html; charset=utf-8",
+        )
+
+
+class PlainTextResponse(Response):
+    """Plain text Response"""
+
+    def __init__(
+        self,
+        content: str = "",
+        status_code: int = 200,
+        headers: Optional[Union[Dict[str, str], List[Tuple[bytes, bytes]]]] = None,
+    ) -> None:
+        super().__init__(
+            content=content,
+            status_code=status_code,
+            headers=headers,
+            media_type="text/plain; charset=utf-8",
+        )
+
+
+class RedirectResponse(Response):
+    """Redirect Response"""
+
+    def __init__(
+        self,
+        url: str,
+        status_code: int = 302,
+        headers: Optional[Union[Dict[str, str], List[Tuple[bytes, bytes]]]] = None,
+    ) -> None:
+        headers_list = []
+        if headers:
+            if isinstance(headers, dict):
+                headers_list.extend(
+                    (k.encode(), v.encode()) for k, v in headers.items()
+                )
+            else:
+                headers_list.extend(headers)
+        headers_list.append((b"location", url.encode()))
+        super().__init__(
+            content=b"",
+            status_code=status_code,
+            headers=headers_list,
+        )
+
+
+class FileResponse(Response):
+    """File Response"""
+
+    def __init__(
+        self,
+        path: str,
+        status_code: int = 200,
+        headers: Optional[Union[Dict[str, str], List[Tuple[bytes, bytes]]]] = None,
+        media_type: Optional[str] = None,
+        filename: Optional[str] = None,
+    ) -> None:
+        import os
+        from pathlib import Path
+
+        self.path = Path(path)
+        self.filename = filename
+
+        if not self.path.exists():
+            raise FileNotFoundError(f"File not found: {path}")
+
+        if media_type is None:
+            media_type = self._guess_media_type(self.path)
+
+        headers_list = []
+        if headers:
+            if isinstance(headers, dict):
+                headers_list.extend(
+                    (k.encode(), v.encode()) for k, v in headers.items()
+                )
+            else:
+                headers_list.extend(headers)
+
+        if filename:
+            headers_list.append(
+                (b"content-disposition", f'attachment; filename="{filename}"'.encode())
+            )
+
+        # Set file size
+        stat_result = self.path.stat()
+        headers_list.append((b"content-length", str(stat_result.st_size).encode()))
+
+        super().__init__(
+            content=None,
+            status_code=status_code,
+            headers=headers_list,
+            media_type=media_type,
+        )
+        self._file_path = str(self.path)
+
+    def _guess_media_type(self, path: Path) -> str:
+        """Guess MIME type by file extension"""
+        ext = path.suffix.lower()
+        mime_types = {
+            ".html": "text/html",
+            ".css": "text/css",
+            ".js": "application/javascript",
+            ".json": "application/json",
+            ".png": "image/png",
+            ".jpg": "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".gif": "image/gif",
+            ".svg": "image/svg+xml",
+            ".pdf": "application/pdf",
+            ".txt": "text/plain",
+            ".xml": "application/xml",
+            ".zip": "application/zip",
+        }
+        return mime_types.get(ext, "application/octet-stream")
+
+    async def _file_generator(
+        self, file_path: str, chunk_size: int = 8192
+    ) -> AsyncIterable[bytes]:
+        """Generator for reading file in chunks"""
+        with open(file_path, "rb") as file:
+            while True:
+                chunk = file.read(chunk_size)
+                if not chunk:
+                    break
+                yield chunk
+
+    async def __call__(self, send) -> None:
+        """Send file response via ASGI"""
+        headers = self.headers_list.copy()
+
+        # Send response start
+        await send(
+            {
+                "type": "http.response.start",
+                "status": self.status_code,
+                "headers": headers,
+            }
+        )
+
+        # Send file in chunks
+        async for chunk in self._file_generator(self._file_path):
+            await send(
+                {
+                    "type": "http.response.body",
+                    "body": chunk,
+                    "more_body": True,
+                }
+            )
+
+        # Send final empty chunk
+        await send(
+            {
+                "type": "http.response.body",
+                "body": b"",
+                "more_body": False,
+            }
+        )
