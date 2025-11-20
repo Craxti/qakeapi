@@ -137,7 +137,7 @@ class TestStaticFiles:
         test_cases = [
             ("test.txt", "text/plain"),
             ("style.css", "text/css"),
-            ("script.js", "application/javascript"),
+            ("script.js", "text/javascript"),
             ("image.png", "image/png"),
             ("unknown.xyz", "application/octet-stream"),
         ]

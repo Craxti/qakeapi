@@ -77,11 +77,12 @@ class TestWebSocketRouting:
 
         # Проверяем, что маршрут был зарегистрирован
         # В новой архитектуре роутеры находятся внутри приложения
-        assert len(app.ws_router.routes) > 0
+        websocket_routes = [r for r in app.routes if r.route_type.value == "websocket"]
+        assert len(websocket_routes) > 0
 
         # Проверяем, что есть маршрут с нужным путем
         found_route = None
-        for route in app.ws_router.routes:
+        for route in websocket_routes:
             if route.path == "/ws/test":
                 found_route = route
                 break
@@ -113,5 +114,5 @@ class TestWebSocketMiddleware:
             "path_params": {},
         }
 
-        # Проверяем выполнение middleware
-        await app.handle_websocket(scope, mock_receive, mock_send)
+        # Проверяем выполнение middleware через ASGI callable
+        await app(scope, mock_receive, mock_send)
