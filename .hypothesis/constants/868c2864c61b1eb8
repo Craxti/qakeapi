@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/security/headers.py
+# hypothesis_version: 6.135.22
+
+[31536000, "'self'", ', ', '1; mode=block', '; ', 'Cache-Control', 'DENY', 'Permissions-Policy', 'Referrer-Policy', 'SAMEORIGIN', 'X-Frame-Options', 'X-XSS-Protection', 'connect-src', 'data:', 'default-src', 'font-src', 'img-src', 'no-store, max-age=0', 'nosniff', 'script-src', 'style-src']

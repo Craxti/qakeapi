@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Live Reload Demo{% endblock %}
+
+{% block content %}
+    <h2>Welcome to Live Reload Demo!</h2>
+    
+    <div class="highlight">
+        <strong>✨ Live Reload Features:</strong>
+        <ul>
+            <li>Automatic template reloading</li>
+            <li>File system watching</li>
+            <li>Browser auto-refresh</li>
+            <li>Development-friendly workflow</li>
+        </ul>
+    </div>
+    
+    <div class="feature">
+        <h3>How to Test Live Reload:</h3>
+        <ol>
+            <li>Open this page in your browser</li>
+            <li>Edit any template file in the <code>templates/</code> directory</li>
+            <li>Save the file</li>
+            <li>Watch the browser refresh automatically!</li>
+        </ol>
+    </div>
+    
+    <div class="feature">
+        <h3>Available Routes:</h3>
+        <ul>
+            <li><a href="/">Home</a> - This page</li>
+            <li><a href="/about">About</a> - About page</li>
+            <li><a href="/dynamic">Dynamic</a> - Dynamic content page</li>
+            <li><a href="/api/info">API Info</a> - JSON API endpoint</li>
+        </ul>
+    </div>
+    
+    <div class="code">
+        <strong>Template Variables:</strong><br>
+        Version: {{ version }}<br>
+        Template: {{ template_name }}<br>
+        Current Time: {{ current_time }}<br>
+        Counter: {{ counter }}
+    </div>
+{% endblock %}

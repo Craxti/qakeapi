@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Dynamic Content - Live Reload Demo{% endblock %}
+
+{% block content %}
+    <h2>Dynamic Content Demo</h2>
+    
+    <div class="feature">
+        <h3>Dynamic Data:</h3>
+        <p>This page demonstrates dynamic content rendering with live reload.</p>
+    </div>
+    
+    <div class="highlight">
+        <h3>User Information:</h3>
+        <ul>
+            <li><strong>Name:</strong> {{ user.name }}</li>
+            <li><strong>Email:</strong> {{ user.email }}</li>
+            <li><strong>Role:</strong> {{ user.role }}</li>
+            <li><strong>Active:</strong> {{ "Yes" if user.active else "No" }}</li>
+        </ul>
+    </div>
+    
+    <div class="feature">
+        <h3>Items List:</h3>
+        {% if items %}
+            <ul>
+            {% for item in items %}
+                <li>{{ item.name }} - {{ item.description }}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No items available.</p>
+        {% endif %}
+    </div>
+    
+    <div class="code">
+        <strong>Page Statistics:</strong><br>
+        Total Items: {{ items|length }}<br>
+        User Status: {{ "Active" if user.active else "Inactive" }}<br>
+        Template Rendered: {{ current_time }}
+    </div>
+{% endblock %}

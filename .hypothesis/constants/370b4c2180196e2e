@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/testing/mocks.py
+# hypothesis_version: 6.135.22
+
+[0.0, 100.0, 200, 201, 404, 8080, '*', '/', '/email/send', '/payments', '/payments/txn_123', '/users', '/users/1', 'DELETE', 'GET', 'Jane Smith', 'John Doe', 'New User', 'Not JSON', 'Not found', 'POST', 'PUT', 'Service not found', 'amount', 'body', 'delay', 'email', 'headers', 'id', 'jane@example.com', 'john@example.com', 'localhost', 'message_id', 'method', 'mock_api', 'mock_service', 'msg_456', 'name', 'new@example.com', 'path', 'payments', 'sent', 'status', 'success', 'timestamp', 'transaction_id', 'txn_123', 'users']

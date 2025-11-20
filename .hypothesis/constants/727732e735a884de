@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/core/requests.py
+# hypothesis_version: 6.135.22
+
+[b'\r\n', b'\r\n\r\n', b'content-type', b'cookie', 8000, '/', ':', ';', 'Content-Disposition', 'Content-Type', 'GET', 'boundary=([^;]+)', 'client', 'filename="([^"]+)"', 'headers', 'http', 'localhost', 'method', 'multipart/form-data', 'name="([^"]+)"', 'path', 'path_params', 'query_string', 'scheme', 'server', 'type']

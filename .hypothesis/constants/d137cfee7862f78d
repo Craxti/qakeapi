@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/templates/jinja2.py
+# hypothesis_version: 6.135.22
+
+[200, 'Live reload stopped', 'auto_reload', 'autoescape', 'content-type', 'live_reload_enabled', 'loader', 'templates']

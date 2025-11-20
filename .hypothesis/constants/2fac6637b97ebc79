@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/security/authorization.py
+# hypothesis_version: 6.135.22
+
+[401, 500, 'Permission denied', 'Permission granted', 'Unauthorized', 'admin', 'detail', 'user']

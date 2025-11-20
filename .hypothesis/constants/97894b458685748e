@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/core/routing/websocket.py
+# hypothesis_version: 6.135.22
+
+[1000, 1011, '(?P<', '/', '>[^/]+)', 'No route found', '\\/', 'websocket', '{', '}']

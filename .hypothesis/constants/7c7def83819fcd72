@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/security/xss.py
+# hypothesis_version: 6.135.22
+
+[' data-removed=""', '<!--.*?-->', '<!DOCTYPE[^>]*>', '<!\\[CDATA\\[.*?\\]\\]>', '<base[^>]*>', '<embed[^>]*>', '<link[^>]*>', '<meta[^>]*>', 'content', 'data:', 'form_data', 'javascript:', 'json', 'onabort', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onerror', 'onfocus', 'onkeydown', 'onkeypress', 'onkeyup', 'onload', 'onmousedown', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onreset', 'onresize', 'onselect', 'onsubmit', 'onunload', 'removed()', 'removed:', 'vbscript:']

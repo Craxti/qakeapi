@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/core/middleware/cors.py
+# hypothesis_version: 6.135.22
+
+[b'Access-Control-Allow-Credentials', b'Access-Control-Allow-Headers', b'Access-Control-Allow-Methods', b'Access-Control-Allow-Origin', b'Access-Control-Expose-Headers', b'Access-Control-Max-Age', b'origin', b'true', 200, 400, 600, '*', ', ', 'DELETE', 'GET', 'No origin header', 'OPTIONS', 'Origin not allowed', 'PATCH', 'POST', 'PUT', 'detail', 'headers']

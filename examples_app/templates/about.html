@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}About - Live Reload Demo{% endblock %}
+
+{% block content %}
+    <h2>About Live Reload</h2>
+    
+    <div class="feature">
+        <h3>What is Live Reload?</h3>
+        <p>Live reload is a development feature that automatically refreshes the browser when template files are modified. This eliminates the need to manually refresh the page during development.</p>
+    </div>
+    
+    <div class="feature">
+        <h3>How it Works:</h3>
+        <ol>
+            <li>The application watches template directories for file changes</li>
+            <li>When a change is detected, it triggers a reload</li>
+            <li>The browser automatically refreshes to show the updated content</li>
+        </ol>
+    </div>
+    
+    <div class="highlight">
+        <strong>Benefits:</strong>
+        <ul>
+            <li>Faster development workflow</li>
+            <li>No manual browser refresh needed</li>
+            <li>Immediate visual feedback</li>
+            <li>Better developer experience</li>
+        </ul>
+    </div>
+    
+    <div class="code">
+        <strong>Technical Details:</strong><br>
+        - Uses watchdog library for file system monitoring<br>
+        - Supports multiple template directories<br>
+        - Debounced file change detection<br>
+        - WebSocket-based browser communication
+    </div>
+{% endblock %}
