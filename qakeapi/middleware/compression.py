@@ -7,7 +7,7 @@ import zlib
 from typing import Callable, Set, Optional
 
 from ..core.request import Request
-from ..core.response import Response
+from ..core.responses import Response
 from .base import BaseMiddleware
 
 

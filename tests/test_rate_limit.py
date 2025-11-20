@@ -5,7 +5,7 @@ from qakeapi.security.rate_limit import (
     InMemoryRateLimiter,
     RateLimitMiddleware,
 )
-from qakeapi.core.requests import Request
+from qakeapi.core.request import Request
 from qakeapi.core.responses import Response
 
 

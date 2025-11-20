@@ -13,7 +13,7 @@ try:
 except ImportError:
     JINJA2_AVAILABLE = False
 
-from ..core.response import HTMLResponse
+from ..core.responses import HTMLResponse
 from ..core.exceptions import QakeAPIException
 
 

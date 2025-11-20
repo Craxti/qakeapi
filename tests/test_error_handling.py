@@ -15,7 +15,7 @@ from qakeapi.core.error_handling import (
 )
 from qakeapi.core.request import Request
 from qakeapi.core.exceptions import HTTPException
-from qakeapi.core.response import JSONResponse
+from qakeapi.core.responses import JSONResponse
 from qakeapi.utils.status import status
 from pydantic import ValidationError, BaseModel, Field
 

@@ -6,7 +6,7 @@ from typing import Callable, Any
 from abc import ABC, abstractmethod
 
 from ..core.request import Request
-from ..core.response import Response
+from ..core.responses import Response
 
 
 class BaseMiddleware(ABC):

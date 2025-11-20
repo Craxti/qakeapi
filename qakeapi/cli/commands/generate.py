@@ -164,7 +164,7 @@ async def delete_{name_lower}(item_id: str):
 from typing import Callable
 from qakeapi.middleware.base import BaseMiddleware
 from qakeapi.core.request import Request
-from qakeapi.core.response import Response
+from qakeapi.core.responses import Response
 
 
 class {name}Middleware(BaseMiddleware):
@@ -215,7 +215,7 @@ class {name}Middleware(BaseMiddleware):
 import pytest
 from qakeapi import QakeAPI
 from qakeapi.core.request import Request
-from qakeapi.core.response import Response
+from qakeapi.core.responses import Response
 
 
 class Test{name}:

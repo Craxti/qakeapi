@@ -217,9 +217,9 @@ class ErrorResponseBuilder:
         # Добаinляем дополнandтельную andнформацandю
         if self.include_error_id:
             content["error_id"] = context.error_id
-            content["request_id"] = (
-                context.error_id
-            )  # Для соinместandмостand с тестамand
+            content[
+                "request_id"
+            ] = context.error_id  # Для соinместandмостand с тестамand
 
         if self.include_timestamp:
             content["timestamp"] = context.timestamp.isoformat()

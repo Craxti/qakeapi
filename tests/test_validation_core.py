@@ -17,7 +17,7 @@ from qakeapi.validation.models import (
     ResponseModel,
     create_model_validator,
 )
-from qakeapi.core.requests import Request
+from qakeapi.core.request import Request
 from qakeapi.core.responses import JSONResponse
 
 

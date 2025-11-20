@@ -11,7 +11,7 @@ from enum import Enum
 
 from ..middleware.base import BaseMiddleware
 from ..core.request import Request
-from ..core.response import Response, JSONResponse
+from ..core.responses import Response, JSONResponse
 from ..utils.status import status
 
 

@@ -9,7 +9,7 @@ from unittest.mock import Mock
 
 from qakeapi.middleware.compression import CompressionMiddleware
 from qakeapi.core.request import Request
-from qakeapi.core.response import Response, JSONResponse
+from qakeapi.core.responses import Response, JSONResponse
 
 
 class TestCompressionMiddleware:

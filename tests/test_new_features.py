@@ -297,7 +297,7 @@ class TestNewFeatures:
 
     def test_response_enhancements(self):
         """Тест улучшений Response"""
-        from qakeapi.core.response import (
+        from qakeapi.core.responses import (
             JSONResponse,
             HTMLResponse,
             PlainTextResponse,

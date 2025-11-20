@@ -5,7 +5,7 @@ from http.cookies import SimpleCookie
 import pytest
 
 from qakeapi.core.files import UploadFile
-from qakeapi.core.requests import Request
+from qakeapi.core.request import Request
 from qakeapi.core.responses import Response
 
 

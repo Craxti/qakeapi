@@ -132,17 +132,17 @@ class VersioningMiddleware:
         if hasattr(response, "headers"):
             response.headers["X-API-Deprecation"] = "true"
             response.headers["X-API-Deprecation-Message"] = warning.message
-            response.headers["X-API-Deprecation-Date"] = (
-                warning.deprecation_date.isoformat()
-            )
+            response.headers[
+                "X-API-Deprecation-Date"
+            ] = warning.deprecation_date.isoformat()
 
             if warning.sunset_date:
                 response.headers["X-API-Sunset-Date"] = warning.sunset_date.isoformat()
 
             if warning.alternative_endpoint:
-                response.headers["X-API-Alternative-Endpoint"] = (
-                    warning.alternative_endpoint
-                )
+                response.headers[
+                    "X-API-Alternative-Endpoint"
+                ] = warning.alternative_endpoint
 
     def _get_version_status(self, version: str) -> str:
         """Get version status string."""

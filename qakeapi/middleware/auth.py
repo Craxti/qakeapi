@@ -11,7 +11,7 @@ import json
 
 from .base import BaseMiddleware
 from ..core.request import Request
-from ..core.response import Response
+from ..core.responses import Response
 from ..core.exceptions import AuthenticationException, AuthorizationException
 
 

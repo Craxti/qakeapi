@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from qakeapi.caching.cache import InMemoryCache, CacheManager, CacheEntry
 from qakeapi.caching.middleware import CacheMiddleware
 from qakeapi.core.request import Request
-from qakeapi.core.response import JSONResponse
+from qakeapi.core.responses import JSONResponse
 
 
 class TestInMemoryCache:

@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 
 from ..middleware.base import BaseMiddleware
 from ..core.request import Request
-from ..core.response import Response
+from ..core.responses import Response
 
 
 @dataclass

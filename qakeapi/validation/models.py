@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict, Optional, Type, TypeVar, Union, get_type
 
 from pydantic import BaseModel, ValidationError
 
-from ..core.requests import Request
+from ..core.request import Request
 from ..core.responses import JSONResponse, Response
 
 T = TypeVar("T", bound=BaseModel)

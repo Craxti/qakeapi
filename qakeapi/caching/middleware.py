@@ -7,7 +7,7 @@ import json
 from typing import Callable, Optional, Set, List
 
 from ..core.request import Request
-from ..core.response import Response, JSONResponse
+from ..core.responses import Response, JSONResponse
 from ..middleware.base import BaseMiddleware
 from .cache import CacheManager, default_cache
 

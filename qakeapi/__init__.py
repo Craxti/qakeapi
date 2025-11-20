@@ -22,7 +22,7 @@ __version__ = "1.1.0"
 # Core components
 from .core.application import QakeAPI
 from .core.request import Request
-from .core.response import (
+from .core.responses import (
     Response,
     JSONResponse,
     HTMLResponse,

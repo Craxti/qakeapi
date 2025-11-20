@@ -3,7 +3,7 @@ import asyncio
 from qakeapi import QakeAPI, JSONResponse
 from qakeapi.core.responses import Response
 from qakeapi.core.routing import HTTPRouter, WebSocketRouter
-from qakeapi.core.cache import Cache
+from qakeapi.caching.cache import InMemoryCache as Cache
 
 
 @pytest.mark.asyncio

@@ -1,5 +1,5 @@
 from typing import List, Optional, Callable
-from ..core.requests import Request
+from ..core.request import Request
 from ..core.responses import Response
 
 

@@ -1,7 +1,7 @@
 import pytest
 
 from qakeapi.core.middleware.cors import CORSConfig, CORSMiddleware
-from qakeapi.core.requests import Request
+from qakeapi.core.request import Request
 from qakeapi.core.responses import Response
 
 

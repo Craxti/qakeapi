@@ -8,7 +8,7 @@ from typing import Optional, Dict, Any
 from pathlib import Path
 
 from ..core.request import Request
-from ..core.response import Response, FileResponse, JSONResponse
+from ..core.responses import Response, FileResponse, JSONResponse
 from ..core.exceptions import NotFoundException
 from ..utils.status import status
 

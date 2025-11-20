@@ -3,7 +3,7 @@ from typing import Dict, Optional, Tuple
 import time
 import asyncio
 from dataclasses import dataclass
-from qakeapi.core.requests import Request
+from qakeapi.core.request import Request
 from qakeapi.core.responses import Response
 
 

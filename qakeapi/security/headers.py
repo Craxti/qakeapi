@@ -57,9 +57,9 @@ class SecurityHeaders:
         headers = cls.get_default_headers()
 
         # Customize HSTS
-        headers["Strict-Transport-Security"] = (
-            f"max-age={hsts_max_age}; includeSubDomains"
-        )
+        headers[
+            "Strict-Transport-Security"
+        ] = f"max-age={hsts_max_age}; includeSubDomains"
 
         # Customize Frame Options
         if frame_options in ["DENY", "SAMEORIGIN"]:

@@ -35,7 +35,7 @@ from hypothesis.stateful import Bundle, RuleBasedStateMachine, rule
 from memory_profiler import profile
 
 from ..core.application import Application
-from ..core.requests import Request
+from ..core.request import Request
 from ..core.responses import Response
 
 logger = logging.getLogger(__name__)

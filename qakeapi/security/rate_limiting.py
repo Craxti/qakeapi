@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from collections import defaultdict, deque
 
 from ..core.request import Request
-from ..core.response import Response, JSONResponse
+from ..core.responses import Response, JSONResponse
 from ..middleware.base import BaseMiddleware
 from ..core.exceptions import HTTPException
 from ..utils.status import status

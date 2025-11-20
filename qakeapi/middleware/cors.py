@@ -7,7 +7,7 @@ import re
 
 from .base import BaseMiddleware
 from ..core.request import Request
-from ..core.response import Response, PlainTextResponse
+from ..core.responses import Response, PlainTextResponse
 from ..utils.status import status
 
 

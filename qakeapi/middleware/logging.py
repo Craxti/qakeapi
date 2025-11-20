@@ -8,7 +8,7 @@ from typing import Callable, Optional, Set
 
 from .base import BaseMiddleware
 from ..core.request import Request
-from ..core.response import Response
+from ..core.responses import Response
 
 
 class LoggingMiddleware(BaseMiddleware):

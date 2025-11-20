@@ -5,7 +5,7 @@ from typing import Any, Callable, List, Optional
 
 from qakeapi.core.responses import Response
 from qakeapi.core.interfaces import UserProtocol
-from qakeapi.core.requests import Request
+from qakeapi.core.request import Request
 
 logger = logging.getLogger(__name__)
 

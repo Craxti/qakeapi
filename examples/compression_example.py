@@ -80,7 +80,7 @@ async def text_response():
 
     Text responses can also be compressed.
     """
-    from qakeapi.core.response import PlainTextResponse
+    from qakeapi.core.responses import PlainTextResponse
 
     large_text = "This is a large text response. " * 100
     return PlainTextResponse(large_text)

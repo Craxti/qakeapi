@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional, Union
 import html
 import re
 from qakeapi.core.middleware import BaseMiddleware
-from qakeapi.core.requests import Request
+from qakeapi.core.request import Request
 from qakeapi.core.responses import Response
 
 
@@ -108,7 +108,9 @@ class XSSProtection:
             k: (
                 cls.sanitize_value(v)
                 if isinstance(v, (str, int, float, bool))
-                else cls.sanitize_dict(v) if isinstance(v, dict) else v
+                else cls.sanitize_dict(v)
+                if isinstance(v, dict)
+                else v
             )
             for k, v in data.items()
         }

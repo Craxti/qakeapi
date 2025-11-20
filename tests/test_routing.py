@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 import pytest
 
-from qakeapi.core.requests import Request
+from qakeapi.core.request import Request
 from qakeapi.core.responses import Response
 from qakeapi.core.routing import HTTPRoute, HTTPRouter, WebSocketRoute, WebSocketRouter
 
