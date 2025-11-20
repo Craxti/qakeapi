@@ -47,6 +47,11 @@ dependencies = [
     
     # Мониторинг
     "psutil>=5.9.0",
+    
+    # Дополнительные зависимости для расширенных функций
+    "aiohttp>=3.8.0",
+    "PyJWT>=2.8.0",
+    "watchdog>=3.0.0",
 ]
 
 [project.optional-dependencies]

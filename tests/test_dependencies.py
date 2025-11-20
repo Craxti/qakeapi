@@ -1,111 +1,85 @@
 from typing import Any, Dict
 
 import pytest
-
-from qakeapi.core.dependencies import Dependency, DependencyContainer, inject
-
-
-class ConfigDependency(Dependency):
-    async def resolve(self) -> Dict[str, Any]:
-        return {"app_name": "Test App", "version": "1.0.3"}
+from qakeapi import QakeAPI, Request
+from qakeapi.core.dependencies import DependencyResolver, Depends
 
 
-class DatabaseDependency(Dependency):
-    def __init__(self):
-        super().__init__(scope="singleton")
-        self.connection = None
-        self.instance_id = id(self)
-
-    async def resolve(self) -> Any:
-        if not self.connection:
-            self.connection = {"connected": True, "instance_id": self.instance_id}
-        return self.connection
-
-    async def cleanup(self) -> None:
-        if self.connection:
-            self.connection = None
+async def get_config() -> Dict[str, Any]:
+    """Dependency function that returns app configuration"""
+    return {"app_name": "Test App", "version": "1.0.3"}
 
 
-class ServiceDependency(Dependency):
-    async def resolve(self) -> Dict[str, Any]:
-        return {"service": "test"}
+async def get_database() -> Dict[str, Any]:
+    """Dependency function that returns database connection"""
+    return {"connected": True, "instance_id": id(get_database)}
 
 
 @pytest.fixture
-def container():
-    return DependencyContainer()
+def resolver():
+    return DependencyResolver()
+
+
+@pytest.fixture
+def app():
+    return QakeAPI()
+
+
+@pytest.fixture
+def mock_request():
+    scope = {
+        "type": "http",
+        "method": "GET",
+        "path": "/test",
+        "headers": [],
+        "query_string": b"",
+    }
+    return Request(scope, lambda: None)
 
 
 @pytest.mark.asyncio
-async def test_dependency_resolution():
-    container = DependencyContainer()
-    config = ConfigDependency()
-    container.register(config)
+async def test_dependency_resolution(mock_request):
+    resolver = DependencyResolver()
 
-    result = await container.resolve(ConfigDependency)
+    async def handler(config: Dict[str, Any] = Depends(get_config)):
+        return config
+
+    dependencies = await resolver.resolve_dependencies(handler, mock_request)
+    result = await handler(**dependencies)
     assert result == {"app_name": "Test App", "version": "1.0.3"}
 
 
 @pytest.mark.asyncio
-async def test_singleton_scope():
-    container = DependencyContainer()
-    db = DatabaseDependency()
-    container.register(db)
+async def test_multiple_dependencies(mock_request):
+    resolver = DependencyResolver()
 
-    # First resolution
-    conn1 = await container.resolve(DatabaseDependency)
-    assert conn1["connected"] is True
-
-    # Second resolution should return the same instance
-    conn2 = await container.resolve(DatabaseDependency)
-    assert conn1 is conn2
-
-
-@pytest.mark.asyncio
-async def test_cleanup():
-    container = DependencyContainer()
-    db = DatabaseDependency()
-    container.register(db)
-
-    conn = await container.resolve(DatabaseDependency)
-    assert conn["connected"] is True
-
-    await container.cleanup()
-    assert db.connection is None
-
-
-@pytest.mark.asyncio
-async def test_inject_decorator():
-    container = DependencyContainer()
-    config = ConfigDependency()
-    db = DatabaseDependency()
-    container.register(config)
-    container.register(db)
-
-    @inject(ConfigDependency, DatabaseDependency)
-    async def handler(request, config, db):
+    async def handler(
+        config: Dict[str, Any] = Depends(get_config),
+        db: Dict[str, Any] = Depends(get_database),
+    ):
         return {"config": config, "db": db}
 
-    result = await handler({"type": "http"}, container=container)
+    dependencies = await resolver.resolve_dependencies(handler, mock_request)
+    result = await handler(**dependencies)
     assert result["config"] == {"app_name": "Test App", "version": "1.0.3"}
     assert result["db"]["connected"] is True
 
 
 @pytest.mark.asyncio
-async def test_multiple_dependencies():
-    container = DependencyContainer()
-    db = DatabaseDependency()
-    service = ServiceDependency()
-    container.register(db)
-    container.register(service)
+async def test_dependency_caching(mock_request):
+    resolver = DependencyResolver()
 
-    @inject(DatabaseDependency, ServiceDependency)
-    async def handler(request, db, service):
-        return {"db": db, "service": service}
+    async def handler(db1: Dict[str, Any] = Depends(get_database, use_cache=True)):
+        return db1
 
-    result = await handler({"type": "http"}, container=container)
-    assert result["db"]["connected"] is True
-    assert result["service"] == {"service": "test"}
+    dependencies1 = await resolver.resolve_dependencies(handler, mock_request)
+    result1 = await handler(**dependencies1)
+
+    dependencies2 = await resolver.resolve_dependencies(handler, mock_request)
+    result2 = await handler(**dependencies2)
+
+    # Cached dependencies should return same instance
+    assert result1["instance_id"] == result2["instance_id"]
 
 
 def get_app_config():
