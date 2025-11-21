@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/testing/fixtures.py
+# hypothesis_version: 6.135.22
+
+[0.0, 1.0, 1000.0, 100, 150, 200, 365, 1000, 'Alice', 'Bob', 'Brown', 'Charlie', 'Diana', 'Eve', 'Frank', 'Garcia', 'Jane', 'John', 'Johnson', 'Jones', 'Miller', 'Smith', 'T', 'Williams', 'admin', 'author_id', 'books', 'category', 'clothing', 'comment', 'content', 'created_at', 'description', 'electronics', 'email', 'en_US', 'home', 'id', 'in_stock', 'is_active', 'is_published', 'moderator', 'name', 'parent_id', 'post', 'post_id', 'price', 'product', 'roles', 'tags', 'title', 'updated_at', 'user', 'username']

@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/validation/models.py
+# hypothesis_version: 6.135.22
+
+[400, 422, 500, 'Invalid JSON', 'PATCH', 'POST', 'PUT', 'T', 'allow', 'detail', 'errors', 'forbid', 'method']

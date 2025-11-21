@@ -1,0 +1,24 @@
+# Core dependencies for QakeAPI examples
+pydantic>=2.0.0
+aiohttp>=3.8.0
+aiofiles>=23.0.0
+aioredis>=2.0.0
+websockets>=11.0.0
+
+# Optional dependencies for advanced examples
+redis>=4.0.0
+sqlite3  # Usually included with Python
+asyncio  # Usually included with Python
+typing  # Usually included with Python
+datetime  # Usually included with Python
+functools  # Usually included with Python
+concurrent.futures  # Usually included with Python
+pathlib  # Usually included with Python
+uuid  # Usually included with Python
+hashlib  # Usually included with Python
+secrets  # Usually included with Python
+re  # Usually included with Python
+json  # Usually included with Python
+time  # Usually included with Python
+os  # Usually included with Python
+sys  # Usually included with Python 

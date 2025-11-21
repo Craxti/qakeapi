@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/testing/performance.py
+# hypothesis_version: 6.135.22
+
+[30.0, 100, 1024, '=', 'avg_time', 'concurrent_tasks', 'cpu_usage', 'iterations', 'max_time', 'measure_memory', 'median_time', 'memory_usage', 'metadata', 'min_time', 'name', 'performance_test', 'requests_per_second', 'std_dev', 'total_requests', 'total_time', 'w', 'warmup_iterations']

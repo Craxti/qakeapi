@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .feature-list {
+            list-style: none;
+        }
+        
+        .feature-list li {
+            padding: 0.5rem 0;
+            font-size: 1.1rem;
+        }
+        
+        .api-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .api-section h2 {
+            color: #667eea;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+        
+        .endpoints {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .endpoint {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .endpoint-method {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+        
+        .endpoint-path {
+            font-family: 'Courier New', monospace;
+            margin: 0.5rem 0;
+            font-weight: bold;
+        }
+        
+        .endpoint-desc {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .link-button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .link-button:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 3rem;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .links {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ title }}</h1>
+            <p>Демонстрация всех возможностей современного асинхронного веб-фреймворка</p>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <h3>🚀 Основные возможности</h3>
+                <ul class="feature-list">
+                    {% for feature in features %}
+                    <li>{{ feature }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="feature-card">
+                <h3>📊 Мониторинг</h3>
+                <ul class="feature-list">
+                    <li>📈 Метрики в реальном времени</li>
+                    <li>🏥 Health checks</li>
+                    <li>📋 Prometheus интеграция</li>
+                    <li>🔍 Request tracing</li>
+                </ul>
+            </div>
+            
+            <div class="feature-card">
+                <h3>🛡️ Безопасность</h3>
+                <ul class="feature-list">
+                    <li>🚦 Rate limiting</li>
+                    <li>🔐 JWT аутентификация</li>
+                    <li>🛡️ CORS защита</li>
+                    <li>🔒 Input validation</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="api-section">
+            <h2>🌐 API Endpoints</h2>
+            <div class="endpoints">
+                <div class="endpoint">
+                    <div class="endpoint-method">GET</div>
+                    <div class="endpoint-path">/api/users</div>
+                    <div class="endpoint-desc">Список пользователей с пагинацией</div>
+                </div>
+                
+                <div class="endpoint">
+                    <div class="endpoint-method">POST</div>
+                    <div class="endpoint-path">/api/users</div>
+                    <div class="endpoint-desc">Создать нового пользователя</div>
+                </div>
+                
+                <div class="endpoint">
+                    <div class="endpoint-method">GET</div>
+                    <div class="endpoint-path">/api/items</div>
+                    <div class="endpoint-desc">Список товаров с фильтрацией</div>
+                </div>
+                
+                <div class="endpoint">
+                    <div class="endpoint-method">GET</div>
+                    <div class="endpoint-path">/api/search</div>
+                    <div class="endpoint-desc">Поиск по пользователям и товарам</div>
+                </div>
+                
+                <div class="endpoint">
+                    <div class="endpoint-method">GET</div>
+                    <div class="endpoint-path">/metrics</div>
+                    <div class="endpoint-desc">Метрики приложения</div>
+                </div>
+                
+                <div class="endpoint">
+                    <div class="endpoint-method">GET</div>
+                    <div class="endpoint-path">/health</div>
+                    <div class="endpoint-desc">Проверка здоровья системы</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="links">
+            <a href="/docs" class="link-button">📚 API Документация</a>
+            <a href="/metrics" class="link-button">📊 Метрики</a>
+            <a href="/health" class="link-button">🏥 Health Check</a>
+            <a href="/api/stats" class="link-button">📈 Статистика</a>
+        </div>
+        
+        <div class="footer">
+            <p>Создано с помощью QakeAPI - современного асинхронного веб-фреймворка</p>
+        </div>
+    </div>
+    
+    <script>
+        // Простая анимация карточек
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.feature-card');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }, index * 100);
+                    }
+                });
+            });
+            
+            cards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+        });
+        
+        // Проверка доступности API
+        async function checkAPI() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                console.log('API Stats:', data);
+            } catch (error) {
+                console.error('API недоступен:', error);
+            }
+        }
+        
+        // Проверяем API при загрузке
+        checkAPI();
+    </script>
+</body>
+</html>

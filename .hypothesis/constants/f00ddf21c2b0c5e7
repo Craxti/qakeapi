@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/core/background.py
+# hypothesis_version: 6.135.22
+
+[300, 'Task was cancelled', 'completed', 'completed_at', 'created_at', 'error', 'failed', 'not_found', 'pending', 'retries', 'running', 'started_at', 'status']

@@ -1,0 +1,4 @@
+# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/security/authentication.py
+# hypothesis_version: 6.135.22
+
+['Failed to get user', 'HS256', 'metadata', 'password', 'roles', 'sub', 'username']
