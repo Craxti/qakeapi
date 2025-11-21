@@ -2,7 +2,12 @@ from datetime import timedelta
 
 import pytest
 
-from qakeapi.security.jwt_auth import AuthenticationError, JWTAuthBackend, JWTConfig
+try:
+    from qakeapi.security.jwt_auth import AuthenticationError, JWTAuthBackend, JWTConfig
+except ImportError as e:
+    if "PyJWT" in str(e):
+        pytest.skip("PyJWT is required for JWT tests", allow_module_level=True)
+    raise
 
 
 @pytest.fixture

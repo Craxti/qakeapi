@@ -65,6 +65,9 @@ def test_http_route_match_multiple_params():
 async def test_http_router_basic(http_router):
     http_router.add_route("/test", mock_handler, ["GET"])
 
+    async def mock_receive():
+        return {"type": "http.request", "body": b"", "more_body": False}
+
     request = Request(
         {
             "type": "http",
@@ -72,7 +75,8 @@ async def test_http_router_basic(http_router):
             "path": "/test",
             "headers": [],
             "query_string": b"",
-        }
+        },
+        mock_receive,
     )
     response = await http_router.handle_request(request)
 
@@ -85,6 +89,9 @@ async def test_http_router_basic(http_router):
 async def test_http_router_not_found(http_router):
     http_router.add_route("/test", mock_handler, ["GET"])
 
+    async def mock_receive():
+        return {"type": "http.request", "body": b"", "more_body": False}
+
     request = Request(
         {
             "type": "http",
@@ -92,7 +99,8 @@ async def test_http_router_not_found(http_router):
             "path": "/nonexistent",
             "headers": [],
             "query_string": b"",
-        }
+        },
+        mock_receive,
     )
     response = await http_router.handle_request(request)
 
@@ -116,6 +124,9 @@ async def test_http_router_middleware(http_router):
     http_router.add_route("/test", mock_handler, ["GET"])
     http_router.add_middleware(mock_middleware)
 
+    async def mock_receive():
+        return {"type": "http.request", "body": b"", "more_body": False}
+
     request = Request(
         {
             "type": "http",
@@ -123,7 +134,8 @@ async def test_http_router_middleware(http_router):
             "path": "/test",
             "headers": [],
             "query_string": b"",
-        }
+        },
+        mock_receive,
     )
 
     response = await http_router.handle_request(request)
@@ -212,6 +224,9 @@ def test_http_route_match_complex_path():
 async def test_http_router_method_not_allowed(http_router):
     http_router.add_route("/test", mock_handler, ["GET"])
 
+    async def mock_receive():
+        return {"type": "http.request", "body": b"", "more_body": False}
+
     request = Request(
         {
             "type": "http",
@@ -219,7 +234,8 @@ async def test_http_router_method_not_allowed(http_router):
             "path": "/test",
             "headers": [],
             "query_string": b"",
-        }
+        },
+        mock_receive,
     )
     response = await http_router.handle_request(request)
 
@@ -241,6 +257,9 @@ class TestHTTPRouter:
         async def get_user(request):
             return Response(content={"user_id": request.path_params["user_id"]})
 
+        async def mock_receive():
+            return {"type": "http.request", "body": b"", "more_body": False}
+
         request = Request(
             {
                 "type": "http",
@@ -248,7 +267,8 @@ class TestHTTPRouter:
                 "path": "/users/123",
                 "headers": [],
                 "query_string": b"",
-            }
+            },
+            mock_receive,
         )
 
         response = await http_router.handle_request(request)
@@ -257,6 +277,9 @@ class TestHTTPRouter:
         assert b"123" in body
 
     async def test_route_not_found(self, http_router):
+        async def mock_receive():
+            return {"type": "http.request", "body": b"", "more_body": False}
+
         request = Request(
             {
                 "type": "http",
@@ -264,7 +287,8 @@ class TestHTTPRouter:
                 "path": "/nonexistent",
                 "headers": [],
                 "query_string": b"",
-            }
+            },
+            mock_receive,
         )
 
         response = await http_router.handle_request(request)
@@ -275,6 +299,9 @@ class TestHTTPRouter:
         async def create_user(request):
             return Response(content={"status": "created"})
 
+        async def mock_receive():
+            return {"type": "http.request", "body": b"", "more_body": False}
+
         # Test POST method
         request = Request(
             {
@@ -283,7 +310,8 @@ class TestHTTPRouter:
                 "path": "/users",
                 "headers": [],
                 "query_string": b"",
-            }
+            },
+            mock_receive,
         )
         response = await http_router.handle_request(request)
         assert response.status_code == 200
@@ -296,7 +324,8 @@ class TestHTTPRouter:
                 "path": "/users",
                 "headers": [],
                 "query_string": b"",
-            }
+            },
+            mock_receive,
         )
         response = await http_router.handle_request(request)
         assert response.status_code == 405
@@ -314,6 +343,9 @@ class TestHTTPRouter:
         async def protected_route(request):
             return Response(content={"status": "ok"})
 
+        async def mock_receive():
+            return {"type": "http.request", "body": b"", "more_body": False}
+
         request = Request(
             {
                 "type": "http",
@@ -321,7 +353,8 @@ class TestHTTPRouter:
                 "path": "/protected",
                 "headers": [],
                 "query_string": b"",
-            }
+            },
+            mock_receive,
         )
 
         response = await http_router.handle_request(request)

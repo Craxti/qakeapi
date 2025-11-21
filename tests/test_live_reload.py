@@ -10,18 +10,25 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from qakeapi.templates import Jinja2TemplateEngine, render_template
-from qakeapi.templates.live_reload import (
-    LiveReloadManager,
-    LiveReloadMiddleware,
-    TemplateChangeHandler,
-    add_live_reload_callback,
-    get_live_reload_manager,
-    remove_live_reload_callback,
-    setup_live_reload,
-    start_live_reload,
-    stop_live_reload,
-)
+try:
+    from qakeapi.templates import Jinja2TemplateEngine, render_template
+    from qakeapi.templates.live_reload import (
+        LiveReloadManager,
+        LiveReloadMiddleware,
+        TemplateChangeHandler,
+        add_live_reload_callback,
+        get_live_reload_manager,
+        remove_live_reload_callback,
+        setup_live_reload,
+        start_live_reload,
+        stop_live_reload,
+    )
+except ImportError as e:
+    if "watchdog" in str(e):
+        pytest.skip(
+            "watchdog is required for live reload tests", allow_module_level=True
+        )
+    raise
 
 
 class TestTemplateChangeHandler:

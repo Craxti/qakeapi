@@ -11,17 +11,24 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from qakeapi.core.websockets import WebSocketConnection
-from qakeapi.security.websocket_auth import (
-    AuthConfig,
-    AuthenticatorFactory,
-    AuthResult,
-    AuthStatus,
-    JWTAuthenticator,
-    WebSocketAuthenticator,
-    WebSocketAuthHandler,
-    WebSocketAuthMiddleware,
-)
+try:
+    from qakeapi.core.websockets import WebSocketConnection
+    from qakeapi.security.websocket_auth import (
+        AuthConfig,
+        AuthenticatorFactory,
+        AuthResult,
+        AuthStatus,
+        JWTAuthenticator,
+        WebSocketAuthenticator,
+        WebSocketAuthHandler,
+        WebSocketAuthMiddleware,
+    )
+except ImportError as e:
+    if "PyJWT" in str(e):
+        pytest.skip(
+            "PyJWT is required for WebSocket auth tests", allow_module_level=True
+        )
+    raise
 
 
 class TestAuthStatus:

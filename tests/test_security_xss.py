@@ -54,6 +54,10 @@ def test_sanitize_dict():
 @pytest.mark.asyncio
 async def test_xss_middleware_request(xss_middleware):
     """Test XSS middleware request processing."""
+
+    async def mock_receive():
+        return {"type": "http.request", "body": b"", "more_body": False}
+
     request = Request(
         {
             "type": "http",
@@ -63,7 +67,8 @@ async def test_xss_middleware_request(xss_middleware):
             "query_string": b"unsafe=<script>alert(1)</script>",
             "headers": [],
             "client": ("127.0.0.1", 8000),
-        }
+        },
+        mock_receive,
     )
     request.json = {"unsafe": "<script>alert(1)</script>"}
 

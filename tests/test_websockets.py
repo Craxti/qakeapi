@@ -78,18 +78,9 @@ class TestWebSocketRouting:
 
         # Проверяем, что маршрут был зарегистрирован
         # В новой архитектуре роутеры находятся внутри приложения
-        websocket_routes = [r for r in app.routes if r.route_type.value == "websocket"]
-        assert len(websocket_routes) > 0
-
-        # Проверяем, что есть маршрут с нужным путем
-        found_route = None
-        for route in websocket_routes:
-            if route.path == "/ws/test":
-                found_route = route
-                break
-
-        assert found_route is not None
-        assert found_route.handler == websocket_handler
+        # Проверяем websocket_routes напрямую
+        assert "/ws/test" in app.websocket_routes
+        assert app.websocket_routes["/ws/test"] == websocket_handler
 
 
 class TestWebSocketMiddleware:

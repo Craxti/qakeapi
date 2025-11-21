@@ -244,10 +244,12 @@ class TestComprehensiveAPI:
 
     def test_middleware_registration(self, app):
         """Тест регистрации middleware"""
-        assert len(app.middleware_stack) > 0
+        assert len(app.middleware_stack.middleware) > 0
 
         # Проверяем, что CORS middleware зарегистрирован
-        cors_found = any(isinstance(mw, CORSMiddleware) for mw in app.middleware_stack)
+        cors_found = any(
+            isinstance(mw, CORSMiddleware) for mw in app.middleware_stack.middleware
+        )
         assert cors_found
 
     def test_exception_handler_registration(self, app):

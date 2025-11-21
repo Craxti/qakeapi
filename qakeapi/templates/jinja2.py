@@ -17,6 +17,7 @@ try:
 except ImportError:
     JINJA2_AVAILABLE = False
     Jinja2Template = None
+    FileSystemLoader = None
 
 from ..core.responses import Response
 from .live_reload import setup_live_reload, start_live_reload, stop_live_reload
@@ -59,7 +60,7 @@ class Jinja2TemplateEngine(TemplateEngine):
             live_reload: Enable live reload functionality
             **kwargs: Additional Jinja2 environment options
         """
-        if not JINJA2_AVAILABLE:
+        if not JINJA2_AVAILABLE or FileSystemLoader is None:
             raise ImportError("Jinja2 is required. Install with: pip install jinja2")
 
         self.template_dir = Path(template_dir)
