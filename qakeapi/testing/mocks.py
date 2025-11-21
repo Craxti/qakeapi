@@ -7,7 +7,16 @@ import json
 import logging
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, AsyncGenerator, Callable, Dict, List, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    AsyncGenerator,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Union,
+)
 from unittest.mock import AsyncMock, MagicMock
 
 if TYPE_CHECKING:
