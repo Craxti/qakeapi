@@ -5,7 +5,11 @@ Tests for enhanced API documentation features.
 import json
 
 import pytest
-from pydantic import BaseModel, Field
+
+try:
+    from pydantic import BaseModel, Field
+except ImportError:
+    pytest.skip("pydantic not installed", allow_module_level=True)
 
 from qakeapi.core.openapi import (
     OpenAPIGenerator,

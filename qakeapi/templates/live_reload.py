@@ -35,6 +35,61 @@ if FileSystemEventHandler is not None:
             """
             super().__init__()
             self.callback = callback
+            self.last_modified: Dict[str, float] = {}
+            self.debounce_time = 0.5  # Debounce time in seconds
+
+        def on_modified(self, event: FileSystemEvent):
+            """Handle file modification events."""
+            if event.is_directory:
+                return
+
+            file_path = event.src_path
+            current_time = time.time()
+
+            # Debounce rapid file changes
+            if file_path in self.last_modified:
+                if current_time - self.last_modified[file_path] < self.debounce_time:
+                    return
+
+            self.last_modified[file_path] = current_time
+
+            # Check if it's a template file
+            if self._is_template_file(file_path):
+                logger.info(f"Template file changed: {file_path}")
+                self.callback(file_path)
+
+        def on_created(self, event: FileSystemEvent):
+            """Handle file creation events."""
+            if event.is_directory:
+                return
+
+            file_path = event.src_path
+            if self._is_template_file(file_path):
+                logger.info(f"Template file created: {file_path}")
+                self.callback(file_path)
+
+        def on_deleted(self, event: FileSystemEvent):
+            """Handle file deletion events."""
+            if event.is_directory:
+                return
+
+            file_path = event.src_path
+            if self._is_template_file(file_path):
+                logger.info(f"Template file deleted: {file_path}")
+                self.callback(file_path)
+
+        def _is_template_file(self, file_path: str) -> bool:
+            """Check if file is a template file."""
+            template_extensions = {
+                ".html",
+                ".htm",
+                ".jinja",
+                ".jinja2",
+                ".j2",
+                ".xml",
+                ".txt",
+            }
+            return Path(file_path).suffix.lower() in template_extensions
 
 else:
 
@@ -52,62 +107,6 @@ else:
                 "watchdog is required for TemplateChangeHandler. "
                 "Install it with: pip install watchdog"
             )
-
-        self.last_modified: Dict[str, float] = {}
-        self.debounce_time = 0.5  # Debounce time in seconds
-
-    def on_modified(self, event: FileSystemEvent):
-        """Handle file modification events."""
-        if event.is_directory:
-            return
-
-        file_path = event.src_path
-        current_time = time.time()
-
-        # Debounce rapid file changes
-        if file_path in self.last_modified:
-            if current_time - self.last_modified[file_path] < self.debounce_time:
-                return
-
-        self.last_modified[file_path] = current_time
-
-        # Check if it's a template file
-        if self._is_template_file(file_path):
-            logger.info(f"Template file changed: {file_path}")
-            self.callback(file_path)
-
-    def on_created(self, event: FileSystemEvent):
-        """Handle file creation events."""
-        if event.is_directory:
-            return
-
-        file_path = event.src_path
-        if self._is_template_file(file_path):
-            logger.info(f"Template file created: {file_path}")
-            self.callback(file_path)
-
-    def on_deleted(self, event: FileSystemEvent):
-        """Handle file deletion events."""
-        if event.is_directory:
-            return
-
-        file_path = event.src_path
-        if self._is_template_file(file_path):
-            logger.info(f"Template file deleted: {file_path}")
-            self.callback(file_path)
-
-    def _is_template_file(self, file_path: str) -> bool:
-        """Check if file is a template file."""
-        template_extensions = {
-            ".html",
-            ".htm",
-            ".jinja",
-            ".jinja2",
-            ".j2",
-            ".xml",
-            ".txt",
-        }
-        return Path(file_path).suffix.lower() in template_extensions
 
 
 class LiveReloadManager:

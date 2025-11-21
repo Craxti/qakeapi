@@ -7,7 +7,11 @@ from datetime import datetime
 from unittest.mock import Mock, patch
 
 import pytest
-from pydantic import BaseModel, Field, ValidationError
+
+try:
+    from pydantic import BaseModel, Field, ValidationError
+except ImportError:
+    pytest.skip("pydantic not installed", allow_module_level=True)
 
 from qakeapi.core.error_handling import (
     ErrorContext,

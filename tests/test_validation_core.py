@@ -1,7 +1,11 @@
 from typing import Optional
 
 import pytest
-from pydantic import BaseModel, Field
+
+try:
+    from pydantic import BaseModel, Field
+except ImportError:
+    pytest.skip("pydantic not installed", allow_module_level=True)
 
 from qakeapi.core.request import Request
 from qakeapi.core.responses import JSONResponse
