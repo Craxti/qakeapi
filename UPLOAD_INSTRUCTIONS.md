@@ -1,23 +1,23 @@
-# Инструкция по загрузке на PyPI
+# PyPI Upload Instructions
 
-## Проблема с соединением
+## Connection Issues
 
-При попытке загрузки возникла ошибка соединения. Это может быть связано с:
-- Нестабильным интернет-соединением
-- Файрволом или антивирусом
-- Проблемами на стороне PyPI
+When attempting to upload, a connection error occurred. This may be related to:
+- Unstable internet connection
+- Firewall or antivirus
+- Issues on PyPI side
 
-## Решения
+## Solutions
 
-### Вариант 1: Запустить скрипт позже
+### Option 1: Run Script Later
 
-Используйте готовый скрипт `upload_to_pypi.ps1`:
+Use the ready script `upload_to_pypi.ps1`:
 
 ```powershell
 .\upload_to_pypi.ps1
 ```
 
-### Вариант 2: Ручная загрузка
+### Option 2: Manual Upload
 
 ```powershell
 $env:TWINE_USERNAME = "__token__"
@@ -25,25 +25,24 @@ $env:TWINE_PASSWORD = "YOUR_PYPI_TOKEN_HERE"
 py -m twine upload dist/*
 ```
 
-### Вариант 3: Использовать GitHub Actions (рекомендуется)
+### Option 3: Use GitHub Actions (Recommended)
 
-1. Создайте релиз на GitHub (тег v1.1.0 уже создан)
-2. Workflow `.github/workflows/publish.yml` автоматически загрузит пакет на PyPI
-3. Убедитесь, что в настройках репозитория есть секрет `PYPI_API_TOKEN` с вашим токеном
+1. Create a release on GitHub (tag v1.1.0 already created)
+2. Workflow `.github/workflows/publish.yml` will automatically upload the package to PyPI
+3. Make sure the repository has the secret `PYPI_API_TOKEN` with your token
 
-### Вариант 4: Проверить настройки сети
+### Option 4: Check Network Settings
 
-1. Временно отключите файрвол/антивирус
-2. Проверьте, не блокирует ли прокси-сервер соединение
-3. Попробуйте с другого компьютера/сети
+1. Temporarily disable firewall/antivirus
+2. Check if proxy server is blocking the connection
+3. Try from another computer/network
 
-## Токен PyPI
+## PyPI Token
 
-Токен сохранен в скрипте `upload_to_pypi.ps1`. Если токен истечет, создайте новый на https://pypi.org/manage/account/
+Token is saved in `upload_to_pypi.ps1` script. If the token expires, create a new one at https://pypi.org/manage/account/
 
-## Готовые файлы
+## Ready Files
 
-Пакеты готовы к загрузке:
+Packages ready for upload:
 - `dist/qakeapi-1.1.0-py3-none-any.whl` (199 KB)
 - `dist/qakeapi-1.1.0.tar.gz` (163 KB)
-

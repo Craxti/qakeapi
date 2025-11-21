@@ -1,42 +1,41 @@
-# ✅ Пакет успешно загружен на PyPI!
+# ✅ Package Successfully Uploaded to PyPI!
 
-## Статус
+## Status
 
-Пакет **qakeapi v1.1.0** уже присутствует на PyPI!
+Package **qakeapi v1.1.0** is already present on PyPI!
 
-Twine сообщил:
-- `qakeapi-1.1.0-py3-none-any.whl` - уже существует
-- `qakeapi-1.1.0.tar.gz` - уже существует
+Twine reported:
+- `qakeapi-1.1.0-py3-none-any.whl` - already exists
+- `qakeapi-1.1.0.tar.gz` - already exists
 
-## Проверка
+## Verification
 
-Проверьте пакет на PyPI:
+Check the package on PyPI:
 **https://pypi.org/project/qakeapi/**
 
-## Установка
+## Installation
 
-Теперь пакет можно установить командой:
+Now the package can be installed with:
 
 ```bash
 pip install qakeapi
 ```
 
-Или конкретную версию:
+Or a specific version:
 
 ```bash
 pip install qakeapi==1.1.0
 ```
 
-## Что дальше?
+## What's Next?
 
-1. ✅ Пакет опубликован на PyPI
-2. ✅ Тег v1.1.0 создан в репозитории
-3. 📝 Можно создать GitHub Release с описанием изменений
-4. 📚 Документация будет доступна на GitHub Pages после настройки
+1. ✅ Package published on PyPI
+2. ✅ Tag v1.1.0 created in repository
+3. 📝 Can create GitHub Release with change description
+4. 📚 Documentation will be available on GitHub Pages after setup
 
-## Следующие шаги
+## Next Steps
 
-- Обновите README с информацией о новой версии
-- Создайте GitHub Release используя описание из `RELEASE_v1.1.0.md`
-- Настройте GitHub Pages в настройках репозитория (Settings → Pages → Source: GitHub Actions)
-
+- Update README with new version information
+- Create GitHub Release using description from `RELEASE_v1.1.0.md`
+- Configure GitHub Pages in repository settings (Settings → Pages → Source: GitHub Actions)

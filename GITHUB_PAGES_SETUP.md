@@ -1,42 +1,41 @@
-# Настройка GitHub Pages для QakeAPI
+# GitHub Pages Setup for QakeAPI
 
-## Автоматическая публикация
+## Automatic Publishing
 
-GitHub Pages настроен для автоматической публикации документации при каждом push в ветку `main`.
+GitHub Pages is configured for automatic documentation publishing on every push to the `main` branch.
 
-## Что нужно сделать вручную
+## Manual Setup Required
 
-1. Перейдите в настройки репозитория: `Settings` → `Pages`
-2. В разделе "Source" выберите:
+1. Go to repository settings: `Settings` → `Pages`
+2. In the "Source" section, select:
    - **Source**: `GitHub Actions`
-3. Сохраните настройки
+3. Save settings
 
-## Структура
+## Structure
 
-- Документация собирается из папки `docs/` с помощью Sphinx
-- Собранная документация публикуется в ветку `gh-pages` автоматически
-- URL документации: `https://craxti.github.io/qakeapi/`
+- Documentation is built from the `docs/` folder using Sphinx
+- Built documentation is published to the `gh-pages` branch automatically
+- Documentation URL: `https://craxti.github.io/qakeapi/`
 
-## Локальная сборка
+## Local Build
 
-Для локальной сборки документации:
+To build documentation locally:
 
 ```bash
 cd docs
 make html
 ```
 
-Собранная документация будет в `docs/_build/html/`
+Built documentation will be in `docs/_build/html/`
 
-## Обновление документации
+## Documentation Updates
 
-Документация автоматически обновляется при:
-- Изменении файлов в папке `docs/`
-- Изменении кода в `qakeapi/`
-- Изменении `README.md`
-- Ручном запуске workflow через `workflow_dispatch`
+Documentation is automatically updated when:
+- Files in the `docs/` folder are changed
+- Code in `qakeapi/` is changed
+- `README.md` is changed
+- Workflow is manually triggered via `workflow_dispatch`
 
-## Проверка статуса
+## Status Check
 
-Проверить статус публикации можно в разделе `Actions` → `Documentation`
-
+Check publishing status in `Actions` → `Documentation`
