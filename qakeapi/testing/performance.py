@@ -12,7 +12,13 @@ from dataclasses import dataclass, field
 from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-import psutil
+try:
+    import psutil
+
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    psutil = None  # type: ignore
+    PSUTIL_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +88,13 @@ class PerformanceTester:
         # Measure memory before
         memory_before = None
         if measure_memory:
-            memory_before = psutil.Process().memory_info().rss / 1024 / 1024  # MB
+            if not PSUTIL_AVAILABLE:
+                logger.warning(
+                    "psutil not available, memory measurement disabled. "
+                    "Install it with: pip install psutil"
+                )
+            else:
+                memory_before = psutil.Process().memory_info().rss / 1024 / 1024  # MB
 
         # Run benchmark
         times = []
@@ -102,7 +114,7 @@ class PerformanceTester:
 
         # Measure memory after
         memory_after = None
-        if measure_memory:
+        if measure_memory and PSUTIL_AVAILABLE:
             memory_after = psutil.Process().memory_info().rss / 1024 / 1024  # MB
 
         # Calculate statistics
@@ -307,6 +319,11 @@ async def measure_time(func: Callable, *args, **kwargs) -> float:
 
 def measure_memory_usage() -> float:
     """Measure current memory usage in MB."""
+    if not PSUTIL_AVAILABLE:
+        raise ImportError(
+            "psutil is required for measure_memory_usage. "
+            "Install it with: pip install psutil"
+        )
     return psutil.Process().memory_info().rss / 1024 / 1024
 
 
