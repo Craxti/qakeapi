@@ -156,7 +156,7 @@ Custom styles are defined in `_static/custom.css`. The styles include:
 The Sphinx configuration is in `conf.py`. Key settings:
 
 - **Project**: QakeAPI
-- **Version**: 1.1.0
+- **Version**: 1.1.2
 - **Theme**: sphinx_rtd_theme
 - **Extensions**: autodoc, napoleon, viewcode, intersphinx, etc.
 - **Mock imports**: External dependencies that shouldn't be imported

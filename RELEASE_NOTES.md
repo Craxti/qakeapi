@@ -1,4 +1,4 @@
-# Release v1.1.0
+# Release v1.1.2
 
 ## 🐛 Bug Fixes
 - Fixed RateLimiter event loop initialization issue

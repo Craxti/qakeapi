@@ -27,7 +27,7 @@ py -m twine upload dist/*
 
 ### Option 3: Use GitHub Actions (Recommended)
 
-1. Create a release on GitHub (tag v1.1.0 already created)
+1. Create a release on GitHub (tag v1.1.2 already created)
 2. Workflow `.github/workflows/publish.yml` will automatically upload the package to PyPI
 3. Make sure the repository has the secret `PYPI_API_TOKEN` with your token
 
@@ -44,5 +44,5 @@ Token is saved in `upload_to_pypi.ps1` script. If the token expires, create a ne
 ## Ready Files
 
 Packages ready for upload:
-- `dist/qakeapi-1.1.0-py3-none-any.whl` (199 KB)
-- `dist/qakeapi-1.1.0.tar.gz` (163 KB)
+- `dist/qakeapi-1.1.2-py3-none-any.whl` (199 KB)
+- `dist/qakeapi-1.1.2.tar.gz` (163 KB)

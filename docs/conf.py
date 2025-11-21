@@ -21,8 +21,8 @@ copyright = '2024, QakeAPI Team'
 author = 'QakeAPI Team'
 
 # The full version, including alpha/beta/rc tags
-release = '1.1.0'
-version = '1.1.0'
+release = '1.1.2'
+version = '1.1.2'
 
 # -- General configuration ---------------------------------------------------
 

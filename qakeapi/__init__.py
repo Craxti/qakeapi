@@ -4,7 +4,7 @@ QakeAPI - Modern asynchronous web framework for Python
 All methods are implemented independently, using only Python standard library.
 """
 
-__version__ = "1.1.1"
+__version__ = "1.1.2"
 __author__ = "QakeAPI Team"
 __description__ = "Modern asynchronous web framework for Python"
 

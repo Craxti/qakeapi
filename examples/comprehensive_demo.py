@@ -45,7 +45,7 @@ from qakeapi.validation import (
 # Create application
 app = QakeAPI(
     title="Comprehensive QakeAPI Demo",
-    version="1.1.0",
+    version="1.1.2",
     description="Complete example demonstrating all QakeAPI features",
     debug=True,
 )
@@ -162,7 +162,7 @@ async def root():
     """Root endpoint with API information."""
     return {
         "message": "Welcome to QakeAPI Comprehensive Demo!",
-        "version": "1.1.0",
+        "version": "1.1.2",
         "endpoints": {
             "users": "/users",
             "items": "/items",

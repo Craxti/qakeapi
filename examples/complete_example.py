@@ -22,7 +22,7 @@ from qakeapi.validation import BaseModel, Field, IntegerValidator, StringValidat
 # Create application
 app = QakeAPI(
     title="Complete Example API",
-    version="1.1.0",
+    version="1.1.2",
     description="Complete example demonstrating all QakeAPI features",
     debug=True,
 )

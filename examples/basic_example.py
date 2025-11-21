@@ -13,7 +13,7 @@ from qakeapi import JSONResponse, QakeAPI, Request
 # Create application
 app = QakeAPI(
     title="Basic Example API",
-    version="1.1.0",
+    version="1.1.2",
     description="A simple example API",
     debug=True,
 )
