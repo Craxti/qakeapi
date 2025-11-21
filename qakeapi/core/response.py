@@ -154,12 +154,24 @@ class Response:
 
         # Prepare headers
         headers = []
-        for key, value in self.headers.items():
-            if isinstance(value, list):
-                for v in value:
-                    headers.append([key.encode(), str(v).encode()])
-            else:
-                headers.append([key.encode(), str(value).encode()])
+        # self.headers может быть списком или словарем
+        if isinstance(self.headers, list):
+            # Если это список кортежей/списков
+            for header in self.headers:
+                if isinstance(header, (list, tuple)) and len(header) == 2:
+                    key, value = header
+                    if isinstance(key, bytes):
+                        headers.append([key, str(value).encode() if isinstance(value, str) else value])
+                    else:
+                        headers.append([key.encode(), str(value).encode() if isinstance(value, str) else value])
+        else:
+            # Если это словарь
+            for key, value in self.headers.items():
+                if isinstance(value, list):
+                    for v in value:
+                        headers.append([key.encode(), str(v).encode()])
+                else:
+                    headers.append([key.encode(), str(value).encode()])
 
         # Add Set-Cookie headers from cookies
         for cookie_string in self.cookies.values():

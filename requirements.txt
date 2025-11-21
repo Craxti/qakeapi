@@ -16,6 +16,7 @@ mypy>=1.0.0
 
 # Optional dependencies for JWT authentication
 PyJWT>=2.0.0
+cryptography>=3.4.8
 
 # Optional dependencies for validation
 pydantic>=2.0.0

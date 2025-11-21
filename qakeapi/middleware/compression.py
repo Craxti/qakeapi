@@ -2,6 +2,7 @@
 Middleware for компрессandand responseоin
 """
 
+import asyncio
 import gzip
 import zlib
 from typing import Callable, Optional, Set
@@ -42,14 +43,39 @@ class CompressionMiddleware(BaseMiddleware):
 
         super().__init__()
 
-    def _should_compress(self, request: Request, response: Response) -> bool:
+    async def _should_compress(self, request: Request, response: Response) -> bool:
         """Определandть, нужно лand сжandмать response"""
         # Пропускаем определенные путand
         if request.path in self.skip_paths:
             return False
 
         # Проinеряем размер responseа
-        if len(response.body) < self.minimum_size:
+        try:
+            # Всегда пытаемся получить body через await
+            # Сначала пробуем await response.body
+            try:
+                body = await asyncio.wait_for(response.body, timeout=0.5)
+            except (AttributeError, TypeError, asyncio.TimeoutError):
+                # Если body не async или не существует, пробуем _content
+                if hasattr(response, '_content'):
+                    content = response._content
+                    if isinstance(content, bytes):
+                        body = content
+                    elif isinstance(content, str):
+                        body = content.encode()
+                    elif isinstance(content, dict):
+                        import json
+                        body = json.dumps(content).encode()
+                    else:
+                        body = str(content).encode()
+                else:
+                    # Не можем определить размер, не сжимаем
+                    return False
+            
+            if len(body) < self.minimum_size:
+                return False
+        except Exception:
+            # Если не можем получить body, не сжимаем
             return False
 
         # Проinеряем, поддержandinает лand клandент сжатandе
@@ -60,6 +86,12 @@ class CompressionMiddleware(BaseMiddleware):
 
         # Проinеряем type контента
         content_type = response.media_type
+        if not content_type:
+            # Пытаемся получить из заголовков
+            content_type_header = response.get_header("content-type")
+            if content_type_header:
+                content_type = content_type_header.split(";")[0].strip().lower()
+        
         if content_type:
             # Убandраем charset and другandе params
             content_type = content_type.split(";")[0].strip().lower()
@@ -103,7 +135,7 @@ class CompressionMiddleware(BaseMiddleware):
         response = await call_next(request)
 
         # Проinеряем, нужно лand сжandмать
-        if not self._should_compress(request, response):
+        if not await self._should_compress(request, response):
             return response
 
         # Определяем метод сжатandя
@@ -114,10 +146,11 @@ class CompressionMiddleware(BaseMiddleware):
             return response
 
         # Получаем data for сжатandя
-        if isinstance(response.body, str):
-            data = response.body.encode("utf-8")
-        elif isinstance(response.body, bytes):
-            data = response.body
+        body = await response.body
+        if isinstance(body, str):
+            data = body.encode("utf-8")
+        elif isinstance(body, bytes):
+            data = body
         else:
             # Не можем сжать
             return response
@@ -136,7 +169,7 @@ class CompressionMiddleware(BaseMiddleware):
                 return response
 
             # Обноinляем response
-            response._body = compressed_data
+            response._content = compressed_data
             response.set_header("Content-Encoding", compression_method)
             response.set_header("Content-Length", str(len(compressed_data)))
 

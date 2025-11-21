@@ -10,7 +10,8 @@ from qakeapi.core.responses import Response
 
 
 class TestRequest:
-    def test_request_properties(self):
+    @pytest.mark.asyncio
+    async def test_request_properties(self):
         scope = {
             "type": "http",
             "method": "GET",
@@ -25,17 +26,18 @@ class TestRequest:
             "scheme": "http",
         }
         body = b'{"hello": "world"}'
-        request = Request(scope, body)
+        request = Request(scope, None, _body=body)
 
         assert request.method == "GET"
         assert request.path == "/test"
         assert request.query_params == {"foo": ["bar", "baz"]}
         assert request.headers == {
-            b"content-type": b"application/json",
-            b"cookie": b"session=abc123; user=john",
+            "content-type": "application/json",
+            "cookie": "session=abc123; user=john",
         }
         assert request.content_type == "application/json"
-        assert request.body == body
+        request_body = await request.body()
+        assert request_body == body
         assert request.client == ("127.0.0.1", 8000)
         assert request.url == "http://localhost:8000/test?foo=bar&foo=baz"
 
@@ -48,7 +50,7 @@ class TestRequest:
             "headers": [(b"content-type", b"application/json")],
         }
         body = b'{"hello": "world"}'
-        request = Request(scope, body)
+        request = Request(scope, None, _body=body)
 
         json_data = await request.json()
         assert json_data == {"hello": "world"}
@@ -62,7 +64,7 @@ class TestRequest:
             "headers": [(b"content-type", b"application/x-www-form-urlencoded")],
         }
         body = b"foo=bar&foo=baz"
-        request = Request(scope, body)
+        request = Request(scope, None, _body=body)
 
         form_data = await request.form()
         assert form_data == {"foo": ["bar", "baz"]}
@@ -74,11 +76,11 @@ class TestRequest:
             "path": "/test",
             "headers": [(b"cookie", b"session=abc123; user=john")],
         }
-        request = Request(scope)
+        request = Request(scope, None)
 
-        assert isinstance(request.cookies, SimpleCookie)
-        assert request.cookies["session"].value == "abc123"
-        assert request.cookies["user"].value == "john"
+        assert isinstance(request.cookies, dict)
+        assert request.cookies["session"] == "abc123"
+        assert request.cookies["user"] == "john"
 
     @pytest.mark.asyncio
     async def test_request_file_upload(self):
@@ -111,7 +113,7 @@ class TestRequest:
             ],
         }
 
-        request = Request(scope, body)
+        request = Request(scope, None, _body=body)
 
         # Проверяем форму
         form = await request.form()

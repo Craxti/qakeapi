@@ -6,9 +6,12 @@ convenient access to request data like headers, query parameters, body, etc.
 """
 
 import json
+import re
 import urllib.parse
 from collections.abc import Mapping
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
+
+from .files import UploadFile
 
 
 class Request:
@@ -47,6 +50,7 @@ class Request:
         self._path_params = _path_params or {}
         self._json: Optional[Dict[str, Any]] = None
         self._form: Optional[Dict[str, str]] = None
+        self._files: Optional[Dict[str, UploadFile]] = None
 
     @property
     def method(self) -> str:
@@ -244,7 +248,7 @@ class Request:
 
         return self._json
 
-    async def form(self) -> Dict[str, str]:
+    async def form(self) -> Dict[str, Any]:
         """
         Parse request body as form data.
 
@@ -259,13 +263,120 @@ class Request:
             self._form = {}
             return self._form
 
-        try:
-            form_data = urllib.parse.parse_qs(body.decode(), keep_blank_values=True)
-            self._form = {k: v[0] if v else "" for k, v in form_data.items()}
-        except Exception:
-            self._form = {}
+        content_type = self.content_type
+        if content_type and "multipart/form-data" in content_type.lower():
+            # Parse multipart
+            self._form, self._files = await self._parse_multipart()
+        else:
+            # Parse URL-encoded form
+            try:
+                form_data = urllib.parse.parse_qs(body.decode(), keep_blank_values=True)
+                # Return list if multiple values, single value if one, empty string if none
+                self._form = {}
+                for k, v in form_data.items():
+                    if len(v) > 1:
+                        self._form[k] = v
+                    elif len(v) == 1:
+                        self._form[k] = v[0]
+                    else:
+                        self._form[k] = ""
+            except Exception:
+                self._form = {}
 
         return self._form
+
+    async def files(self) -> Dict[str, UploadFile]:
+        """
+        Parse uploaded files from multipart/form-data.
+
+        Returns:
+            Dictionary of uploaded files
+        """
+        if self._files is not None:
+            return self._files
+
+        body = await self.body()
+        if not body:
+            self._files = {}
+            return self._files
+
+        content_type = self.content_type
+        if content_type and "multipart/form-data" in content_type.lower():
+            # Parse multipart
+            self._form, self._files = await self._parse_multipart()
+        else:
+            self._files = {}
+
+        return self._files
+
+    async def _parse_multipart(self) -> Tuple[Dict[str, Any], Dict[str, UploadFile]]:
+        """Parse multipart/form-data"""
+        form_data = {}
+        files = {}
+
+        # Get boundary from Content-Type
+        content_type = self.content_type
+        if not content_type:
+            return form_data, files
+
+        boundary_match = re.search(r"boundary=([^;]+)", content_type)
+        if not boundary_match:
+            return form_data, files
+
+        boundary = boundary_match.group(1).strip('"')
+        body = await self.body()
+        parts = body.split(f"--{boundary}".encode())
+
+        # Skip first and last parts (empty)
+        for part in parts[1:-1]:
+            # Skip initial \r\n
+            part = part.strip(b"\r\n")
+            if not part:
+                continue
+
+            # Split headers and content
+            try:
+                headers_raw, content = part.split(b"\r\n\r\n", 1)
+            except ValueError:
+                continue
+
+            headers = self._parse_part_headers(headers_raw.decode())
+
+            # Get field name
+            content_disposition = headers.get("Content-Disposition", "")
+            name_match = re.search(r'name="([^"]+)"', content_disposition)
+            if not name_match:
+                continue
+            name = name_match.group(1)
+
+            # Check if this is a file
+            filename_match = re.search(r'filename="([^"]+)"', content_disposition)
+            if filename_match:
+                # This is a file
+                filename = filename_match.group(1)
+                part_content_type = headers.get("Content-Type", "application/octet-stream")
+
+                # Create UploadFile
+                upload_file = UploadFile(
+                    filename=filename, content_type=part_content_type, headers=headers
+                )
+                await upload_file.write(content.strip(b"\r\n"))
+                files[name] = upload_file
+            else:
+                # This is a regular form field
+                value = content.strip(b"\r\n").decode()
+                form_data[name] = value
+
+        return form_data, files
+
+    def _parse_part_headers(self, headers_raw: str) -> Dict[str, str]:
+        """Parse part headers in multipart/form-data"""
+        headers = {}
+        for line in headers_raw.split("\r\n"):
+            if ":" in line:
+                key, value = line.split(":", 1)
+                headers[key.strip()] = value.strip()
+        return headers
 
     @property
     def content_type(self) -> Optional[str]:

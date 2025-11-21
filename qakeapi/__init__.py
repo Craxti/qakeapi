@@ -11,6 +11,19 @@ __description__ = "Modern asynchronous web framework for Python"
 # Caching imports
 from .caching import CacheManager, CacheMiddleware, MemoryCache
 
+# Security imports
+from .security import CORSMiddleware, JWTManager
+
+# Middleware imports
+from .middleware.logging import LoggingMiddleware
+
+# Monitoring imports
+from .monitoring.health import HealthChecker
+from .monitoring.metrics import MetricsCollector
+
+# Error handling imports
+from .core.error_handling import ErrorHandler, create_error_handler
+
 # Core imports
 from .core import (
     APIRouter,
@@ -111,4 +124,15 @@ __all__ = [
     "TestClient",
     "TestResponse",
     "WebSocketTestClient",
+    # Security
+    "CORSMiddleware",
+    "JWTManager",
+    # Middleware
+    "LoggingMiddleware",
+    # Monitoring
+    "HealthChecker",
+    "MetricsCollector",
+    # Error handling
+    "ErrorHandler",
+    "create_error_handler",
 ]

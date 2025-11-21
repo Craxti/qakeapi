@@ -50,12 +50,16 @@ async def test_rate_limit_reset(rate_limiter):
     await rate_limiter.update("test_key")
 
     # Изменяем время для симуляции прошедшей минуты
-    rate_limiter.storage["test_key"] = {time.time() - 61: 1, time.time() - 61: 1}
+    rate_limiter.requests["test_key"] = [time.time() - 61]
 
     # После сброса лимита запрос должен быть разрешен
     allowed, info = await rate_limiter.is_allowed("test_key")
     assert allowed is True
     assert info.remaining == 1  # Учитываем текущий запрос
+
+
+async def mock_receive():
+    return {"type": "http.request", "body": b"", "more_body": False}
 
 
 @pytest.mark.asyncio
@@ -65,12 +69,13 @@ async def test_rate_limit_middleware():
 
     # Создаем тестовый запрос
     request = Request(
-        scope={
+        {
             "type": "http",
             "method": "GET",
             "path": "/test",
             "client": ("127.0.0.1", 8000),
-        }
+        },
+        mock_receive,
     )
 
     # Тестовый обработчик
@@ -100,32 +105,34 @@ async def test_rate_limit_middleware():
 async def test_custom_key_function():
     rate_limiter = InMemoryRateLimiter(requests_per_minute=2)
     # Используем пользовательскую функцию для ключа
-    middleware = RateLimitMiddleware(
-        rate_limiter,
-        key_func=lambda request: dict(request.headers)
-        .get(b"x-api-key", b"default")
-        .decode(),
-    )
+    def key_func(request):
+        # Получаем заголовок x-api-key из request
+        api_key = request.get_header("x-api-key", "default")
+        return api_key if isinstance(api_key, str) else api_key.decode() if isinstance(api_key, bytes) else "default"
+    
+    middleware = RateLimitMiddleware(rate_limiter, key_func=key_func)
 
     # Создаем два запроса с разными API ключами
     request1 = Request(
-        scope={
+        {
             "type": "http",
             "method": "GET",
             "path": "/test",
             "client": ("127.0.0.1", 8000),
             "headers": [(b"x-api-key", b"key1")],
-        }
+        },
+        mock_receive,
     )
 
     request2 = Request(
-        scope={
+        {
             "type": "http",
             "method": "GET",
             "path": "/test",
             "client": ("127.0.0.1", 8000),
             "headers": [(b"x-api-key", b"key2")],
-        }
+        },
+        mock_receive,
     )
 
     async def handler(request):

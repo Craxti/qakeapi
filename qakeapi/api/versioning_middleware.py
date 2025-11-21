@@ -114,6 +114,17 @@ class VersioningMiddleware:
     def _extract_query_version(self, request) -> Optional[str]:
         """Extract version from query parameter."""
         query_params = getattr(request, "query_params", {})
+        if not isinstance(query_params, dict):
+            # Try to parse from query_string if available
+            query_string = getattr(request, "query_string", None)
+            if query_string:
+                if isinstance(query_string, bytes):
+                    query_string = query_string.decode()
+                from urllib.parse import parse_qs
+                parsed = parse_qs(query_string)
+                query_params = {k: v[0] if v else None for k, v in parsed.items()}
+            else:
+                return None
         for param_name in ["version", "api_version", "v"]:
             if param_name in query_params:
                 version_str = query_params[param_name]
@@ -196,15 +207,51 @@ class VersionRouteMiddleware:
 
     def __init__(self, version_manager: APIVersionManager):
         self.version_manager = version_manager
+        self.version_routes: Dict[str, Dict[str, Callable]] = {}
+
+    def register_version_route(self, version: str, path: str, handler: Callable):
+        """Register a version-specific route."""
+        if version not in self.version_routes:
+            self.version_routes[version] = {}
+        self.version_routes[version][path] = handler
 
     async def __call__(self, request, handler):
         """Route request based on version."""
-        version = (
-            getattr(request, "api_version", None)
-            or self.version_manager.default_version
-        )
+        # Get version from request or extract from path
+        version = getattr(request, "api_version", None)
+        path = request.path
+        
+        if not version:
+            # Try to extract from path
+            if path.startswith("/v") and len(path) > 2:
+                # Extract version from path (e.g., /v1/users -> v1)
+                parts = path[1:].split("/", 1)
+                if parts[0].startswith("v") and len(parts[0]) > 1:
+                    potential_version = parts[0]
+                    # Check if this version is registered
+                    if potential_version in self.version_routes:
+                        version = potential_version
+            if not version:
+                version = getattr(self.version_manager, "default_version", "v1")
 
         # Check if version-specific route exists
+        if version and version in self.version_routes:
+            # Remove version prefix if present (e.g., /v1/users -> /users)
+            version_prefix = f"/{version}"
+            if path.startswith(version_prefix):
+                # Remove version prefix
+                path = path[len(version_prefix):]
+                # Ensure path starts with /
+                if not path:
+                    path = "/"
+                elif not path.startswith("/"):
+                    path = "/" + path
+                
+                # Check exact path match
+                if path in self.version_routes[version]:
+                    return await self.version_routes[version][path](request)
+
+        # Check if versioned path exists
         versioned_path = self._get_versioned_path(request.path, version)
         if versioned_path and versioned_path != request.path:
             # Update request path for versioned route

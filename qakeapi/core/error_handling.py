@@ -2,6 +2,7 @@
 Enhanced error handling system for QakeAPI
 """
 
+import asyncio
 import logging
 import traceback
 import uuid
@@ -11,7 +12,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from ..utils.status import status
 from .exceptions import HTTPException, QakeAPIException
 from .request import Request
-from .response import JSONResponse, Response, TextResponse
+from .responses import JSONResponse, Response
 
 
 class ErrorContext:
@@ -95,7 +96,16 @@ class ErrorLogger:
             return None
 
         try:
-            body = await request.body()
+            # Проверяем, есть ли уже кешированное тело
+            if hasattr(request, "_body") and request._body is not None:
+                body = request._body
+            else:
+                # Пытаемся прочитать body с таймаутом
+                try:
+                    body = await asyncio.wait_for(request.body(), timeout=1.0)
+                except asyncio.TimeoutError:
+                    return "[TIMEOUT reading body]"
+            
             if len(body) > self.max_body_size:
                 return f"[TRUNCATED - {len(body)} bytes]"
             return body.decode("utf-8", errors="replace")

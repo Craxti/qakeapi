@@ -4,9 +4,10 @@ Caching system for the framework.
 This module provides in-memory caching with TTL support.
 """
 
+import asyncio
 import time
 from threading import Lock
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 
 class Cache:
@@ -229,3 +230,36 @@ class CacheManager:
             cache: Cache instance
         """
         self._caches[name] = cache
+
+    async def get_or_set(
+        self,
+        key: str,
+        callable_func: Callable,
+        expire: Optional[int] = None,
+    ) -> Any:
+        """
+        Get value from cache or set it by calling callable.
+
+        Args:
+            key: Cache key
+            callable_func: Async or sync callable to get value if not cached
+            expire: TTL in seconds
+
+        Returns:
+            Cached or computed value
+        """
+        # Try to get from cache
+        value = self.default_cache.get(key)
+        if value is not None:
+            return value
+
+        # Call function to get value
+        if asyncio.iscoroutinefunction(callable_func):
+            value = await callable_func()
+        else:
+            value = callable_func()
+
+        # Store in cache
+        self.default_cache.set(key, value, ttl=expire)
+
+        return value

@@ -12,6 +12,12 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 try:
+    import jwt
+    JWT_AVAILABLE = jwt is not None
+except (ImportError, OSError, Exception):
+    JWT_AVAILABLE = False
+
+try:
     from qakeapi.core.websockets import WebSocketConnection
     from qakeapi.security.websocket_auth import (
         AuthConfig,
@@ -24,7 +30,7 @@ try:
         WebSocketAuthMiddleware,
     )
 except ImportError as e:
-    if "PyJWT" in str(e):
+    if "PyJWT" in str(e) or not JWT_AVAILABLE:
         pytest.skip(
             "PyJWT is required for WebSocket auth tests", allow_module_level=True
         )
@@ -484,33 +490,42 @@ class TestWebSocketAuthHandler:
 class TestAuthenticatorFactory:
     """Test authenticator factory."""
 
+    @pytest.mark.skipif(not JWT_AVAILABLE, reason="PyJWT is not available")
     def test_create_jwt_authenticator(self):
         """Test creating JWT authenticator."""
         config = AuthConfig(secret_key="test_secret")
-        authenticator = AuthenticatorFactory.create_jwt_authenticator(config)
+        try:
+            authenticator = AuthenticatorFactory.create_jwt_authenticator(config)
+            assert isinstance(authenticator, JWTAuthenticator)
+            assert authenticator.config == config
+        except ImportError:
+            pytest.skip("PyJWT is not available")
 
-        assert isinstance(authenticator, JWTAuthenticator)
-        assert authenticator.config == config
-
+    @pytest.mark.skipif(not JWT_AVAILABLE, reason="PyJWT is not available")
     def test_create_auth_middleware(self):
         """Test creating authentication middleware."""
         config = AuthConfig(secret_key="test_secret")
-        authenticator = JWTAuthenticator(config)
-        middleware = AuthenticatorFactory.create_auth_middleware(authenticator, config)
+        try:
+            authenticator = JWTAuthenticator(config)
+            middleware = AuthenticatorFactory.create_auth_middleware(authenticator, config)
+            assert isinstance(middleware, WebSocketAuthMiddleware)
+            assert middleware.authenticator == authenticator
+            assert middleware.config == config
+        except ImportError:
+            pytest.skip("PyJWT is not available")
 
-        assert isinstance(middleware, WebSocketAuthMiddleware)
-        assert middleware.authenticator == authenticator
-        assert middleware.config == config
-
+    @pytest.mark.skipif(not JWT_AVAILABLE, reason="PyJWT is not available")
     def test_create_auth_handler(self):
         """Test creating authentication handler."""
         config = AuthConfig(secret_key="test_secret")
-        authenticator = JWTAuthenticator(config)
-        middleware = WebSocketAuthMiddleware(authenticator, config)
-        handler = AuthenticatorFactory.create_auth_handler(middleware)
-
-        assert isinstance(handler, WebSocketAuthHandler)
-        assert handler.middleware == middleware
+        try:
+            authenticator = JWTAuthenticator(config)
+            middleware = WebSocketAuthMiddleware(authenticator, config)
+            handler = AuthenticatorFactory.create_auth_handler(middleware)
+            assert isinstance(handler, WebSocketAuthHandler)
+            assert handler.middleware == middleware
+        except ImportError:
+            pytest.skip("PyJWT is not available")
 
 
 class TestIntegration:

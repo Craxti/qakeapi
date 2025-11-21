@@ -122,8 +122,8 @@ class QakeAPIException(FrameworkException):
 class AuthenticationException(HTTPException):
     """401 Unauthorized exception for authentication errors."""
 
-    def __init__(self, detail: Any = "Authentication required"):
-        super().__init__(401, detail)
+    def __init__(self, detail: Any = "Authentication required", headers: Optional[Dict[str, str]] = None):
+        super().__init__(401, detail, headers)
 
 
 class AuthorizationException(HTTPException):

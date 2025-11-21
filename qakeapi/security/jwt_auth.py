@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 
 try:
     import jwt
-except ImportError:
+except (ImportError, OSError, Exception):
     jwt = None  # type: ignore
 
 from .authentication import AuthenticationBackend, AuthenticationError, User

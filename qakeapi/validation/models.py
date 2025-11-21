@@ -58,6 +58,23 @@ class BaseModel:
         # Get field definitions from class
         fields = self._get_fields()
 
+        # Check for extra fields - by default, forbid extra fields for request models
+        # Response models can allow extra fields
+        extra_fields = set(kwargs.keys()) - set(fields.keys())
+        if extra_fields:
+            # Check if model has model_config with extra setting
+            if hasattr(self, 'model_config'):
+                extra_setting = getattr(self.model_config, 'extra', 'forbid')
+                if extra_setting == 'forbid':
+                    raise ValidationError(f"Extra fields not allowed: {', '.join(extra_fields)}")
+            else:
+                # Default: forbid extra fields (for request models)
+                # But allow for response models (they can have extra fields)
+                # We'll check class name or a flag
+                class_name = self.__class__.__name__
+                if 'Request' in class_name or 'Input' in class_name:
+                    raise ValidationError(f"Extra fields not allowed: {', '.join(extra_fields)}")
+
         # Set field values
         for field_name, field_def in fields.items():
             if field_name in kwargs:

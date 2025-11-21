@@ -115,12 +115,18 @@ class CacheMiddleware(BaseMiddleware):
         cached_response = self.cache.get(cache_key)
 
         if cached_response is not None:
+            # Add cache hit header (remove existing x-cache if present)
+            headers = list(cached_response["headers"]) if cached_response["headers"] else []
+            # Remove existing x-cache header if present
+            headers = [h for h in headers if h[0].lower() != b"x-cache"]
+            headers.append((b"x-cache", b"HIT"))
+            
             # Send cached response
             await send(
                 {
                     "type": "http.response.start",
                     "status": cached_response["status"],
-                    "headers": cached_response["headers"],
+                    "headers": headers,
                 }
             )
             await send(
@@ -141,7 +147,14 @@ class CacheMiddleware(BaseMiddleware):
         async def send_wrapper(message: Dict[str, Any]) -> None:
             if message["type"] == "http.response.start":
                 response_data["status"] = message["status"]
-                response_data["headers"] = message["headers"]
+                # Add cache miss header (remove existing x-cache if present)
+                headers = list(message["headers"]) if message["headers"] else []
+                # Remove existing x-cache header if present
+                headers = [h for h in headers if h[0].lower() != b"x-cache"]
+                headers.append((b"x-cache", b"MISS"))
+                response_data["headers"] = headers
+                # Update message with new headers
+                message["headers"] = headers
             elif message["type"] == "http.response.body":
                 response_data["body"] = message.get("body", b"")
 

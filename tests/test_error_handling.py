@@ -196,7 +196,8 @@ class TestErrorResponseBuilder:
         assert response.status_code == status.BAD_REQUEST
 
         # Проверяем содержимое ответа
-        content = response.body
+        import asyncio
+        content = asyncio.run(response.body)
         if isinstance(content, bytes):
             import json
 
@@ -240,7 +241,8 @@ class TestErrorResponseBuilder:
             response.status_code == status.INTERNAL_SERVER_ERROR
         )  # Generic exception handler
 
-        content = response.body
+        import asyncio
+        content = asyncio.run(response.body)
         if isinstance(content, bytes):
             import json
 
@@ -275,7 +277,8 @@ class TestErrorResponseBuilder:
 
         assert response.status_code == status.INTERNAL_SERVER_ERROR
 
-        content = response.body
+        import asyncio
+        content = asyncio.run(response.body)
         if isinstance(content, bytes):
             import json
 
@@ -308,7 +311,8 @@ class TestErrorResponseBuilder:
 
         response = builder.build_response(context)
 
-        content = response.body
+        import asyncio
+        content = asyncio.run(response.body)
         if isinstance(content, bytes):
             import json
 
@@ -421,7 +425,7 @@ class TestErrorHandler:
 
         assert response.status_code == 418
 
-        content = response.body
+        content = await response.body
         if isinstance(content, bytes):
             import json
 

@@ -102,13 +102,14 @@ class CORSMiddleware(BaseMiddleware):
         headers = {}
         origin = request.get_header("origin")
 
-        if origin and self._is_allowed_origin(origin):
-            headers["Access-Control-Allow-Origin"] = origin
+        if origin:
+            if self._is_allowed_origin(origin):
+                headers["Access-Control-Allow-Origin"] = origin
+                if self.allow_credentials:
+                    headers["Access-Control-Allow-Credentials"] = "true"
         elif "*" in self.allow_origins and not self.allow_credentials:
+            # Если origin не указан, но разрешены все origins
             headers["Access-Control-Allow-Origin"] = "*"
-
-        if self.allow_credentials:
-            headers["Access-Control-Allow-Credentials"] = "true"
 
         if self.expose_headers:
             headers["Access-Control-Expose-Headers"] = ", ".join(self.expose_headers)
@@ -181,7 +182,9 @@ class CORSMiddleware(BaseMiddleware):
 
         # Добаinляем CORS headers к responseу
         cors_headers = self._get_cors_headers(request)
-        for key, value in cors_headers.items():
-            response.headers[key] = value
+        if cors_headers:
+            # Используем set_header для правильного добавления заголовков
+            for key, value in cors_headers.items():
+                response.set_header(key, value)
 
         return response

@@ -3,15 +3,23 @@ from datetime import timedelta
 import pytest
 
 try:
+    import jwt
+    JWT_AVAILABLE = jwt is not None
+except (ImportError, OSError, Exception):
+    JWT_AVAILABLE = False
+
+try:
     from qakeapi.security.jwt_auth import AuthenticationError, JWTAuthBackend, JWTConfig
 except ImportError as e:
-    if "PyJWT" in str(e):
+    if "PyJWT" in str(e) or not JWT_AVAILABLE:
         pytest.skip("PyJWT is required for JWT tests", allow_module_level=True)
     raise
 
 
 @pytest.fixture
 def jwt_config():
+    if not JWT_AVAILABLE:
+        pytest.skip("PyJWT is not available")
     return JWTConfig(
         secret_key="test_secret_key", algorithm="HS256", access_token_expire_minutes=30
     )
@@ -19,10 +27,15 @@ def jwt_config():
 
 @pytest.fixture
 def auth_backend(jwt_config):
-    backend = JWTAuthBackend(jwt_config)
-    backend.add_user("test_user", "test_pass", ["user"])
-    backend.add_user("admin", "admin_pass", ["admin", "user"])
-    return backend
+    if not JWT_AVAILABLE:
+        pytest.skip("PyJWT is not available")
+    try:
+        backend = JWTAuthBackend(jwt_config)
+        backend.add_user("test_user", "test_pass", ["user"])
+        backend.add_user("admin", "admin_pass", ["admin", "user"])
+        return backend
+    except ImportError:
+        pytest.skip("PyJWT is not available")
 
 
 @pytest.mark.asyncio

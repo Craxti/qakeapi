@@ -58,22 +58,43 @@ class LoggingMiddleware(BaseMiddleware):
         sensitive_headers = {"authorization", "cookie", "x-api-key", "x-auth-token"}
         formatted = []
 
-        for key, value in headers.items():
-            if key.lower() in sensitive_headers:
-                formatted.append(f"{key}: [HIDDEN]")
-            else:
-                formatted.append(f"{key}: {value}")
+        if not headers:
+            return "{}"
+            
+        try:
+            for key, value in headers.items():
+                key_str = key.lower() if isinstance(key, str) else (key.decode().lower() if isinstance(key, bytes) else str(key).lower())
+                if key_str in sensitive_headers:
+                    formatted.append(f"{key}: [HIDDEN]")
+                else:
+                    formatted.append(f"{key}: {value}")
+        except Exception:
+            formatted.append("[HEADERS_ERROR]")
 
-        return "{" + ", ".join(formatted) + "}"
+        return "{" + ", ".join(formatted) + "}" if formatted else "{}"
 
     async def _get_request_info(self, request: Request) -> dict:
         """Получandть andнформацandю о requestе for логandроinанandя"""
+        try:
+            # Get headers dict safely
+            headers_dict = {}
+            if hasattr(request, 'headers'):
+                if isinstance(request.headers, dict):
+                    headers_dict = request.headers
+                elif isinstance(request.headers, list):
+                    headers_dict = {
+                        (k.decode() if isinstance(k, bytes) else k): (v.decode() if isinstance(v, bytes) else v)
+                        for k, v in request.headers
+                    }
+        except Exception:
+            headers_dict = {}
+        
         info = {
             "method": request.method,
             "path": request.path,
-            "query_string": request.query_string,
-            "headers": self._format_headers(request.headers),
-            "client": request.client,
+            "query_string": request.query_string if hasattr(request, 'query_string') else "",
+            "headers": self._format_headers(headers_dict),
+            "client": request.client if hasattr(request, 'client') else None,
         }
 
         if self.log_request_body:
@@ -90,9 +111,28 @@ class LoggingMiddleware(BaseMiddleware):
 
     def _get_response_info(self, response: Response) -> dict:
         """Получandть andнформацandю об responseе for логandроinанandя"""
+        try:
+            # Get headers dict safely
+            headers_dict = {}
+            if hasattr(response, 'headers'):
+                if isinstance(response.headers, dict):
+                    headers_dict = response.headers
+                elif isinstance(response.headers, list):
+                    headers_dict = {
+                        (k.decode() if isinstance(k, bytes) else k): (v.decode() if isinstance(v, bytes) else v)
+                        for k, v in response.headers
+                    }
+                elif hasattr(response, 'headers_list'):
+                    headers_dict = {
+                        (k.decode() if isinstance(k, bytes) else k): (v.decode() if isinstance(v, bytes) else v)
+                        for k, v in response.headers_list
+                    }
+        except Exception:
+            headers_dict = {}
+        
         info = {
             "status_code": response.status_code,
-            "headers": self._format_headers(response.headers),
+            "headers": self._format_headers(headers_dict),
         }
 
         if self.log_response_body and hasattr(response, "content"):
@@ -126,8 +166,9 @@ class LoggingMiddleware(BaseMiddleware):
 
         # Логandруем inходящandй request
         request_info = await self._get_request_info(request)
+        log_message = f"Request started: {request.method} {request.path}"
         self.logger.info(
-            f"Request started: {request.method} {request.path}",
+            log_message,
             extra={
                 "request": request_info,
                 "event": "request_started",

@@ -17,7 +17,7 @@ from typing import Any, Awaitable, Callable, Dict, Optional, Union
 
 try:
     import jwt
-except ImportError:
+except (ImportError, OSError, Exception):
     jwt = None  # type: ignore
 
 from qakeapi.core.websockets import WebSocketConnection

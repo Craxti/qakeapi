@@ -49,13 +49,35 @@ class CORSMiddleware:
     def _get_allow_headers(self, request_headers: str = None) -> str:
         """Get allowed headers"""
         if "*" in self.config.allow_headers:
-            return request_headers or "*"
+            return request_headers if request_headers else "*"
         return ", ".join(self.config.allow_headers)
 
-    def _get_origin_from_headers(self, headers: Dict[bytes, bytes]) -> Optional[str]:
+    def _get_origin_from_headers(self, headers) -> Optional[str]:
         """Extract origin from headers"""
-        if b"origin" in headers:
-            return headers[b"origin"].decode()
+        # Headers может быть словарем или списком кортежей
+        if isinstance(headers, dict):
+            # Проверяем разные варианты ключей
+            for key in [b"origin", "origin", "Origin", b"Origin"]:
+                if key in headers:
+                    origin = headers[key]
+                    return origin.decode() if isinstance(origin, bytes) else str(origin)
+            # Попробуем найти в нижнем регистре (для словарей с ключами в нижнем регистре)
+            if "origin" in headers:
+                origin = headers["origin"]
+                return origin.decode() if isinstance(origin, bytes) else str(origin)
+            # Ищем по всем ключам
+            for key, value in headers.items():
+                key_str = key.decode().lower() if isinstance(key, bytes) else key.lower() if isinstance(key, str) else str(key).lower()
+                if key_str == "origin":
+                    return value.decode() if isinstance(value, bytes) else str(value)
+        elif isinstance(headers, list):
+            # Ищем в списке кортежей
+            for header_name, header_value in headers:
+                if isinstance(header_name, bytes):
+                    if header_name.lower() == b"origin":
+                        return header_value.decode() if isinstance(header_value, bytes) else str(header_value)
+                elif isinstance(header_name, str) and header_name.lower() == "origin":
+                    return header_value.decode() if isinstance(header_value, bytes) else str(header_value)
         return None
 
     def _build_preflight_response(self, request: Request) -> Response:
@@ -70,6 +92,11 @@ class CORSMiddleware:
             return Response(content={"detail": "Origin not allowed"}, status_code=400)
 
         response = Response(content={}, status_code=200)
+        
+        # Получаем запрошенные заголовки
+        requested_headers = request.get_header("access-control-request-headers", "")
+        allowed_headers = self._get_allow_headers(requested_headers)
+        
         response.headers = [
             (b"Access-Control-Allow-Origin", origin.encode()),
             (
@@ -79,7 +106,7 @@ class CORSMiddleware:
             (b"Access-Control-Max-Age", str(self.config.max_age).encode()),
             (
                 b"Access-Control-Allow-Headers",
-                ", ".join(self.config.allow_headers).encode(),
+                allowed_headers.encode() if isinstance(allowed_headers, str) else allowed_headers,
             ),
         ]
 

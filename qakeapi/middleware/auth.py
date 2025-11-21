@@ -75,10 +75,27 @@ class AuthMiddleware(BaseMiddleware):
             return await call_next(request)
 
         # Выполняем аутентandфandкацandю
-        user_info = await self.authenticate(request)
+        try:
+            user_info = await self.authenticate(request)
+        except AuthenticationException as exc:
+            # Пробрасываем исключение дальше с headers
+            raise
+        except Exception:
+            # Другие исключения - возвращаем 401
+            from ..core.responses import JSONResponse
+            from ..utils.status import status
+            return JSONResponse(
+                {"detail": "Authentication required"},
+                status_code=status.UNAUTHORIZED,
+            )
 
         if user_info is None:
-            raise AuthenticationException("Authentication required")
+            from ..core.responses import JSONResponse
+            from ..utils.status import status
+            return JSONResponse(
+                {"detail": "Authentication required"},
+                status_code=status.UNAUTHORIZED,
+            )
 
         # Добаinляем andнформацandю о пользоinателе in request
         request._user = user_info

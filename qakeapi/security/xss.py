@@ -132,7 +132,12 @@ class XSSMiddleware(BaseMiddleware):
             request._form_data = sanitized_form
 
         # Sanitize JSON data if present
-        if hasattr(request, "json") and request.json:
+        if hasattr(request, "_json") and request._json:
+            if isinstance(request._json, dict):
+                request._json = XSSProtection.sanitize_dict(request._json)
+            elif isinstance(request._json, str):
+                request._json = XSSProtection.sanitize_value(request._json)
+        elif hasattr(request, "json") and request.json:
             if isinstance(request.json, dict):
                 request.json = XSSProtection.sanitize_dict(request.json)
             elif isinstance(request.json, str):

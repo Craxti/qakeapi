@@ -178,6 +178,31 @@ class Response:
         """Delete response cookie"""
         self.set_cookie(key, "", max_age=0, path=path, domain=domain)
 
+    def get_header(self, name: str) -> Optional[str]:
+        """Get header value by name (case-insensitive)"""
+        name_lower = name.lower().encode()
+        for header_name, header_value in self._headers:
+            if header_name.lower() == name_lower:
+                if isinstance(header_value, bytes):
+                    return header_value.decode()
+                return str(header_value)
+        return None
+
+    def set_header(self, name: str, value: str) -> None:
+        """Set header value"""
+        name_bytes = name.encode()
+        value_bytes = value.encode() if isinstance(value, str) else value
+        
+        # Remove existing header with same name (case-insensitive)
+        name_lower = name.lower()
+        self._headers = [
+            (h, v) for h, v in self._headers 
+            if (h.decode() if isinstance(h, bytes) else h).lower() != name_lower
+        ]
+        
+        # Add new header
+        self._headers.append((name_bytes, value_bytes))
+
     @classmethod
     def json(
         cls,
@@ -266,7 +291,16 @@ class Response:
     @property
     def headers_dict(self) -> Dict[str, str]:
         """Get response headers as dict"""
-        return {k.decode(): v.decode() for k, v in self.headers_list}
+        return {k.decode() if isinstance(k, bytes) else k.lower(): v.decode() if isinstance(v, bytes) else v for k, v in self.headers_list}
+    
+    def get_header(self, name: str) -> Optional[str]:
+        """Get header value by name (case-insensitive)"""
+        name_lower = name.lower()
+        for k, v in self.headers_list:
+            k_str = k.decode() if isinstance(k, bytes) else k
+            if k_str.lower() == name_lower:
+                return v.decode() if isinstance(v, bytes) else v
+        return None
 
     @property
     def media_type(self) -> Optional[str]:
@@ -317,6 +351,9 @@ class JSONResponse(Response):
 
     @property
     async def body(self) -> bytes:
+        # Если _content уже bytes (например, после сжатия), возвращаем его напрямую
+        if isinstance(self._content, bytes):
+            return self._content
         try:
             return json.dumps(self.content, cls=CustomJSONEncoder).encode()
         except (TypeError, ValueError):
@@ -355,6 +392,10 @@ class PlainTextResponse(Response):
             headers=headers,
             media_type="text/plain; charset=utf-8",
         )
+
+
+# Alias for backward compatibility
+TextResponse = PlainTextResponse
 
 
 class RedirectResponse(Response):

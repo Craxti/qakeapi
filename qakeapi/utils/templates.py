@@ -242,3 +242,7 @@ class TemplateRenderer:
         """
         content = self.engine.render(template_name, context)
         return HTMLResponse(content, status_code=status_code)
+
+
+# Alias for backward compatibility
+SimpleTemplates = TemplateEngine
