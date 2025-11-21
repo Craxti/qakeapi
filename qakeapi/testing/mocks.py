@@ -257,7 +257,8 @@ class MockHTTPClient:
     ) -> "aiohttp.ClientResponse":
         """Mock HTTP request."""
         # Create mock response
-        mock_response = AsyncMock(spec=aiohttp.ClientResponse)
+        # Use Any type for spec to avoid issues when aiohttp is None
+        mock_response = AsyncMock()
 
         # Parse URL to find service and path
         parsed_url = url.replace(self.mock_api.base_url, "").strip("/")
