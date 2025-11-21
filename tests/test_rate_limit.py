@@ -104,12 +104,19 @@ async def test_rate_limit_middleware():
 @pytest.mark.asyncio
 async def test_custom_key_function():
     rate_limiter = InMemoryRateLimiter(requests_per_minute=2)
+
     # Используем пользовательскую функцию для ключа
     def key_func(request):
         # Получаем заголовок x-api-key из request
         api_key = request.get_header("x-api-key", "default")
-        return api_key if isinstance(api_key, str) else api_key.decode() if isinstance(api_key, bytes) else "default"
-    
+        return (
+            api_key
+            if isinstance(api_key, str)
+            else api_key.decode()
+            if isinstance(api_key, bytes)
+            else "default"
+        )
+
     middleware = RateLimitMiddleware(rate_limiter, key_func=key_func)
 
     # Создаем два запроса с разными API ключами

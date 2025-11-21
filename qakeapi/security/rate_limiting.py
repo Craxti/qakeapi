@@ -280,7 +280,7 @@ class RateLimitMiddleware(BaseMiddleware):
         # Добаinляем headers rate limit
         for key, value in headers.items():
             # Используем метод set_header для установки заголовков
-            if hasattr(response, 'set_header'):
+            if hasattr(response, "set_header"):
                 response.set_header(key, str(value))
             else:
                 # Fallback: устанавливаем заголовок вручную
@@ -289,12 +289,15 @@ class RateLimitMiddleware(BaseMiddleware):
                 elif isinstance(response.headers, list):
                     # Если headers - это список, добавляем новый заголовок
                     key_bytes = key.encode() if isinstance(key, str) else key
-                    value_bytes = str(value).encode() if isinstance(value, str) else value
+                    value_bytes = (
+                        str(value).encode() if isinstance(value, str) else value
+                    )
                     # Удаляем существующий заголовок с таким же именем (case-insensitive)
-                    key_lower = key.lower().encode() if isinstance(key, str) else key.lower()
+                    key_lower = (
+                        key.lower().encode() if isinstance(key, str) else key.lower()
+                    )
                     response.headers = [
-                        (h, v) for h, v in response.headers 
-                        if h.lower() != key_lower
+                        (h, v) for h, v in response.headers if h.lower() != key_lower
                     ]
                     response.headers.append((key_bytes, value_bytes))
 

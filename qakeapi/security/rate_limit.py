@@ -337,8 +337,10 @@ class RateLimitMiddleware(BaseMiddleware):
                 if hasattr(response, "set_header"):
                     response.set_header("X-RateLimit-Limit", str(info.limit))
                     response.set_header("X-RateLimit-Remaining", str(info.remaining))
-                    if hasattr(info, 'reset_time') and info.reset_time:
-                        response.set_header("X-RateLimit-Reset", str(int(info.reset_time)))
+                    if hasattr(info, "reset_time") and info.reset_time:
+                        response.set_header(
+                            "X-RateLimit-Reset", str(int(info.reset_time))
+                        )
                 elif hasattr(response, "headers"):
                     # Fallback для старых версий
                     if isinstance(response.headers, dict):
@@ -346,8 +348,12 @@ class RateLimitMiddleware(BaseMiddleware):
                         response.headers["X-RateLimit-Remaining"] = str(info.remaining)
                     elif isinstance(response.headers, list):
                         # Добавляем заголовки в список
-                        response.headers.append((b"X-RateLimit-Limit", str(info.limit).encode()))
-                        response.headers.append((b"X-RateLimit-Remaining", str(info.remaining).encode()))
+                        response.headers.append(
+                            (b"X-RateLimit-Limit", str(info.limit).encode())
+                        )
+                        response.headers.append(
+                            (b"X-RateLimit-Remaining", str(info.remaining).encode())
+                        )
                 return response
         else:
             # Sync rate limiter (RateLimiter)

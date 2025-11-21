@@ -161,9 +161,23 @@ class Response:
                 if isinstance(header, (list, tuple)) and len(header) == 2:
                     key, value = header
                     if isinstance(key, bytes):
-                        headers.append([key, str(value).encode() if isinstance(value, str) else value])
+                        headers.append(
+                            [
+                                key,
+                                str(value).encode()
+                                if isinstance(value, str)
+                                else value,
+                            ]
+                        )
                     else:
-                        headers.append([key.encode(), str(value).encode() if isinstance(value, str) else value])
+                        headers.append(
+                            [
+                                key.encode(),
+                                str(value).encode()
+                                if isinstance(value, str)
+                                else value,
+                            ]
+                        )
         else:
             # Если это словарь
             for key, value in self.headers.items():

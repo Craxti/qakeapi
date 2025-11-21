@@ -351,7 +351,7 @@ class TestVersioningMiddleware:
         # Register version first
         v2_info = VersionInfo(version="v2", status=VersionStatus.ACTIVE)
         self.manager.register_version(v2_info)
-        
+
         request = Mock(query_string=b"version=v2")
         version = self.middleware._extract_query_version(request)
         assert version == "v2"

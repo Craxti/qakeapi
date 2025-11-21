@@ -4,6 +4,7 @@ import pytest
 
 try:
     import jwt
+
     JWT_AVAILABLE = jwt is not None
 except (ImportError, OSError, Exception):
     JWT_AVAILABLE = False

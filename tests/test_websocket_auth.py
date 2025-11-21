@@ -13,6 +13,7 @@ import pytest
 
 try:
     import jwt
+
     JWT_AVAILABLE = jwt is not None
 except (ImportError, OSError, Exception):
     JWT_AVAILABLE = False
@@ -507,7 +508,9 @@ class TestAuthenticatorFactory:
         config = AuthConfig(secret_key="test_secret")
         try:
             authenticator = JWTAuthenticator(config)
-            middleware = AuthenticatorFactory.create_auth_middleware(authenticator, config)
+            middleware = AuthenticatorFactory.create_auth_middleware(
+                authenticator, config
+            )
             assert isinstance(middleware, WebSocketAuthMiddleware)
             assert middleware.authenticator == authenticator
             assert middleware.config == config

@@ -197,6 +197,7 @@ class TestErrorResponseBuilder:
 
         # Проверяем содержимое ответа
         import asyncio
+
         content = asyncio.run(response.body)
         if isinstance(content, bytes):
             import json
@@ -242,6 +243,7 @@ class TestErrorResponseBuilder:
         )  # Generic exception handler
 
         import asyncio
+
         content = asyncio.run(response.body)
         if isinstance(content, bytes):
             import json
@@ -278,6 +280,7 @@ class TestErrorResponseBuilder:
         assert response.status_code == status.INTERNAL_SERVER_ERROR
 
         import asyncio
+
         content = asyncio.run(response.body)
         if isinstance(content, bytes):
             import json
@@ -312,6 +315,7 @@ class TestErrorResponseBuilder:
         response = builder.build_response(context)
 
         import asyncio
+
         content = asyncio.run(response.body)
         if isinstance(content, bytes):
             import json

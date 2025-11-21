@@ -57,7 +57,7 @@ class CompressionMiddleware(BaseMiddleware):
                 body = await asyncio.wait_for(response.body, timeout=0.5)
             except (AttributeError, TypeError, asyncio.TimeoutError):
                 # Если body не async или не существует, пробуем _content
-                if hasattr(response, '_content'):
+                if hasattr(response, "_content"):
                     content = response._content
                     if isinstance(content, bytes):
                         body = content
@@ -65,13 +65,14 @@ class CompressionMiddleware(BaseMiddleware):
                         body = content.encode()
                     elif isinstance(content, dict):
                         import json
+
                         body = json.dumps(content).encode()
                     else:
                         body = str(content).encode()
                 else:
                     # Не можем определить размер, не сжимаем
                     return False
-            
+
             if len(body) < self.minimum_size:
                 return False
         except Exception:
@@ -91,7 +92,7 @@ class CompressionMiddleware(BaseMiddleware):
             content_type_header = response.get_header("content-type")
             if content_type_header:
                 content_type = content_type_header.split(";")[0].strip().lower()
-        
+
         if content_type:
             # Убandраем charset and другandе params
             content_type = content_type.split(";")[0].strip().lower()

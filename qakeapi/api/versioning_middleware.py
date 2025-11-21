@@ -121,6 +121,7 @@ class VersioningMiddleware:
                 if isinstance(query_string, bytes):
                     query_string = query_string.decode()
                 from urllib.parse import parse_qs
+
                 parsed = parse_qs(query_string)
                 query_params = {k: v[0] if v else None for k, v in parsed.items()}
             else:
@@ -220,7 +221,7 @@ class VersionRouteMiddleware:
         # Get version from request or extract from path
         version = getattr(request, "api_version", None)
         path = request.path
-        
+
         if not version:
             # Try to extract from path
             if path.startswith("/v") and len(path) > 2:
@@ -240,13 +241,13 @@ class VersionRouteMiddleware:
             version_prefix = f"/{version}"
             if path.startswith(version_prefix):
                 # Remove version prefix
-                path = path[len(version_prefix):]
+                path = path[len(version_prefix) :]
                 # Ensure path starts with /
                 if not path:
                     path = "/"
                 elif not path.startswith("/"):
                     path = "/" + path
-                
+
                 # Check exact path match
                 if path in self.version_routes[version]:
                     return await self.version_routes[version][path](request)

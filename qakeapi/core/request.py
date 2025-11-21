@@ -354,7 +354,9 @@ class Request:
             if filename_match:
                 # This is a file
                 filename = filename_match.group(1)
-                part_content_type = headers.get("Content-Type", "application/octet-stream")
+                part_content_type = headers.get(
+                    "Content-Type", "application/octet-stream"
+                )
 
                 # Create UploadFile
                 upload_file = UploadFile(

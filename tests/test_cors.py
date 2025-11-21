@@ -57,8 +57,10 @@ async def test_cors_preflight_default_config(default_cors_middleware):
     headers_dict = {}
     for key, value in response.headers:
         key_str = key.decode() if isinstance(key, bytes) else key
-        headers_dict[key_str.lower()] = value.decode() if isinstance(value, bytes) else value
-    
+        headers_dict[key_str.lower()] = (
+            value.decode() if isinstance(value, bytes) else value
+        )
+
     assert headers_dict.get("access-control-allow-origin") == "http://example.com"
     methods = headers_dict.get("access-control-allow-methods", "")
     assert "GET" in methods
@@ -87,8 +89,10 @@ async def test_cors_preflight_custom_config(custom_cors_middleware):
     headers_dict = {}
     for key, value in response.headers:
         key_str = key.decode() if isinstance(key, bytes) else key
-        headers_dict[key_str.lower()] = value.decode() if isinstance(value, bytes) else value
-    
+        headers_dict[key_str.lower()] = (
+            value.decode() if isinstance(value, bytes) else value
+        )
+
     assert headers_dict.get("access-control-allow-origin") == "http://localhost:3000"
     assert headers_dict.get("access-control-allow-methods") == "GET, POST"
     assert headers_dict.get("access-control-allow-headers") == "X-Custom-Header"
@@ -114,8 +118,10 @@ async def test_cors_actual_request(custom_cors_middleware):
     headers_dict = {}
     for key, value in response.headers:
         key_str = key.decode() if isinstance(key, bytes) else key
-        headers_dict[key_str.lower()] = value.decode() if isinstance(value, bytes) else value
-    
+        headers_dict[key_str.lower()] = (
+            value.decode() if isinstance(value, bytes) else value
+        )
+
     assert headers_dict.get("access-control-allow-origin") == "http://localhost:3000"
     assert headers_dict.get("access-control-allow-credentials") == "true"
     assert headers_dict.get("access-control-expose-headers") == "X-Custom-Header"
@@ -141,9 +147,7 @@ async def test_cors_disallowed_origin(custom_cors_middleware):
 
 @pytest.mark.asyncio
 async def test_cors_no_origin(custom_cors_middleware):
-    request = Request(
-        {"type": "http", "method": "GET", "headers": []}, mock_receive
-    )
+    request = Request({"type": "http", "method": "GET", "headers": []}, mock_receive)
 
     response = await custom_cors_middleware(request, mock_handler)
     assert response.status_code == 200

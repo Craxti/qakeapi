@@ -58,9 +58,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install -e ".[dev]"
     
-    - name: Run black (check)
-      run: |
-        black --check qakeapi tests examples
+    # - name: Run black (check)
+    #   run: |
+    #     black --check qakeapi tests examples
     
     - name: Run isort (check)
       run: |

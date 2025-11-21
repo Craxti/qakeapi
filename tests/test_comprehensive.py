@@ -252,17 +252,20 @@ class TestComprehensiveAPI:
 
     def test_exception_handler_registration(self, app):
         """Тест регистрации обработчиков исключений"""
+
         # Регистрируем обработчики для теста
         @app.exception_handler(HTTPException)
         async def handle_http_exception(request, exc):
             from qakeapi.core.responses import JSONResponse
+
             return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
-        
+
         @app.exception_handler(Exception)
         async def handle_exception(request, exc):
             from qakeapi.core.responses import JSONResponse
+
             return JSONResponse({"detail": str(exc)}, status_code=500)
-        
+
         # Теперь проверяем, что они зарегистрированы
         assert HTTPException in app.exception_handlers
         assert Exception in app.exception_handlers
@@ -313,7 +316,9 @@ class TestComprehensiveAPI:
         assert shutdown_called
         # Проверяем, что были отправлены правильные сообщения
         assert any(msg.get("type") == "lifespan.startup.complete" for msg in send_calls)
-        assert any(msg.get("type") == "lifespan.shutdown.complete" for msg in send_calls)
+        assert any(
+            msg.get("type") == "lifespan.shutdown.complete" for msg in send_calls
+        )
 
 
 class TestAPIRouter:
@@ -365,9 +370,9 @@ class TestMiddleware:
         app = AsyncMock()
         cors = CORSMiddleware(
             app=app,
-            allow_origins=["*"], 
-            allow_methods=["GET", "POST"], 
-            allow_headers=["*"]
+            allow_origins=["*"],
+            allow_methods=["GET", "POST"],
+            allow_headers=["*"],
         )
 
         # Создаем ASGI scope

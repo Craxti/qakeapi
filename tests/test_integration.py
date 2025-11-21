@@ -215,8 +215,7 @@ class TestIntegration:
         safe_data = {"name": "John Doe", "email": "john@example.com"}
         # Добавляем таймаут для предотвращения зависания
         response = await asyncio.wait_for(
-            client.post("/secure-endpoint", json=safe_data),
-            timeout=5.0
+            client.post("/secure-endpoint", json=safe_data), timeout=5.0
         )
         assert response.status_code == 200
 
@@ -397,49 +396,69 @@ class TestPerformanceIntegration:
         compressed_response = await middleware(request, call_next)
 
         # Проверяем эффективность сжатия
-        original_size = len(json.dumps({"data": repetitive_content}, ensure_ascii=False).encode())
+        original_size = len(
+            json.dumps({"data": repetitive_content}, ensure_ascii=False).encode()
+        )
         # Получаем тело ответа - используем async property body
         response_body = None
-        if hasattr(compressed_response, 'body'):
+        if hasattr(compressed_response, "body"):
             try:
                 response_body = await compressed_response.body
             except Exception:
                 pass
-        if response_body is None and hasattr(compressed_response, '_content'):
+        if response_body is None and hasattr(compressed_response, "_content"):
             content = compressed_response._content
             if isinstance(content, bytes):
                 response_body = content
             elif isinstance(content, dict):
                 response_body = json.dumps(content, ensure_ascii=False).encode()
             else:
-                response_body = json.dumps({"data": repetitive_content}, ensure_ascii=False).encode()
+                response_body = json.dumps(
+                    {"data": repetitive_content}, ensure_ascii=False
+                ).encode()
         if response_body is None:
-            response_body = json.dumps({"data": repetitive_content}, ensure_ascii=False).encode()
-        
+            response_body = json.dumps(
+                {"data": repetitive_content}, ensure_ascii=False
+            ).encode()
+
         compressed_size = len(response_body) if response_body else 0
 
-        compression_ratio = compressed_size / original_size if original_size > 0 else 1.0
+        compression_ratio = (
+            compressed_size / original_size if original_size > 0 else 1.0
+        )
 
         # Проверяем, что сжатие применяется (если Content-Encoding установлен)
         content_encoding = None
-        if hasattr(compressed_response, 'get_header'):
+        if hasattr(compressed_response, "get_header"):
             content_encoding = compressed_response.get_header("Content-Encoding")
-        elif hasattr(compressed_response, '_headers'):
+        elif hasattr(compressed_response, "_headers"):
             # Try to find Content-Encoding in headers
             headers = compressed_response._headers
             if isinstance(headers, list):
                 for header in headers:
                     if isinstance(header, (list, tuple)) and len(header) == 2:
-                        key = header[0].decode() if isinstance(header[0], bytes) else header[0]
+                        key = (
+                            header[0].decode()
+                            if isinstance(header[0], bytes)
+                            else header[0]
+                        )
                         if key.lower() == "content-encoding":
-                            content_encoding = header[1].decode() if isinstance(header[1], bytes) else header[1]
+                            content_encoding = (
+                                header[1].decode()
+                                if isinstance(header[1], bytes)
+                                else header[1]
+                            )
                             break
             elif isinstance(headers, dict):
-                content_encoding = headers.get("content-encoding") or headers.get("Content-Encoding")
-        
+                content_encoding = headers.get("content-encoding") or headers.get(
+                    "Content-Encoding"
+                )
+
         if content_encoding == "gzip":
             # Если сжатие применено, проверяем что оно эффективно
-            assert compression_ratio < 0.5, f"Compression ratio {compression_ratio} is too high"
+            assert (
+                compression_ratio < 0.5
+            ), f"Compression ratio {compression_ratio} is too high"
         else:
             # Если сжатие не применено, это может быть нормально для маленьких ответов
             # Проверяем, что ответ вообще получен

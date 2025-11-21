@@ -143,7 +143,7 @@ class TestApplication:
         # Middleware is wrapped in adapter, so check adapter's request_middleware
         assert len(app.middleware_stack.middleware) > 0
         adapter = app.middleware_stack.middleware[0]
-        assert hasattr(adapter, 'request_middleware')
+        assert hasattr(adapter, "request_middleware")
         assert adapter.request_middleware == cors_middleware
 
     def test_exception_handler_registration(self):

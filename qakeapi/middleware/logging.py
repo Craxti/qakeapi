@@ -60,10 +60,18 @@ class LoggingMiddleware(BaseMiddleware):
 
         if not headers:
             return "{}"
-            
+
         try:
             for key, value in headers.items():
-                key_str = key.lower() if isinstance(key, str) else (key.decode().lower() if isinstance(key, bytes) else str(key).lower())
+                key_str = (
+                    key.lower()
+                    if isinstance(key, str)
+                    else (
+                        key.decode().lower()
+                        if isinstance(key, bytes)
+                        else str(key).lower()
+                    )
+                )
                 if key_str in sensitive_headers:
                     formatted.append(f"{key}: [HIDDEN]")
                 else:
@@ -78,23 +86,27 @@ class LoggingMiddleware(BaseMiddleware):
         try:
             # Get headers dict safely
             headers_dict = {}
-            if hasattr(request, 'headers'):
+            if hasattr(request, "headers"):
                 if isinstance(request.headers, dict):
                     headers_dict = request.headers
                 elif isinstance(request.headers, list):
                     headers_dict = {
-                        (k.decode() if isinstance(k, bytes) else k): (v.decode() if isinstance(v, bytes) else v)
+                        (k.decode() if isinstance(k, bytes) else k): (
+                            v.decode() if isinstance(v, bytes) else v
+                        )
                         for k, v in request.headers
                     }
         except Exception:
             headers_dict = {}
-        
+
         info = {
             "method": request.method,
             "path": request.path,
-            "query_string": request.query_string if hasattr(request, 'query_string') else "",
+            "query_string": request.query_string
+            if hasattr(request, "query_string")
+            else "",
             "headers": self._format_headers(headers_dict),
-            "client": request.client if hasattr(request, 'client') else None,
+            "client": request.client if hasattr(request, "client") else None,
         }
 
         if self.log_request_body:
@@ -114,22 +126,26 @@ class LoggingMiddleware(BaseMiddleware):
         try:
             # Get headers dict safely
             headers_dict = {}
-            if hasattr(response, 'headers'):
+            if hasattr(response, "headers"):
                 if isinstance(response.headers, dict):
                     headers_dict = response.headers
                 elif isinstance(response.headers, list):
                     headers_dict = {
-                        (k.decode() if isinstance(k, bytes) else k): (v.decode() if isinstance(v, bytes) else v)
+                        (k.decode() if isinstance(k, bytes) else k): (
+                            v.decode() if isinstance(v, bytes) else v
+                        )
                         for k, v in response.headers
                     }
-                elif hasattr(response, 'headers_list'):
+                elif hasattr(response, "headers_list"):
                     headers_dict = {
-                        (k.decode() if isinstance(k, bytes) else k): (v.decode() if isinstance(v, bytes) else v)
+                        (k.decode() if isinstance(k, bytes) else k): (
+                            v.decode() if isinstance(v, bytes) else v
+                        )
                         for k, v in response.headers_list
                     }
         except Exception:
             headers_dict = {}
-        
+
         info = {
             "status_code": response.status_code,
             "headers": self._format_headers(headers_dict),

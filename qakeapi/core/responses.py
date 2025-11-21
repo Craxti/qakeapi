@@ -192,14 +192,15 @@ class Response:
         """Set header value"""
         name_bytes = name.encode()
         value_bytes = value.encode() if isinstance(value, str) else value
-        
+
         # Remove existing header with same name (case-insensitive)
         name_lower = name.lower()
         self._headers = [
-            (h, v) for h, v in self._headers 
+            (h, v)
+            for h, v in self._headers
             if (h.decode() if isinstance(h, bytes) else h).lower() != name_lower
         ]
-        
+
         # Add new header
         self._headers.append((name_bytes, value_bytes))
 
@@ -291,8 +292,15 @@ class Response:
     @property
     def headers_dict(self) -> Dict[str, str]:
         """Get response headers as dict"""
-        return {k.decode() if isinstance(k, bytes) else k.lower(): v.decode() if isinstance(v, bytes) else v for k, v in self.headers_list}
-    
+        return {
+            k.decode()
+            if isinstance(k, bytes)
+            else k.lower(): v.decode()
+            if isinstance(v, bytes)
+            else v
+            for k, v in self.headers_list
+        }
+
     def get_header(self, name: str) -> Optional[str]:
         """Get header value by name (case-insensitive)"""
         name_lower = name.lower()

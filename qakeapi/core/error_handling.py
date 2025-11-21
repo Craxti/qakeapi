@@ -105,7 +105,7 @@ class ErrorLogger:
                     body = await asyncio.wait_for(request.body(), timeout=1.0)
                 except asyncio.TimeoutError:
                     return "[TIMEOUT reading body]"
-            
+
             if len(body) > self.max_body_size:
                 return f"[TRUNCATED - {len(body)} bytes]"
             return body.decode("utf-8", errors="replace")

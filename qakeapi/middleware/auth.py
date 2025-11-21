@@ -84,6 +84,7 @@ class AuthMiddleware(BaseMiddleware):
             # Другие исключения - возвращаем 401
             from ..core.responses import JSONResponse
             from ..utils.status import status
+
             return JSONResponse(
                 {"detail": "Authentication required"},
                 status_code=status.UNAUTHORIZED,
@@ -92,6 +93,7 @@ class AuthMiddleware(BaseMiddleware):
         if user_info is None:
             from ..core.responses import JSONResponse
             from ..utils.status import status
+
             return JSONResponse(
                 {"detail": "Authentication required"},
                 status_code=status.UNAUTHORIZED,

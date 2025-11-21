@@ -64,61 +64,75 @@ class _RequestResponseMiddlewareAdapter(BaseMiddleware):
             response_data = {"status": 200, "headers": [], "body": b""}
             response_complete = False
             response_started = False
-            
+
             # Process through app
             if self.app:
                 await self.app(scope, receive, send_wrapper)
-            
+
             # Wait for response to complete
             import asyncio
+
             max_wait = 10  # 10 seconds max wait
             waited = 0
             while not response_complete and waited < max_wait:
                 await asyncio.sleep(0.01)
                 waited += 0.01
-            
+
             if not response_started:
                 # No response was sent - create default response
                 response_obj = JSONResponse({"detail": "No response"}, status_code=500)
                 return response_obj
-            
+
             # Convert ASGI response to Response object
             headers_list = response_data["headers"]
             headers = []
             for header in headers_list:
                 if isinstance(header, (list, tuple)) and len(header) == 2:
                     headers.append((header[0], header[1]))
-            
+
             # Convert headers to dict format if needed
             headers_dict = {}
             for header in headers_list:
                 if isinstance(header, (list, tuple)) and len(header) == 2:
-                    key = header[0].decode() if isinstance(header[0], bytes) else header[0]
-                    value = header[1].decode() if isinstance(header[1], bytes) else header[1]
+                    key = (
+                        header[0].decode()
+                        if isinstance(header[0], bytes)
+                        else header[0]
+                    )
+                    value = (
+                        header[1].decode()
+                        if isinstance(header[1], bytes)
+                        else header[1]
+                    )
                     headers_dict[key.lower()] = value
-            
+
             # Use Response from qakeapi/core/responses.py which is what middleware expects
             # Convert headers_list to list of tuples format
             headers_list_formatted = []
             for header in headers_list:
                 if isinstance(header, (list, tuple)) and len(header) == 2:
                     headers_list_formatted.append((header[0], header[1]))
-            
+
             # Try to parse as JSON, if successful use JSONResponse
             try:
                 import json
+
                 if response_data["body"]:
                     content = json.loads(response_data["body"].decode())
                     response_obj = JSONResponseNew(
                         content=content,
                         status_code=response_data["status"],
-                        headers=headers_list_formatted if headers_list_formatted else None,
+                        headers=headers_list_formatted
+                        if headers_list_formatted
+                        else None,
                     )
                 else:
                     response_obj = Response(
                         content=None,
                         status_code=response_data["status"],
-                        headers=headers_list_formatted if headers_list_formatted else None,
+                        headers=headers_list_formatted
+                        if headers_list_formatted
+                        else None,
                     )
             except (json.JSONDecodeError, UnicodeDecodeError):
                 # Not JSON, use regular Response from responses.py
@@ -134,12 +148,14 @@ class _RequestResponseMiddlewareAdapter(BaseMiddleware):
             response = await self.request_middleware(request, call_next)
             # Ensure response is a Response object from responses.py
             # Response from responses.py uses __call__(send) interface
-            if hasattr(response, '__call__'):
+            if hasattr(response, "__call__"):
                 # Response has ASGI interface (takes send parameter)
                 await response(send)
             else:
                 # Fallback: create JSONResponseNew
-                response = JSONResponseNew(response if isinstance(response, dict) else {"data": response})
+                response = JSONResponseNew(
+                    response if isinstance(response, dict) else {"data": response}
+                )
                 await response(send)
         except HTTPException as exc:
             # HTTP exceptions should be handled by _handle_request
@@ -153,14 +169,25 @@ class _RequestResponseMiddlewareAdapter(BaseMiddleware):
                     # Convert list to dict
                     for header in exc.headers:
                         if isinstance(header, (list, tuple)) and len(header) == 2:
-                            key = header[0].decode() if isinstance(header[0], bytes) else header[0]
-                            value = header[1].decode() if isinstance(header[1], bytes) else header[1]
+                            key = (
+                                header[0].decode()
+                                if isinstance(header[0], bytes)
+                                else header[0]
+                            )
+                            value = (
+                                header[1].decode()
+                                if isinstance(header[1], bytes)
+                                else header[1]
+                            )
                             headers_dict[key] = value
             # Convert headers_dict to list format for Response
             headers_list = []
             if headers_dict:
-                headers_list = [(k.encode(), v.encode() if isinstance(v, str) else v) for k, v in headers_dict.items()]
-            
+                headers_list = [
+                    (k.encode(), v.encode() if isinstance(v, str) else v)
+                    for k, v in headers_dict.items()
+                ]
+
             error_response = JSONResponseNew(
                 {"detail": exc.detail},
                 status_code=exc.status_code,
@@ -249,7 +276,7 @@ class QakeAPI:
         else:
             # It's already an instance
             middleware = middleware_class
-        
+
         # Check if middleware has request/call_next interface
         # If so, wrap it in an ASGI adapter
         if hasattr(middleware, "__call__"):
@@ -259,13 +286,17 @@ class QakeAPI:
                 # Check if it's request/call_next interface (2 params: request, call_next)
                 # Exclude 'self' from params count
                 non_self_params = [p for p in params if p != "self"]
-                if len(non_self_params) >= 2 and "request" in params and "call_next" in params:
+                if (
+                    len(non_self_params) >= 2
+                    and "request" in params
+                    and "call_next" in params
+                ):
                     # Wrap in ASGI adapter
                     middleware = _RequestResponseMiddlewareAdapter(middleware)
             except (ValueError, TypeError):
                 # If signature inspection fails, assume it's ASGI middleware
                 pass
-        
+
         self.middleware_stack.add(middleware)
 
     def on_event(self, event_type: str) -> Callable:
@@ -678,7 +709,12 @@ class QakeAPI:
                             if isinstance(v, str):
                                 headers_list.append((k.encode(), v.encode()))
                             else:
-                                headers_list.append((k.encode() if isinstance(k, bytes) else k, v if isinstance(v, bytes) else str(v).encode()))
+                                headers_list.append(
+                                    (
+                                        k.encode() if isinstance(k, bytes) else k,
+                                        v if isinstance(v, bytes) else str(v).encode(),
+                                    )
+                                )
                     else:
                         headers_list = exc.headers
                 response = JSONResponse(
@@ -797,41 +833,51 @@ class QakeAPI:
             else:
                 handler()
 
-    async def _apply_middleware(self, request: Request, call_next: Callable) -> Response:
+    async def _apply_middleware(
+        self, request: Request, call_next: Callable
+    ) -> Response:
         """
         Apply middleware to request.
-        
+
         Args:
             request: Request object
             call_next: Next handler in chain
-            
+
         Returns:
             Response object
         """
+
         # Create a simple middleware chain executor
         async def execute_middleware(middleware_list, index, req):
             if index >= len(middleware_list):
                 return await call_next(req)
-            
+
             middleware = middleware_list[index]
-            
+
             # Check if middleware has request/call_next interface
             if hasattr(middleware, "__call__"):
                 try:
                     sig = inspect.signature(middleware.__call__)
                     params = list(sig.parameters.keys())
                     non_self_params = [p for p in params if p != "self"]
-                    if len(non_self_params) >= 2 and "request" in params and "call_next" in params:
+                    if (
+                        len(non_self_params) >= 2
+                        and "request" in params
+                        and "call_next" in params
+                    ):
                         # Request/call_next interface
                         async def next_handler(r):
-                            return await execute_middleware(middleware_list, index + 1, r)
+                            return await execute_middleware(
+                                middleware_list, index + 1, r
+                            )
+
                         return await middleware(req, next_handler)
                 except (ValueError, TypeError):
                     pass
-            
+
             # Default: continue to next middleware
             return await execute_middleware(middleware_list, index + 1, req)
-        
+
         # Get request/call_next middleware from stack
         request_middleware = []
         for mw in self.middleware_stack.middleware:
@@ -840,11 +886,15 @@ class QakeAPI:
                     sig = inspect.signature(mw.__call__)
                     params = list(sig.parameters.keys())
                     non_self_params = [p for p in params if p != "self"]
-                    if len(non_self_params) >= 2 and "request" in params and "call_next" in params:
+                    if (
+                        len(non_self_params) >= 2
+                        and "request" in params
+                        and "call_next" in params
+                    ):
                         request_middleware.append(mw)
                 except (ValueError, TypeError):
                     pass
-        
+
         return await execute_middleware(request_middleware, 0, request)
 
     async def _shutdown(self) -> None:
@@ -867,7 +917,7 @@ class QakeAPI:
             send: ASGI send callable
         """
         message = await receive()
-        
+
         while True:
             if message["type"] == "lifespan.startup":
                 # Run startup handlers
@@ -883,11 +933,13 @@ class QakeAPI:
                     await self._shutdown()
                     await send({"type": "lifespan.shutdown.complete"})
                 except Exception as exc:
-                    await send({"type": "lifespan.shutdown.failed", "message": str(exc)})
+                    await send(
+                        {"type": "lifespan.shutdown.failed", "message": str(exc)}
+                    )
                     return
             elif message["type"] == "lifespan.disconnect":
                 return
-            
+
             message = await receive()
 
     def openapi(self) -> Dict[str, Any]:

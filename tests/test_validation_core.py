@@ -20,30 +20,40 @@ from qakeapi.validation.models import (
     BaseModel,
 )
 
+
 # Stub functions for missing validation decorators
 def validate_request_body(model):
     def decorator(func):
         return func
+
     return decorator
+
 
 def validate_response_model(model):
     def decorator(func):
         return func
+
     return decorator
+
 
 def validate_path_params(**kwargs):
     def decorator(func):
         return func
+
     return decorator
+
 
 def validate_query_params(model):
     def decorator(func):
         return func
+
     return decorator
+
 
 def create_model_validator(*validators):
     def decorator(func):
         return func
+
     return decorator
 
 

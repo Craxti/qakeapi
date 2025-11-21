@@ -71,8 +71,8 @@ class TestNewFeatures:
 
         # Проверяем, что middleware stack существует
         assert hasattr(app, "middleware_stack")
-        assert hasattr(app, 'middleware_stack')
-        assert hasattr(app.middleware_stack, 'middleware')
+        assert hasattr(app, "middleware_stack")
+        assert hasattr(app.middleware_stack, "middleware")
 
     def test_middleware_chain_fix(self):
         """Тест исправления цепочки middleware"""
@@ -110,7 +110,7 @@ class TestNewFeatures:
         # Создаем mock запрос и call_next
         from qakeapi.core.request import Request
         from qakeapi.core.responses import JSONResponse
-        
+
         scope = {
             "type": "http",
             "method": "GET",
@@ -124,15 +124,15 @@ class TestNewFeatures:
         # Выполняем middleware через middleware_stack напрямую
         # Проверяем, что middleware добавлен
         assert len(app.middleware_stack.middleware) > 0
-        
+
         # Проверяем, что middleware имеет правильный интерфейс
         # Создаем простой тест вызова
         async def test_call_next(req):
             return await call_next(req)
-        
+
         # Вызываем middleware напрямую
         result = await test_mw(request, test_call_next)
-        
+
         assert test_mw.called
         assert call_next.called
 
@@ -165,7 +165,7 @@ class TestNewFeatures:
 
         # Exception handlers регистрируются только при добавлении
         # Проверяем, что словарь существует
-        assert hasattr(app, 'exception_handlers')
+        assert hasattr(app, "exception_handlers")
         assert isinstance(app.exception_handlers, dict)
 
         # Добавляем кастомный обработчик
@@ -227,7 +227,11 @@ class TestNewFeatures:
 
     def test_template_integration(self):
         """Тест интеграции шаблонов"""
-        from qakeapi.utils.templates import TemplateEngine, TemplateRenderer, SimpleTemplates
+        from qakeapi.utils.templates import (
+            TemplateEngine,
+            TemplateRenderer,
+            SimpleTemplates,
+        )
 
         # Проверяем, что классы доступны
         assert TemplateRenderer is not None
@@ -343,7 +347,7 @@ class TestNewFeatures:
         redirect_resp = RedirectResponse("/new-location")
         assert redirect_resp.status_code == 302  # FOUND по умолчанию
         # Headers can be list of tuples, check properly
-        if hasattr(redirect_resp, 'headers_dict'):
+        if hasattr(redirect_resp, "headers_dict"):
             assert redirect_resp.headers_dict.get("location") == "/new-location"
         else:
             # Check if headers is a list of tuples
@@ -355,7 +359,9 @@ class TestNewFeatures:
                     if key.lower() == "location" and value == "/new-location":
                         location_found = True
                         break
-            assert location_found, f"Location header not found in {redirect_resp.headers}"
+            assert (
+                location_found
+            ), f"Location header not found in {redirect_resp.headers}"
 
 
 class TestCompatibility:

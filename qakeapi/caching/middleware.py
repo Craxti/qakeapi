@@ -116,11 +116,13 @@ class CacheMiddleware(BaseMiddleware):
 
         if cached_response is not None:
             # Add cache hit header (remove existing x-cache if present)
-            headers = list(cached_response["headers"]) if cached_response["headers"] else []
+            headers = (
+                list(cached_response["headers"]) if cached_response["headers"] else []
+            )
             # Remove existing x-cache header if present
             headers = [h for h in headers if h[0].lower() != b"x-cache"]
             headers.append((b"x-cache", b"HIT"))
-            
+
             # Send cached response
             await send(
                 {
