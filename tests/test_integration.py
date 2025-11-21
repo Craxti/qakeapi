@@ -15,7 +15,9 @@ from qakeapi.caching.middleware import CacheMiddleware
 from qakeapi.core.error_handling import ErrorHandler
 from qakeapi.core.exceptions import HTTPException
 from qakeapi.middleware.compression import CompressionMiddleware
-from qakeapi.security.auth import JWTManager, PasswordManager, SecurityConfig
+from qakeapi.security.auth import AuthManager
+from qakeapi.security.jwt import JWTManager
+from qakeapi.security.password import PasswordHasher
 from qakeapi.security.rate_limiting import RateLimitMiddleware, RateLimitRule
 from qakeapi.security.validation import SecurityValidator
 from qakeapi.utils.status import status
@@ -256,28 +258,25 @@ class TestSecurityIntegration:
 
     def test_jwt_password_integration(self):
         """Тест интеграции JWT и паролей"""
-        config = SecurityConfig(secret_key="test-secret")
-        jwt_manager = JWTManager(config)
-        password_manager = PasswordManager(config)
+        secret_key = "test-secret"
+        jwt_manager = JWTManager(secret_key)
+        password_hasher = PasswordHasher()
 
         # Создаем пользователя
         password = "SecurePassword123!"
-        hashed_password = password_manager.hash_password(password)
+        hashed_password = password_hasher.hash(password)
 
         # Проверяем пароль
-        assert password_manager.verify_password(password, hashed_password)
+        assert password_hasher.verify(password, hashed_password)
 
         # Создаем токен для пользователя
         user_data = {"user_id": 123, "username": "testuser"}
-        token_pair = jwt_manager.create_token_pair(user_data)
+        token = jwt_manager.encode(user_data)
 
-        # Проверяем токены
-        access_data = jwt_manager.verify_token(token_pair.access_token, "access")
-        assert access_data.user_id == 123
-        assert access_data.username == "testuser"
-
-        refresh_data = jwt_manager.verify_token(token_pair.refresh_token, "refresh")
-        assert refresh_data.user_id == 123
+        # Проверяем токен
+        decoded_data = jwt_manager.decode(token)
+        assert decoded_data["user_id"] == 123
+        assert decoded_data["username"] == "testuser"
 
     @pytest.mark.asyncio
     async def test_rate_limiting_with_different_keys(self):

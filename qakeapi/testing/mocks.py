@@ -7,8 +7,11 @@ import json
 import logging
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from typing import Any, AsyncGenerator, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, AsyncGenerator, Callable, Dict, List, Optional, Union
 from unittest.mock import AsyncMock, MagicMock
+
+if TYPE_CHECKING:
+    from aiohttp import web
 
 try:
     import aiohttp
@@ -156,7 +159,7 @@ class MockExternalAPI:
 
         logger.info("Mock API server stopped")
 
-    async def _handle_request(self, request: web.Request) -> web.Response:
+    async def _handle_request(self, request: "web.Request") -> "web.Response":
         """Handle incoming request."""
         path = request.match_info["path"]
         method = request.method
