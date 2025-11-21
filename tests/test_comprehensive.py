@@ -2,19 +2,20 @@
 Комплексные тесты QakeAPI для расширенного покрытия
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import AsyncMock, Mock
 
-from qakeapi import QakeAPI, Request, JSONResponse, HTTPException
+import pytest
+
+from qakeapi import HTTPException, JSONResponse, QakeAPI, Request
 from qakeapi.core.router import APIRouter
 from qakeapi.middleware.cors import CORSMiddleware
 from qakeapi.middleware.logging import LoggingMiddleware
 from qakeapi.utils.validation import (
     DataValidator,
     DictValidator,
-    StringValidator,
     IntegerValidator,
+    StringValidator,
 )
 
 

@@ -3,14 +3,15 @@
 """
 
 import pytest
+
 from qakeapi import QakeAPI
+from qakeapi.middleware.auth import (
+    APIKeyMiddleware,
+    BasicAuthMiddleware,
+    BearerTokenMiddleware,
+)
 from qakeapi.middleware.cors import CORSMiddleware
 from qakeapi.middleware.logging import LoggingMiddleware
-from qakeapi.middleware.auth import (
-    BearerTokenMiddleware,
-    BasicAuthMiddleware,
-    APIKeyMiddleware,
-)
 
 
 @pytest.fixture
@@ -52,8 +53,6 @@ class TestCORSMiddleware:
 
         from httpx import AsyncClient
 
-        from httpx import AsyncClient
-
         try:
             from httpx import ASGITransport
         except ImportError:
@@ -85,8 +84,6 @@ class TestCORSMiddleware:
         @app.post("/")
         async def root():
             return {"message": "Hello"}
-
-        from httpx import AsyncClient
 
         from httpx import AsyncClient
 
@@ -125,8 +122,6 @@ class TestCORSMiddleware:
 
         from httpx import AsyncClient
 
-        from httpx import AsyncClient
-
         try:
             from httpx import ASGITransport
         except ImportError:
@@ -159,8 +154,6 @@ class TestAuthMiddleware:
         @app.get("/protected")
         async def protected():
             return {"message": "Protected"}
-
-        from httpx import AsyncClient
 
         from httpx import AsyncClient
 
@@ -198,7 +191,6 @@ class TestAuthMiddleware:
         async def protected():
             return {"message": "Protected"}
 
-        from httpx import AsyncClient
         import base64
 
         from httpx import AsyncClient
@@ -256,8 +248,6 @@ class TestAuthMiddleware:
 
         from httpx import AsyncClient
 
-        from httpx import AsyncClient
-
         try:
             from httpx import ASGITransport
         except ImportError:
@@ -307,8 +297,6 @@ class TestLoggingMiddleware:
         @app.get("/")
         async def root():
             return {"message": "Hello"}
-
-        from httpx import AsyncClient
 
         from httpx import AsyncClient
 

@@ -2,7 +2,7 @@
 Простой тест основного функционала QakeAPI
 """
 
-from qakeapi import QakeAPI, JSONResponse
+from qakeapi import JSONResponse, QakeAPI
 
 # Создаем приложение
 app = QakeAPI(title="Simple Test", debug=True)

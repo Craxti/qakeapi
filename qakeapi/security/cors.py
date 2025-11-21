@@ -5,6 +5,7 @@ This module provides CORS middleware for handling cross-origin requests.
 """
 
 from typing import Any, Dict, List, Optional
+
 from qakeapi.core.middleware import BaseMiddleware
 
 

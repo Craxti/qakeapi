@@ -2,8 +2,8 @@
 Base class for middleware
 """
 
-from typing import Callable, Any
 from abc import ABC, abstractmethod
+from typing import Any, Callable
 
 from ..core.request import Request
 from ..core.responses import Response

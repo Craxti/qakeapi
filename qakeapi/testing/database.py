@@ -3,12 +3,12 @@ Database testing utilities with test isolation for QakeAPI.
 """
 
 import asyncio
-import tempfile
+import logging
 import sqlite3
-from typing import Any, Dict, List, Optional, Callable, AsyncGenerator
+import tempfile
 from contextlib import asynccontextmanager
 from pathlib import Path
-import logging
+from typing import Any, AsyncGenerator, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -52,8 +52,8 @@ class TestDatabase:
         # Remove file if it exists
         # On Windows, we need to wait a bit for the file to be released
         if self.db_path != ":memory:" and Path(self.db_path).exists():
-            import time
             import os
+            import time
 
             # Try to remove the file, with retries on Windows
             max_retries = 5

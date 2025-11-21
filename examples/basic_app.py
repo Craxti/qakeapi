@@ -8,7 +8,7 @@ This example demonstrates basic features of QakeAPI:
 - Lifecycle events
 """
 
-from qakeapi import QakeAPI, Request, JSONResponse
+from qakeapi import JSONResponse, QakeAPI, Request
 from qakeapi.middleware.cors import CORSMiddleware
 from qakeapi.middleware.logging import LoggingMiddleware
 

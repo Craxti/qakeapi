@@ -5,8 +5,8 @@ This module provides in-memory caching with TTL support.
 """
 
 import time
-from typing import Any, Dict, Optional
 from threading import Lock
+from typing import Any, Dict, Optional
 
 
 class Cache:

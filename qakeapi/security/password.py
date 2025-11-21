@@ -6,10 +6,10 @@ Since we can't use external libraries, we implement a simplified
 but secure password hashing using PBKDF2 (which is in standard library).
 """
 
+import base64
 import hashlib
 import hmac
 import secrets
-import base64
 from typing import Optional
 
 

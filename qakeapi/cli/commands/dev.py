@@ -2,9 +2,9 @@
 Команда запуска серinера разработкand
 """
 
+import importlib.util
 import os
 import sys
-import importlib.util
 from pathlib import Path
 
 

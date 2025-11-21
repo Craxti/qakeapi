@@ -2,12 +2,13 @@
 Пример веб-приложения с шаблонами и статическими файлами
 """
 
-from qakeapi import QakeAPI, Request
-from qakeapi.utils.templates import Jinja2Templates, SimpleTemplates
-from qakeapi.utils.static import mount_static
-from qakeapi.middleware.cors import CORSMiddleware
-from qakeapi.core.responses import HTMLResponse, RedirectResponse
 import os
+
+from qakeapi import QakeAPI, Request
+from qakeapi.core.responses import HTMLResponse, RedirectResponse
+from qakeapi.middleware.cors import CORSMiddleware
+from qakeapi.utils.static import mount_static
+from qakeapi.utils.templates import Jinja2Templates, SimpleTemplates
 
 # Создаем приложение
 app = QakeAPI(

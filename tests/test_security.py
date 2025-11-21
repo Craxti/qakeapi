@@ -2,18 +2,20 @@
 Tests for security module.
 """
 
-import pytest
 import time
 from datetime import timedelta
+
+import pytest
+
 from qakeapi.security import (
-    JWTManager,
-    JWTError,
-    PasswordHasher,
-    hash_password,
-    verify_password,
     AuthManager,
     CSRFProtection,
+    JWTError,
+    JWTManager,
+    PasswordHasher,
     RateLimiter,
+    hash_password,
+    verify_password,
 )
 
 

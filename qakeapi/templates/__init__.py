@@ -11,12 +11,12 @@ from .jinja2 import (
 from .live_reload import (
     LiveReloadManager,
     LiveReloadMiddleware,
+    add_live_reload_callback,
+    get_live_reload_manager,
+    remove_live_reload_callback,
     setup_live_reload,
     start_live_reload,
     stop_live_reload,
-    add_live_reload_callback,
-    remove_live_reload_callback,
-    get_live_reload_manager,
 )
 
 __all__ = [

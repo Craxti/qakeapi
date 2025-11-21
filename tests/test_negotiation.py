@@ -1,5 +1,6 @@
 import pytest
-from qakeapi.core.negotiation import MediaType, ContentNegotiator
+
+from qakeapi.core.negotiation import ContentNegotiator, MediaType
 
 
 def test_media_type_parse_basic():

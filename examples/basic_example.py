@@ -8,8 +8,7 @@ This example demonstrates:
 - Returning JSON responses
 """
 
-from qakeapi import QakeAPI, Request, JSONResponse
-
+from qakeapi import JSONResponse, QakeAPI, Request
 
 # Create application
 app = QakeAPI(

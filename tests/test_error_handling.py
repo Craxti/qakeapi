@@ -2,22 +2,23 @@
 Тесты улучшенной системы обработки ошибок
 """
 
-import pytest
 import logging
-from unittest.mock import Mock, patch
 from datetime import datetime
+from unittest.mock import Mock, patch
+
+import pytest
+from pydantic import BaseModel, Field, ValidationError
 
 from qakeapi.core.error_handling import (
     ErrorContext,
+    ErrorHandler,
     ErrorLogger,
     ErrorResponseBuilder,
-    ErrorHandler,
 )
-from qakeapi.core.request import Request
 from qakeapi.core.exceptions import HTTPException
+from qakeapi.core.request import Request
 from qakeapi.core.responses import JSONResponse
 from qakeapi.utils.status import status
-from pydantic import ValidationError, BaseModel, Field
 
 
 class TestModel(BaseModel):

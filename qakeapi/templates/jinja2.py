@@ -2,15 +2,16 @@
 Jinja2 template engine integration for QakeAPI.
 """
 
-import os
 import logging
+import os
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 try:
-    from jinja2 import Environment, FileSystemLoader, select_autoescape
+    from jinja2 import Environment, FileSystemLoader
     from jinja2 import Template as Jinja2Template
+    from jinja2 import select_autoescape
 
     JINJA2_AVAILABLE = True
 except ImportError:

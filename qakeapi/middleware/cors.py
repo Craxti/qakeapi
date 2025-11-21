@@ -2,13 +2,13 @@
 CORS (Cross-Origin Resource Sharing) middleware
 """
 
-from typing import List, Optional, Union, Callable
 import re
+from typing import Callable, List, Optional, Union
 
-from .base import BaseMiddleware
 from ..core.request import Request
-from ..core.responses import Response, PlainTextResponse
+from ..core.responses import PlainTextResponse, Response
 from ..utils.status import status
+from .base import BaseMiddleware
 
 
 class CORSMiddleware(BaseMiddleware):

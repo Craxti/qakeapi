@@ -1,11 +1,11 @@
+import logging
 from abc import ABC, abstractmethod
 from functools import wraps
-import logging
 from typing import Any, Callable, List, Optional
 
-from qakeapi.core.responses import Response
 from qakeapi.core.interfaces import UserProtocol
 from qakeapi.core.request import Request
+from qakeapi.core.responses import Response
 
 logger = logging.getLogger(__name__)
 

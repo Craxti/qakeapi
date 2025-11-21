@@ -2,7 +2,7 @@
 Рабочая демонстрация QakeAPI с основными улучшениями
 """
 
-from qakeapi import QakeAPI, Request, JSONResponse
+from qakeapi import JSONResponse, QakeAPI, Request
 from qakeapi.core.exceptions import HTTPException
 from qakeapi.utils.status import status
 

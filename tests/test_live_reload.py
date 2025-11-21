@@ -10,18 +10,18 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from qakeapi.templates import Jinja2TemplateEngine, render_template
 from qakeapi.templates.live_reload import (
     LiveReloadManager,
     LiveReloadMiddleware,
     TemplateChangeHandler,
+    add_live_reload_callback,
+    get_live_reload_manager,
+    remove_live_reload_callback,
     setup_live_reload,
     start_live_reload,
     stop_live_reload,
-    add_live_reload_callback,
-    remove_live_reload_callback,
-    get_live_reload_manager,
 )
-from qakeapi.templates import Jinja2TemplateEngine, render_template
 
 
 class TestTemplateChangeHandler:

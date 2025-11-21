@@ -2,7 +2,7 @@
 Сandстема уpermissionsленandя конфandгурацandей QakeAPI
 """
 
-from .settings import Settings, DatabaseConfig, CacheConfig, SecurityConfig
+from .settings import CacheConfig, DatabaseConfig, SecurityConfig, Settings
 
 __all__ = [
     "Settings",

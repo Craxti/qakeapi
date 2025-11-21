@@ -3,7 +3,8 @@ Tests for Application class.
 """
 
 import pytest
-from qakeapi import QakeAPI, Request, JSONResponse, NotFound
+
+from qakeapi import JSONResponse, NotFound, QakeAPI, Request
 
 
 @pytest.fixture

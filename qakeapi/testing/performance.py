@@ -3,15 +3,16 @@ Performance testing framework with benchmarks for QakeAPI.
 """
 
 import asyncio
-import time
-import statistics
-import psutil
+import json
 import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+import statistics
+import time
+from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from functools import wraps
-from contextlib import asynccontextmanager
-import json
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
+import psutil
 
 logger = logging.getLogger(__name__)
 

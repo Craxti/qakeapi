@@ -3,12 +3,14 @@
 """
 
 from typing import List, Optional
+
 from pydantic import BaseModel, Field
-from qakeapi import QakeAPI, Request, JSONResponse, Depends, WebSocket
+
+from qakeapi import Depends, JSONResponse, QakeAPI, Request, WebSocket
+from qakeapi.core.exceptions import HTTPException
+from qakeapi.middleware.auth import APIKeyMiddleware, BearerTokenMiddleware
 from qakeapi.middleware.cors import CORSMiddleware
 from qakeapi.middleware.logging import LoggingMiddleware
-from qakeapi.middleware.auth import BearerTokenMiddleware, APIKeyMiddleware
-from qakeapi.core.exceptions import HTTPException
 from qakeapi.utils.status import status
 
 
@@ -156,10 +158,10 @@ async def public_info():
 @app.post("/auth/login")
 async def login(request: Request):
     """Вход в систему"""
-    import json
     import base64
-    import hmac
     import hashlib
+    import hmac
+    import json
     import time
 
     data = await request.json()

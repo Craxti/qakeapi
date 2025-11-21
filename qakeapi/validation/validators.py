@@ -5,10 +5,10 @@ This module provides various validators for different data types.
 All validators use only Python standard library.
 """
 
-import re
 import email.utils
-from typing import Any, Optional, List, Dict, Callable
+import re
 from datetime import datetime
+from typing import Any, Callable, Dict, List, Optional
 from urllib.parse import urlparse
 
 

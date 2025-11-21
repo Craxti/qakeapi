@@ -7,14 +7,14 @@ Provides middleware integration for the versioning system.
 import json
 import logging
 from datetime import date
-from typing import Dict, Any, Optional, Callable
+from typing import Any, Callable, Dict, Optional
 from urllib.parse import parse_qs
 
 from .versioning import (
     APIVersionManager,
-    VersionStrategy,
-    VersionStatus,
     DeprecationWarning,
+    VersionStatus,
+    VersionStrategy,
 )
 
 logger = logging.getLogger(__name__)

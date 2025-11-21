@@ -7,8 +7,8 @@ This example demonstrates how to use rate limiting to protect your API.
 from qakeapi import QakeAPI, Request
 from qakeapi.security.rate_limiting import (
     RateLimiter,
-    RateLimitRule,
     RateLimitMiddleware,
+    RateLimitRule,
 )
 
 app = QakeAPI(

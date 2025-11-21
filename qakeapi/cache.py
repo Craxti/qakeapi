@@ -3,12 +3,12 @@
 Cache module for QakeAPI.
 """
 
-from typing import Any, Optional, Union
-from functools import wraps
 import json
-import time
 import os
+import time
+from functools import wraps
 from pathlib import Path
+from typing import Any, Optional, Union
 
 
 class Cache:

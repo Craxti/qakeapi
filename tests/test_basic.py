@@ -2,9 +2,11 @@
 Базовые тесты для QakeAPI
 """
 
-import pytest
 import asyncio
-from qakeapi import QakeAPI, Request, JSONResponse
+
+import pytest
+
+from qakeapi import JSONResponse, QakeAPI, Request
 from qakeapi.core.exceptions import HTTPException
 from qakeapi.utils.status import status
 

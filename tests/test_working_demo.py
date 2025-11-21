@@ -2,10 +2,11 @@
 Тесты для working_demo.py приложения
 """
 
-import pytest
-import sys
 import os
+import sys
 from pathlib import Path
+
+import pytest
 
 # Добавляем путь к examples в sys.path
 examples_path = Path(__file__).parent.parent / "examples"

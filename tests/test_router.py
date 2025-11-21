@@ -3,7 +3,8 @@ Tests for Router classes.
 """
 
 import pytest
-from qakeapi.core.router import Router, APIRouter, Route
+
+from qakeapi.core.router import APIRouter, Route, Router
 
 
 def test_route_creation():

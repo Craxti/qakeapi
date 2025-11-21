@@ -1,8 +1,8 @@
 """Middleware management for routing."""
 
+import asyncio
 import logging
 from typing import Any, Callable, List
-import asyncio
 
 logger = logging.getLogger(__name__)
 

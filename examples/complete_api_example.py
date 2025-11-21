@@ -5,27 +5,29 @@ This is a comprehensive example showing all major features of QakeAPI working to
 """
 
 from typing import List, Optional
+
 from pydantic import BaseModel, Field
-from qakeapi import QakeAPI, Request, Depends, WebSocket
+
+from qakeapi import Depends, QakeAPI, Request, WebSocket
+from qakeapi.caching.cache import CacheManager, InMemoryCache
+from qakeapi.caching.middleware import CacheMiddleware
+from qakeapi.core.exceptions import HTTPException
+from qakeapi.middleware.auth import BearerTokenMiddleware
+from qakeapi.middleware.compression import CompressionMiddleware
 from qakeapi.middleware.cors import CORSMiddleware
 from qakeapi.middleware.logging import LoggingMiddleware
-from qakeapi.middleware.compression import CompressionMiddleware
-from qakeapi.middleware.auth import BearerTokenMiddleware
-from qakeapi.core.exceptions import HTTPException
-from qakeapi.utils.status import status
-from qakeapi.monitoring.metrics import MetricsCollector, MetricsMiddleware
 from qakeapi.monitoring.health import (
     HealthChecker,
     HealthCheckMiddleware,
     MemoryHealthCheck,
 )
-from qakeapi.caching.cache import InMemoryCache, CacheManager
-from qakeapi.caching.middleware import CacheMiddleware
+from qakeapi.monitoring.metrics import MetricsCollector, MetricsMiddleware
 from qakeapi.security.rate_limiting import (
     RateLimiter,
-    RateLimitRule,
     RateLimitMiddleware,
+    RateLimitRule,
 )
+from qakeapi.utils.status import status
 
 
 # Data Models

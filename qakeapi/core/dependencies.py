@@ -4,8 +4,8 @@ Dependency Injection system for the framework.
 This module provides the Depends decorator and dependency resolution system.
 """
 
-import inspect
 import asyncio
+import inspect
 from typing import Any, Callable, Dict, Optional, Type
 
 

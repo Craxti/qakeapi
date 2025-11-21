@@ -2,14 +2,15 @@
 Тесты middleware компрессии
 """
 
-import pytest
 import gzip
 import zlib
 from unittest.mock import Mock
 
-from qakeapi.middleware.compression import CompressionMiddleware
+import pytest
+
 from qakeapi.core.request import Request
-from qakeapi.core.responses import Response, JSONResponse
+from qakeapi.core.responses import JSONResponse, Response
+from qakeapi.middleware.compression import CompressionMiddleware
 
 
 class TestCompressionMiddleware:

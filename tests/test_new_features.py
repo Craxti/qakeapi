@@ -2,9 +2,10 @@
 Тесты новых возможностей QakeAPI
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from qakeapi import QakeAPI
 from qakeapi.core.application import QakeAPI as QakeAPICore
@@ -17,12 +18,12 @@ class TestNewFeatures:
         """Тест доступности импортов"""
         # Проверяем, что основные компоненты импортируются
         from qakeapi import (
+            CORSMiddleware,
+            HTTPException,
+            JSONResponse,
+            LoggingMiddleware,
             QakeAPI,
             Request,
-            JSONResponse,
-            HTTPException,
-            CORSMiddleware,
-            LoggingMiddleware,
         )
 
         assert QakeAPI is not None
@@ -35,7 +36,7 @@ class TestNewFeatures:
     def test_optional_imports(self):
         """Тест опциональных импортов"""
         # Проверяем, что опциональные модули импортируются (как заглушки если недоступны)
-        from qakeapi import MetricsCollector, HealthChecker, JWTManager, CacheManager
+        from qakeapi import CacheManager, HealthChecker, JWTManager, MetricsCollector
 
         # Должны быть доступны (как заглушки или реальные классы)
         assert MetricsCollector is not None
@@ -195,8 +196,8 @@ class TestNewFeatures:
 
         # Проверяем, что можно монтировать статические файлы
         # (создаем временную директорию для теста)
-        import tempfile
         import os
+        import tempfile
 
         with tempfile.TemporaryDirectory() as temp_dir:
             # Создаем тестовый файл
@@ -209,15 +210,15 @@ class TestNewFeatures:
 
     def test_template_integration(self):
         """Тест интеграции шаблонов"""
-        from qakeapi.utils.templates import TemplateRenderer, SimpleTemplates
+        from qakeapi.utils.templates import SimpleTemplates, TemplateRenderer
 
         # Проверяем, что классы доступны
         assert TemplateRenderer is not None
         assert SimpleTemplates is not None
 
         # Создаем временную директорию для тестов
-        import tempfile
         import os
+        import tempfile
 
         with tempfile.TemporaryDirectory() as temp_dir:
             # Создаем тестовый шаблон
@@ -234,9 +235,9 @@ class TestNewFeatures:
         """Тест улучшений валидации"""
         from qakeapi.utils.validation import (
             DataValidator,
-            StringValidator,
-            IntegerValidator,
             EmailValidator,
+            IntegerValidator,
+            StringValidator,
             validate_json,
         )
 
@@ -298,11 +299,11 @@ class TestNewFeatures:
     def test_response_enhancements(self):
         """Тест улучшений Response"""
         from qakeapi.core.responses import (
-            JSONResponse,
+            FileResponse,
             HTMLResponse,
+            JSONResponse,
             PlainTextResponse,
             RedirectResponse,
-            FileResponse,
         )
 
         # JSON Response

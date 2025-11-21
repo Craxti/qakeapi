@@ -1,7 +1,8 @@
 import pytest
 import pytest_asyncio
-from qakeapi.core.websockets import WebSocketConnection, WebSocketState
+
 from qakeapi import QakeAPI
+from qakeapi.core.websockets import WebSocketConnection, WebSocketState
 
 
 @pytest_asyncio.fixture

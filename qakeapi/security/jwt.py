@@ -6,12 +6,12 @@ Python standard library (base64, hmac, hashlib, json, time).
 """
 
 import base64
-import hmac
 import hashlib
+import hmac
 import json
 import time
-from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
+from typing import Any, Dict, Optional
 
 
 class JWTError(Exception):

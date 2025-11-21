@@ -1,18 +1,20 @@
 """Tests for enhanced WebSocket system."""
 
-import pytest
 import asyncio
 import json
 from datetime import datetime
-from unittest.mock import Mock, AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, Mock
+
+import pytest
+
 from qakeapi.core.websockets import (
-    WebSocketConnection,
-    WebSocketState,
-    WebSocketMessage,
-    WebSocketManager,
     InMemoryWebSocketManager,
+    WebSocketConnection,
     WebSocketHandler,
+    WebSocketManager,
+    WebSocketMessage,
     WebSocketMiddleware,
+    WebSocketState,
 )
 
 

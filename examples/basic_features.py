@@ -8,8 +8,7 @@ Demonstrates:
 - Response types
 """
 
-from qakeapi import QakeAPI, Request, JSONResponse, HTMLResponse
-
+from qakeapi import HTMLResponse, JSONResponse, QakeAPI, Request
 
 app = QakeAPI(title="Basic Features Example")
 

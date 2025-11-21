@@ -2,16 +2,17 @@
 Глаinный CLI andнтерфейс QakeAPI
 """
 
+import asyncio
 import os
 import sys
-import click
-import asyncio
 from pathlib import Path
 from typing import Optional
 
-from .commands.new import create_new_project
+import click
+
 from .commands.dev import run_dev_server
 from .commands.generate import generate_code
+from .commands.new import create_new_project
 from .commands.test import run_tests
 
 

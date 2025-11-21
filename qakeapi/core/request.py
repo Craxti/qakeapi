@@ -7,8 +7,8 @@ convenient access to request data like headers, query parameters, body, etc.
 
 import json
 import urllib.parse
-from typing import Dict, Any, Optional, List
 from collections.abc import Mapping
+from typing import Any, Dict, List, Optional
 
 
 class Request:

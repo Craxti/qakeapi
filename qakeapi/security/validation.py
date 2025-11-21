@@ -2,11 +2,11 @@
 Улучшенная сandстема inалandдацandand and санandтandзацandand inходных данных
 """
 
-import re
 import html
+import re
 import urllib.parse
-from typing import Any, Dict, List, Optional, Union, Callable
 from dataclasses import dataclass
+from typing import Any, Callable, Dict, List, Optional, Union
 
 try:
     from pydantic import BaseModel, validator

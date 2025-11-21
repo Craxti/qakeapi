@@ -5,8 +5,9 @@ This module provides a simple template engine for rendering HTML templates.
 """
 
 import re
-from typing import Any, Dict, Optional
 from pathlib import Path
+from typing import Any, Dict, Optional
+
 from qakeapi.core.response import HTMLResponse
 
 

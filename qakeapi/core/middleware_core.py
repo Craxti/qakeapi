@@ -4,8 +4,8 @@ Middleware system for request/response processing.
 This module provides the base middleware class and middleware chain management.
 """
 
-from typing import Any, Callable, Dict, List, Optional
 from abc import ABC, abstractmethod
+from typing import Any, Callable, Dict, List, Optional
 
 
 class BaseMiddleware(ABC):

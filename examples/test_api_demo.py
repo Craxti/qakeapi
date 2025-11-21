@@ -4,10 +4,11 @@
 
 import asyncio
 import json
-from qakeapi import QakeAPI, Request, JSONResponse, HTTPException
-from qakeapi.utils.validation import DataValidator, StringValidator, IntegerValidator
+
+from qakeapi import HTTPException, JSONResponse, QakeAPI, Request
 from qakeapi.middleware.cors import CORSMiddleware
 from qakeapi.middleware.logging import LoggingMiddleware
+from qakeapi.utils.validation import DataValidator, IntegerValidator, StringValidator
 
 # Создаем приложение
 app = QakeAPI(

@@ -3,6 +3,7 @@ Tests for WebSocket support.
 """
 
 import pytest
+
 from qakeapi import QakeAPI, WebSocket
 
 

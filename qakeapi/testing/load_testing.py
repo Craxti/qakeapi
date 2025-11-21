@@ -3,14 +3,15 @@ Load testing integration for QakeAPI.
 """
 
 import asyncio
-import time
-import statistics
-import logging
-from typing import Any, Callable, Dict, List, Optional, Union
-from dataclasses import dataclass, field
-from contextlib import asynccontextmanager
-import aiohttp
 import json
+import logging
+import statistics
+import time
+from contextlib import asynccontextmanager
+from dataclasses import dataclass, field
+from typing import Any, Callable, Dict, List, Optional, Union
+
+import aiohttp
 
 logger = logging.getLogger(__name__)
 

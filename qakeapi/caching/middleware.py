@@ -6,8 +6,10 @@ This module provides middleware for caching HTTP responses.
 
 import hashlib
 from typing import Any, Dict, Optional
+
 from qakeapi.core.middleware import BaseMiddleware
-from qakeapi.core.response import Response, JSONResponse
+from qakeapi.core.response import JSONResponse, Response
+
 from .cache import Cache, MemoryCache
 
 

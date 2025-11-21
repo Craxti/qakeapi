@@ -1,10 +1,10 @@
 """Base classes for routing."""
 
+import logging
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Pattern, Union
-import re
-import logging
 
 logger = logging.getLogger(__name__)
 

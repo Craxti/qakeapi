@@ -3,13 +3,14 @@ Tests for Response classes.
 """
 
 import pytest
+
 from qakeapi.core.response import (
-    Response,
-    JSONResponse,
-    HTMLResponse,
-    TextResponse,
-    RedirectResponse,
     FileResponse,
+    HTMLResponse,
+    JSONResponse,
+    RedirectResponse,
+    Response,
+    TextResponse,
 )
 
 

@@ -2,8 +2,10 @@
 Tests for OpenAPI generation.
 """
 
-import pytest
 import json
+
+import pytest
+
 from qakeapi import QakeAPI
 from qakeapi.core.openapi import OpenAPIGenerator
 

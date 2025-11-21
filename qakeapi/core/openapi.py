@@ -4,10 +4,11 @@ OpenAPI schema generation.
 This module provides OpenAPI 3.0 schema generation for API documentation.
 """
 
-import json
 import inspect
+import json
 from typing import Any, Dict, List, Optional
-from .router import Router, Route
+
+from .router import Route, Router
 
 
 class OpenAPIGenerator:

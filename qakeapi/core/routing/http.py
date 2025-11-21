@@ -1,8 +1,8 @@
 """HTTP routing implementation."""
 
-import re
-import logging
 import asyncio
+import logging
+import re
 from typing import Any, Callable, Dict, List, Optional, Pattern, Union
 
 from ..requests import Request

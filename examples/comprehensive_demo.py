@@ -16,31 +16,31 @@ This example demonstrates all major features of QakeAPI:
 - Template rendering
 """
 
-from qakeapi import (
-    QakeAPI,
-    Request,
-    JSONResponse,
-    HTMLResponse,
-    Depends,
-    WebSocket,
-    NotFound,
-    BadRequest,
-)
-from qakeapi.validation import (
-    BaseModel,
-    Field,
-    StringValidator,
-    IntegerValidator,
-    EmailValidator,
-    ValidationError,
-)
-from qakeapi.security import AuthManager, CORSMiddleware
-from qakeapi.caching import MemoryCache, CacheMiddleware
-from qakeapi.utils import TemplateRenderer
-import tempfile
 import os
+import tempfile
 from pathlib import Path
 
+from qakeapi import (
+    BadRequest,
+    Depends,
+    HTMLResponse,
+    JSONResponse,
+    NotFound,
+    QakeAPI,
+    Request,
+    WebSocket,
+)
+from qakeapi.caching import CacheMiddleware, MemoryCache
+from qakeapi.security import AuthManager, CORSMiddleware
+from qakeapi.utils import TemplateRenderer
+from qakeapi.validation import (
+    BaseModel,
+    EmailValidator,
+    Field,
+    IntegerValidator,
+    StringValidator,
+    ValidationError,
+)
 
 # Create application
 app = QakeAPI(

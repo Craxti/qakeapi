@@ -6,8 +6,8 @@ HTTP routes and WebSocket routes.
 """
 
 import re
-from typing import Any, Callable, Dict, List, Optional, Tuple
 from collections import defaultdict
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 
 class Route:

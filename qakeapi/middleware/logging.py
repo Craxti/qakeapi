@@ -2,13 +2,13 @@
 Logging middleware for QakeAPI
 """
 
-import time
 import logging
+import time
 from typing import Callable, Optional, Set
 
-from .base import BaseMiddleware
 from ..core.request import Request
 from ..core.responses import Response
+from .base import BaseMiddleware
 
 
 class LoggingMiddleware(BaseMiddleware):

@@ -5,7 +5,7 @@ Template renderers and utilities for QakeAPI.
 import logging
 import time
 from functools import wraps
-from typing import Any, Dict, Optional, Callable
+from typing import Any, Callable, Dict, Optional
 
 from .jinja2 import Jinja2TemplateEngine, render_template, render_template_string
 

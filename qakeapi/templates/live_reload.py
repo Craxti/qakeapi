@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Callable, Dict, List, Optional, Set
 
 try:
-    from watchdog.events import FileSystemEventHandler, FileSystemEvent
+    from watchdog.events import FileSystemEvent, FileSystemEventHandler
     from watchdog.observers import Observer
 except ImportError:
     FileSystemEventHandler = None  # type: ignore

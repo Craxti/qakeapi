@@ -2,11 +2,12 @@
 Tests for template system.
 """
 
-import pytest
-import tempfile
 import os
+import tempfile
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 from qakeapi.templates.jinja2 import (
     Jinja2TemplateEngine,
@@ -15,8 +16,8 @@ from qakeapi.templates.jinja2 import (
     render_template_string,
 )
 from qakeapi.templates.renderers import (
-    TemplateCache,
     CachedTemplateEngine,
+    TemplateCache,
     TemplateDebugger,
     create_template_engine,
 )

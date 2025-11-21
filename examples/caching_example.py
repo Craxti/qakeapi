@@ -5,7 +5,7 @@ This example demonstrates how to use built-in caching with in-memory and Redis b
 """
 
 from qakeapi import QakeAPI, Request
-from qakeapi.caching.cache import InMemoryCache, CacheManager
+from qakeapi.caching.cache import CacheManager, InMemoryCache
 from qakeapi.caching.middleware import CacheMiddleware
 
 app = QakeAPI(

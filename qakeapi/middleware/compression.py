@@ -4,7 +4,7 @@ Middleware for компрессandand responseоin
 
 import gzip
 import zlib
-from typing import Callable, Set, Optional
+from typing import Callable, Optional, Set
 
 from ..core.request import Request
 from ..core.responses import Response

@@ -2,10 +2,12 @@
 Tests for utility modules.
 """
 
-import pytest
-import tempfile
 import os
+import tempfile
 from pathlib import Path
+
+import pytest
+
 from qakeapi.utils import StaticFiles, TemplateEngine, TemplateRenderer
 
 

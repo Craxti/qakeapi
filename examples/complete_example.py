@@ -13,19 +13,11 @@ This example shows:
 - Templates
 """
 
-from qakeapi import (
-    QakeAPI,
-    Request,
-    JSONResponse,
-    Depends,
-    WebSocket,
-    NotFound,
-)
-from qakeapi.validation import BaseModel, Field, StringValidator, IntegerValidator
-from qakeapi.security import AuthManager, CORSMiddleware
+from qakeapi import Depends, JSONResponse, NotFound, QakeAPI, Request, WebSocket
 from qakeapi.caching import CacheMiddleware, MemoryCache
+from qakeapi.security import AuthManager, CORSMiddleware
 from qakeapi.utils import TemplateRenderer, mount_static
-
+from qakeapi.validation import BaseModel, Field, IntegerValidator, StringValidator
 
 # Create application
 app = QakeAPI(

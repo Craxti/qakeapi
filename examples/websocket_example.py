@@ -7,9 +7,9 @@ Demonstrates:
 - JSON message handling
 """
 
-from qakeapi import QakeAPI, WebSocket
 import json
 
+from qakeapi import QakeAPI, WebSocket
 
 app = QakeAPI(title="WebSocket Example")
 

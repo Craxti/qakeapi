@@ -5,10 +5,10 @@ Test fixtures and factories system for QakeAPI.
 import random
 import string
 import uuid
-from typing import Any, Dict, List, Optional, Type, TypeVar, Callable
-from datetime import datetime, timedelta
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta
 from functools import wraps
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar
 
 T = TypeVar("T")
 

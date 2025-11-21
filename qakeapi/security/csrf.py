@@ -4,11 +4,11 @@ CSRF (Cross-Site Request Forgery) protection.
 This module provides CSRF token generation and verification.
 """
 
-import secrets
-import hmac
 import hashlib
-from typing import Optional, Dict
+import hmac
+import secrets
 from datetime import datetime, timedelta
+from typing import Dict, Optional
 
 
 class CSRFProtection:

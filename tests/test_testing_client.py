@@ -3,6 +3,7 @@ Tests for test client.
 """
 
 import pytest
+
 from qakeapi import QakeAPI, Request
 from qakeapi.testing import TestClient, TestResponse
 

@@ -1,11 +1,12 @@
 import pytest
+
 from qakeapi.core.routing import (
+    BaseRoute,
+    BaseRouter,
     HTTPRoute,
     HTTPRouter,
     WebSocketRoute,
     WebSocketRouter,
-    BaseRoute,
-    BaseRouter,
 )
 
 

@@ -7,17 +7,15 @@ Demonstrates:
 - Automatic validation errors
 """
 
-from qakeapi import QakeAPI, Request, HTTPException
-from qakeapi import JSONResponse
+from qakeapi import HTTPException, JSONResponse, QakeAPI, Request
 from qakeapi.validation import (
     BaseModel,
-    Field,
-    ValidationError,
-    StringValidator,
-    IntegerValidator,
     EmailValidator,
+    Field,
+    IntegerValidator,
+    StringValidator,
+    ValidationError,
 )
-
 
 app = QakeAPI(title="Validation Example")
 

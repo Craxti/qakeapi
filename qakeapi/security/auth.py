@@ -4,8 +4,9 @@ Authentication system.
 This module provides authentication helpers and middleware.
 """
 
-from typing import Optional, Dict, Any, Callable
-from .jwt import JWTManager, JWTError
+from typing import Any, Callable, Dict, Optional
+
+from .jwt import JWTError, JWTManager
 from .password import PasswordHasher, hash_password, verify_password
 
 

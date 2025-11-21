@@ -2,21 +2,22 @@
 Интеграционные тесты для всех улучшений QakeAPI
 """
 
-import pytest
-import pytest_asyncio
 import asyncio
 import time
 from unittest.mock import patch
 
-from qakeapi import QakeAPI, Request, JSONResponse
+import pytest
+import pytest_asyncio
+
+from qakeapi import JSONResponse, QakeAPI, Request
+from qakeapi.caching.cache import CacheManager
+from qakeapi.caching.middleware import CacheMiddleware
+from qakeapi.core.error_handling import ErrorHandler
+from qakeapi.core.exceptions import HTTPException
+from qakeapi.middleware.compression import CompressionMiddleware
 from qakeapi.security.auth import JWTManager, PasswordManager, SecurityConfig
 from qakeapi.security.rate_limiting import RateLimitMiddleware, RateLimitRule
 from qakeapi.security.validation import SecurityValidator
-from qakeapi.middleware.compression import CompressionMiddleware
-from qakeapi.caching.middleware import CacheMiddleware
-from qakeapi.caching.cache import CacheManager
-from qakeapi.core.error_handling import ErrorHandler
-from qakeapi.core.exceptions import HTTPException
 from qakeapi.utils.status import status
 
 
@@ -93,8 +94,6 @@ def enhanced_app():
 @pytest_asyncio.fixture
 async def client(enhanced_app):
     """Создать тестовый клиент"""
-    from httpx import AsyncClient
-
     from httpx import AsyncClient
 
     try:

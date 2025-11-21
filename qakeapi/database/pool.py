@@ -4,9 +4,9 @@ Connection pooling for баз данных
 
 import asyncio
 import logging
-from typing import Any, Dict, Optional, Union, AsyncContextManager
-from dataclasses import dataclass
 from contextlib import asynccontextmanager
+from dataclasses import dataclass
+from typing import Any, AsyncContextManager, Dict, Optional, Union
 from urllib.parse import urlparse
 
 

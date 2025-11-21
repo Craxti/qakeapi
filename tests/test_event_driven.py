@@ -11,17 +11,18 @@ Tests cover:
 
 import asyncio
 import json
-import pytest
 from datetime import datetime, timedelta
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import AsyncMock, Mock
+
+import pytest
 
 from qakeapi.core.events import (
     Event,
-    EventType,
     EventBus,
-    EventStore,
-    InMemoryEventStorage,
     EventHandler,
+    EventStore,
+    EventType,
+    InMemoryEventStorage,
     Saga,
     SagaManager,
 )

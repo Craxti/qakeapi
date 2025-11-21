@@ -5,13 +5,13 @@ This example demonstrates how to use built-in monitoring, metrics, and health ch
 """
 
 from qakeapi import QakeAPI, Request
-from qakeapi.monitoring.metrics import MetricsCollector, MetricsMiddleware
 from qakeapi.monitoring.health import (
+    DiskSpaceHealthCheck,
     HealthChecker,
     HealthCheckMiddleware,
     MemoryHealthCheck,
-    DiskSpaceHealthCheck,
 )
+from qakeapi.monitoring.metrics import MetricsCollector, MetricsMiddleware
 
 app = QakeAPI(
     title="Monitoring Example",

@@ -4,23 +4,24 @@ Tests for WebSocket Authentication System.
 Tests cover all authentication scenarios and edge cases.
 """
 
-import pytest
 import asyncio
 import json
 from datetime import datetime, timedelta
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
-from qakeapi.security.websocket_auth import (
-    AuthStatus,
-    AuthResult,
-    AuthConfig,
-    WebSocketAuthenticator,
-    JWTAuthenticator,
-    WebSocketAuthMiddleware,
-    WebSocketAuthHandler,
-    AuthenticatorFactory,
-)
+import pytest
+
 from qakeapi.core.websockets import WebSocketConnection
+from qakeapi.security.websocket_auth import (
+    AuthConfig,
+    AuthenticatorFactory,
+    AuthResult,
+    AuthStatus,
+    JWTAuthenticator,
+    WebSocketAuthenticator,
+    WebSocketAuthHandler,
+    WebSocketAuthMiddleware,
+)
 
 
 class TestAuthStatus:

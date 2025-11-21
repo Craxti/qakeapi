@@ -1,15 +1,16 @@
+import os
+
 from ariadne import (
-    QueryType,
     MutationType,
+    QueryType,
     SubscriptionType,
-    make_executable_schema,
     graphql_sync,
     load_schema_from_path,
+    make_executable_schema,
 )
 from ariadne.asgi import GraphQL
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
-import os
 
 
 # SOLID: Single Responsibility — отдельный класс для GraphQL API

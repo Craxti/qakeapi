@@ -2,11 +2,11 @@
 Utilities for data validation in QakeAPI
 """
 
-import re
-from typing import Any, Dict, List, Optional, Union, Type, get_type_hints
-from datetime import datetime, date
-from decimal import Decimal
 import json
+import re
+from datetime import date, datetime
+from decimal import Decimal
+from typing import Any, Dict, List, Optional, Type, Union, get_type_hints
 
 try:
     from pydantic import BaseModel, ValidationError, validator

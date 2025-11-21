@@ -7,9 +7,8 @@ Demonstrates:
 - Type conversion in dependencies
 """
 
-from qakeapi import QakeAPI, Request, Depends
+from qakeapi import Depends, QakeAPI, Request
 from qakeapi.security import AuthManager
-
 
 app = QakeAPI(title="Dependency Injection Example")
 auth_manager = AuthManager(secret_key="secret-key")

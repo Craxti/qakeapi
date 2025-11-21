@@ -3,13 +3,12 @@
 import time
 from typing import Any, Callable, Dict, List, Optional, Type
 
-from ..requests import Request
-from ..responses import JSONResponse, Response
-from .cors import CORSMiddleware
-
 # Import BaseMiddleware and MiddlewareStack from parent middleware_core.py file
 # This avoids conflict between middleware.py file and middleware/ directory
 from ..middleware_core import BaseMiddleware, MiddlewareStack
+from ..requests import Request
+from ..responses import JSONResponse, Response
+from .cors import CORSMiddleware
 
 
 class Middleware:

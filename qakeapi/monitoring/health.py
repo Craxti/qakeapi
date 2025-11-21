@@ -3,15 +3,15 @@
 """
 
 import asyncio
-import time
 import logging
-from typing import Dict, List, Optional, Any, Callable, Union
+import time
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from ..middleware.base import BaseMiddleware
 from ..core.request import Request
-from ..core.responses import Response, JSONResponse
+from ..core.responses import JSONResponse, Response
+from ..middleware.base import BaseMiddleware
 from ..utils.status import status
 
 

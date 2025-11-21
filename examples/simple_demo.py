@@ -2,11 +2,11 @@
 Упрощенная демонстрация QakeAPI без сложных зависимостей
 """
 
-from qakeapi import QakeAPI, Request, JSONResponse
-from qakeapi.middleware.compression import CompressionMiddleware
-from qakeapi.caching.middleware import CacheMiddleware
+from qakeapi import JSONResponse, QakeAPI, Request
 from qakeapi.caching.cache import CacheManager
+from qakeapi.caching.middleware import CacheMiddleware
 from qakeapi.core.exceptions import HTTPException
+from qakeapi.middleware.compression import CompressionMiddleware
 from qakeapi.utils.status import status
 
 # Создаем приложение

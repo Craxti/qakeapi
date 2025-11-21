@@ -1,9 +1,9 @@
+import logging
+import traceback
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-import logging
-from typing import Any, Dict, List, Optional
-import traceback
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 try:
     import jwt
@@ -15,8 +15,8 @@ try:
 except ImportError:
     BaseModel = None  # type: ignore
 
-from qakeapi.core.responses import Response
 from qakeapi.core.interfaces import UserProtocol
+from qakeapi.core.responses import Response
 
 logger = logging.getLogger(__name__)
 

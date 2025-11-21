@@ -3,7 +3,8 @@ Tests for dependency injection system.
 """
 
 import pytest
-from qakeapi import Request, Depends
+
+from qakeapi import Depends, Request
 from qakeapi.core.dependencies import Dependency, resolve_dependencies
 
 

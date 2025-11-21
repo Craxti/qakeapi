@@ -5,16 +5,15 @@ This module provides a flexible and extensible authentication system for WebSock
 """
 
 import asyncio
+import hashlib
 import json
 import logging
+import secrets
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, Optional, Union, Callable, Awaitable
-from dataclasses import field
-import hashlib
-import secrets
+from typing import Any, Awaitable, Callable, Dict, Optional, Union
 
 try:
     import jwt

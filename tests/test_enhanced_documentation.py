@@ -3,19 +3,20 @@ Tests for enhanced API documentation features.
 """
 
 import json
+
 import pytest
 from pydantic import BaseModel, Field
 
 from qakeapi.core.openapi import (
+    OpenAPIGenerator,
     OpenAPIInfo,
     OpenAPIPath,
-    OpenAPIGenerator,
     SecurityScheme,
     SecuritySchemeType,
     WebSocketDocumentation,
     WebSocketEvent,
-    get_swagger_ui_html,
     get_redoc_html,
+    get_swagger_ui_html,
     get_webSocket_docs_html,
 )
 

@@ -5,9 +5,10 @@ This module provides rate limiting to prevent abuse.
 """
 
 import time
-from typing import Any, Callable, Dict, Optional, Tuple
 from collections import defaultdict
 from threading import Lock
+from typing import Any, Callable, Dict, Optional, Tuple
+
 from qakeapi.core.middleware import BaseMiddleware
 
 

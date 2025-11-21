@@ -30,7 +30,8 @@ from unittest.mock import Mock, patch
 
 import psutil
 import pytest
-from hypothesis import given, settings, strategies as st
+from hypothesis import given, settings
+from hypothesis import strategies as st
 from hypothesis.stateful import Bundle, RuleBasedStateMachine, rule
 from memory_profiler import profile
 
@@ -115,8 +116,8 @@ class MutationTester:
 
     def create_mutation(self, target_function: Callable, mutation_type: str):
         """Create a mutation of the target function."""
-        import inspect
         import ast
+        import inspect
 
         source = inspect.getsource(target_function)
         tree = ast.parse(source)

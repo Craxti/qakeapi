@@ -4,14 +4,14 @@ QakeAPI Error Handling Example
 This example demonstrates comprehensive error handling in QakeAPI.
 """
 
-from qakeapi import QakeAPI, Request, JSONResponse
-from qakeapi.core.exceptions import (
-    HTTPException,
-    ValidationException,
-    NotFoundException,
-    AuthenticationException,
-)
+from qakeapi import JSONResponse, QakeAPI, Request
 from qakeapi.core.error_handling import ErrorHandler
+from qakeapi.core.exceptions import (
+    AuthenticationException,
+    HTTPException,
+    NotFoundException,
+    ValidationException,
+)
 from qakeapi.utils.status import status
 
 app = QakeAPI(

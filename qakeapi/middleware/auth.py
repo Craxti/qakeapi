@@ -5,14 +5,14 @@ Authentication middleware for QakeAPI
 import base64
 import hashlib
 import hmac
-import time
-from typing import Callable, Optional, Set, Union, Dict, Any
 import json
+import time
+from typing import Any, Callable, Dict, Optional, Set, Union
 
-from .base import BaseMiddleware
+from ..core.exceptions import AuthenticationException, AuthorizationException
 from ..core.request import Request
 from ..core.responses import Response
-from ..core.exceptions import AuthenticationException, AuthorizationException
+from .base import BaseMiddleware
 
 
 class AuthMiddleware(BaseMiddleware):

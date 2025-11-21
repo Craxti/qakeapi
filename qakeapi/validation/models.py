@@ -4,16 +4,17 @@ Data models for the framework.
 This module provides a simple model system for data validation and serialization.
 """
 
-from typing import Any, Dict, Optional, Type, get_type_hints, get_origin, get_args
+from typing import Any, Dict, Optional, Type, get_args, get_origin, get_type_hints
+
 from .validators import (
     BaseValidator,
-    StringValidator,
-    IntegerValidator,
-    FloatValidator,
     BooleanValidator,
-    EmailValidator,
-    URLValidator,
     DateTimeValidator,
+    EmailValidator,
+    FloatValidator,
+    IntegerValidator,
+    StringValidator,
+    URLValidator,
     ValidationError,
 )
 

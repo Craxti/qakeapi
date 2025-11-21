@@ -3,31 +3,32 @@
 """
 
 import asyncio
+
 from qakeapi import (
-    QakeAPI,
-    Request,
-    JSONResponse,
-    CORSMiddleware,
-    LoggingMiddleware,
-    CompressionMiddleware,
-    MetricsCollector,
-    MetricsMiddleware,
-    create_metrics_endpoint,
-    HealthChecker,
-    HealthCheckMiddleware,
-    DiskSpaceHealthCheck,
-    MemoryHealthCheck,
-    RateLimitMiddleware,
-    RateLimiter,
     CacheManager,
     CacheMiddleware,
-    ErrorHandler,
-    create_error_handler,
+    CompressionMiddleware,
+    CORSMiddleware,
     DataValidator,
-    StringValidator,
+    DiskSpaceHealthCheck,
+    ErrorHandler,
+    HealthChecker,
+    HealthCheckMiddleware,
     IntegerValidator,
+    JSONResponse,
+    LoggingMiddleware,
+    MemoryHealthCheck,
+    MetricsCollector,
+    MetricsMiddleware,
+    QakeAPI,
+    RateLimiter,
+    RateLimitMiddleware,
+    Request,
     StaticFiles,
+    StringValidator,
     TemplateRenderer,
+    create_error_handler,
+    create_metrics_endpoint,
     status,
 )
 
@@ -459,8 +460,9 @@ async def shutdown():
 
 
 if __name__ == "__main__":
-    import uvicorn
     import time
+
+    import uvicorn
 
     print("🌟 Запуск QakeAPI Enhanced Demo...")
     print("✨ Включены все возможности фреймворка!")

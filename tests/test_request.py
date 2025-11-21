@@ -3,6 +3,7 @@ Tests for Request class.
 """
 
 import pytest
+
 from qakeapi.core.request import Request
 
 

@@ -4,13 +4,14 @@ Static files serving.
 This module provides functionality for serving static files.
 """
 
-import os
 import mimetypes
-from typing import Any, Dict, Optional
+import os
 from pathlib import Path
-from qakeapi.core.response import Response, FileResponse
+from typing import Any, Dict, Optional
+
 from qakeapi.core.exceptions import NotFound
 from qakeapi.core.request import Request
+from qakeapi.core.response import FileResponse, Response
 
 
 class StaticFiles:

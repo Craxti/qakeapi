@@ -4,8 +4,7 @@
 
 import os
 from pathlib import Path
-from typing import Dict, Any, Optional
-
+from typing import Any, Dict, Optional
 
 TEMPLATES = {
     "model": {

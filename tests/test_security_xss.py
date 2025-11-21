@@ -1,7 +1,8 @@
 import pytest
-from qakeapi.security.xss import XSSProtection, XSSMiddleware
+
 from qakeapi.core.request import Request
 from qakeapi.core.responses import Response
+from qakeapi.security.xss import XSSMiddleware, XSSProtection
 
 
 @pytest.fixture

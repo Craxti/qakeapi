@@ -2,9 +2,11 @@
 Tests for caching module.
 """
 
-import pytest
 import time
-from qakeapi.caching import MemoryCache, CacheManager, CacheMiddleware
+
+import pytest
+
+from qakeapi.caching import CacheManager, CacheMiddleware, MemoryCache
 
 
 def test_memory_cache_basic():

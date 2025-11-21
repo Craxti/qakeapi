@@ -2,11 +2,11 @@
 Модуль логирования для QakeAPI.
 """
 
-import logging
 import json
+import logging
+import sys
 from datetime import datetime
 from typing import Any, Dict, Optional
-import sys
 
 
 class JsonFormatter(logging.Formatter):

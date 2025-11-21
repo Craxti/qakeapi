@@ -5,8 +5,8 @@ This module provides WebSocket class and WebSocket route handling.
 """
 
 import json
-from typing import Any, Dict, Optional, AsyncIterator
 from enum import Enum
+from typing import Any, AsyncIterator, Dict, Optional
 
 
 class WebSocketState(Enum):
