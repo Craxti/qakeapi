@@ -118,9 +118,9 @@ class MockExternalAPI:
             )
         self.base_url = base_url
         self.services: Dict[str, MockService] = {}
-        self._server: Optional[web.Application] = None
-        self._runner: Optional[web.AppRunner] = None
-        self._site: Optional[web.TCPSite] = None
+        self._server: Optional["web.Application"] = None
+        self._runner: Optional["web.AppRunner"] = None
+        self._site: Optional["web.TCPSite"] = None
 
     def add_service(self, service: MockService) -> None:
         """Add mock service."""
@@ -212,7 +212,7 @@ class MockHTTPClient:
                 "Install it with: pip install aiohttp"
             )
         self.mock_api = mock_api
-        self._session: Optional[aiohttp.ClientSession] = None
+        self._session: Optional["aiohttp.ClientSession"] = None
 
     async def __aenter__(self):
         """Async context manager entry."""
@@ -226,25 +226,25 @@ class MockHTTPClient:
 
     async def get(
         self, url: str, headers: Optional[Dict[str, str]] = None
-    ) -> aiohttp.ClientResponse:
+    ) -> "aiohttp.ClientResponse":
         """Mock GET request."""
         return await self._request("GET", url, headers=headers)
 
     async def post(
         self, url: str, data: Any = None, headers: Optional[Dict[str, str]] = None
-    ) -> aiohttp.ClientResponse:
+    ) -> "aiohttp.ClientResponse":
         """Mock POST request."""
         return await self._request("POST", url, data=data, headers=headers)
 
     async def put(
         self, url: str, data: Any = None, headers: Optional[Dict[str, str]] = None
-    ) -> aiohttp.ClientResponse:
+    ) -> "aiohttp.ClientResponse":
         """Mock PUT request."""
         return await self._request("PUT", url, data=data, headers=headers)
 
     async def delete(
         self, url: str, headers: Optional[Dict[str, str]] = None
-    ) -> aiohttp.ClientResponse:
+    ) -> "aiohttp.ClientResponse":
         """Mock DELETE request."""
         return await self._request("DELETE", url, headers=headers)
 
@@ -254,7 +254,7 @@ class MockHTTPClient:
         url: str,
         data: Any = None,
         headers: Optional[Dict[str, str]] = None,
-    ) -> aiohttp.ClientResponse:
+    ) -> "aiohttp.ClientResponse":
         """Mock HTTP request."""
         # Create mock response
         mock_response = AsyncMock(spec=aiohttp.ClientResponse)
