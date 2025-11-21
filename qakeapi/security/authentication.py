@@ -5,8 +5,15 @@ from typing import Any, Dict, List, Optional
 import traceback
 from datetime import datetime, timedelta
 
-import jwt
-from pydantic import BaseModel
+try:
+    import jwt
+except ImportError:
+    jwt = None  # type: ignore
+
+try:
+    from pydantic import BaseModel
+except ImportError:
+    BaseModel = None  # type: ignore
 
 from qakeapi.core.responses import Response
 from qakeapi.core.interfaces import UserProtocol
@@ -148,6 +155,11 @@ class JWTAuthBackend(AuthenticationBackend):
     """JWT authentication backend"""
 
     def __init__(self, config: JWTConfig):
+        if jwt is None:
+            raise ImportError(
+                "PyJWT is required for JWTAuthBackend. "
+                "Install it with: pip install PyJWT"
+            )
         self.config = config
         self.users: Dict[str, Dict[str, Any]] = {}
         logger.debug("Initialized JWTAuthBackend")

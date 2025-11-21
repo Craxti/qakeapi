@@ -1,7 +1,10 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
-import jwt
+try:
+    import jwt
+except ImportError:
+    jwt = None  # type: ignore
 
 from .authentication import AuthenticationBackend, AuthenticationError, User
 
@@ -26,6 +29,11 @@ class JWTAuthBackend(AuthenticationBackend):
     """JWT authentication backend implementation"""
 
     def __init__(self, config: JWTConfig):
+        if jwt is None:
+            raise ImportError(
+                "PyJWT is required for JWTAuthBackend. "
+                "Install it with: pip install PyJWT"
+            )
         self.config = config
         self.users: Dict[str, Dict[str, Any]] = {}
 

@@ -13,9 +13,13 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, Optional, Union, Callable, Awaitable
 from dataclasses import field
-import jwt
 import hashlib
 import secrets
+
+try:
+    import jwt
+except ImportError:
+    jwt = None  # type: ignore
 
 from qakeapi.core.websockets import WebSocketConnection
 
@@ -100,6 +104,11 @@ class JWTAuthenticator(WebSocketAuthenticator):
     """
 
     def __init__(self, config: AuthConfig):
+        if jwt is None:
+            raise ImportError(
+                "PyJWT is required for JWTAuthenticator. "
+                "Install it with: pip install PyJWT"
+            )
         self.config = config
         self._revoked_tokens: set = set()
         self._auth_attempts: Dict[str, int] = {}
