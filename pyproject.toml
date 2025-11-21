@@ -40,6 +40,17 @@ dev = [
     "black>=23.0.0",
     "isort>=5.12.0",
     "mypy>=1.0.0",
+    # Optional dependencies for JWT authentication
+    "PyJWT>=2.0.0",
+    "cryptography>=3.4.8",
+    # Optional dependencies for validation
+    "pydantic>=2.0.0",
+    # Optional dependencies for live reload
+    "watchdog>=3.0.0",
+    # Optional dependencies for load testing
+    "aiohttp>=3.9.0",
+    # Optional dependencies for templates
+    "jinja2>=3.0.0",
 ]
 
 # Only for running the server
