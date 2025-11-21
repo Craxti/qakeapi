@@ -9,7 +9,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="qakeapi",
-    version="1.1.0",
+    version="1.1.1",
     description="Modern asynchronous web framework for Python",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -34,8 +34,9 @@ setup(
     ],
     keywords="web framework api rest async asgi",
     project_urls={
-        "Documentation": "https://github.com/qakeapi/qakeapi",
-        "Source": "https://github.com/qakeapi/qakeapi",
-        "Tracker": "https://github.com/qakeapi/qakeapi/issues",
+        "Documentation": "https://github.com/craxti/qakeapi",
+        "Source": "https://github.com/craxti/qakeapi",
+        "Tracker": "https://github.com/craxti/qakeapi/issues",
+        "Homepage": "https://github.com/craxti/qakeapi",
     },
 )

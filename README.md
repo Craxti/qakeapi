@@ -8,7 +8,8 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/qakeapi/qakeapi)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/craxti/qakeapi)
+[![PyPI version](https://badge.fury.io/py/qakeapi.svg)](https://badge.fury.io/py/qakeapi)
 
 </div>
 
