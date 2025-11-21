@@ -20,7 +20,7 @@ from .validators import (
 
 class Field:
     """Represents a model field with validation."""
-    
+
     def __init__(
         self,
         validator: Optional[BaseValidator] = None,
@@ -29,7 +29,7 @@ class Field:
     ):
         """
         Initialize field.
-        
+
         Args:
             validator: Validator instance
             default: Default value
@@ -43,20 +43,20 @@ class Field:
 class BaseModel:
     """
     Base class for data models.
-    
+
     Provides validation and serialization for model instances.
     """
-    
+
     def __init__(self, **kwargs):
         """
         Initialize model instance.
-        
+
         Args:
             **kwargs: Field values
         """
         # Get field definitions from class
         fields = self._get_fields()
-        
+
         # Set field values
         for field_name, field_def in fields.items():
             if field_name in kwargs:
@@ -67,7 +67,7 @@ class BaseModel:
                 raise ValidationError(f"Required field missing: {field_name}")
             else:
                 value = None
-            
+
             # Validate and set value
             if value is not None and field_def.validator:
                 try:
@@ -75,45 +75,45 @@ class BaseModel:
                 except ValidationError as e:
                     e.field = field_name
                     raise
-            
+
             setattr(self, field_name, value)
-    
+
     @classmethod
     def _get_fields(cls) -> Dict[str, Field]:
         """
         Get field definitions from class.
-        
+
         Returns:
             Dictionary of field definitions
         """
         fields = {}
-        
+
         # Check for explicit field definitions
         for name in dir(cls):
             if not name.startswith("_") and isinstance(getattr(cls, name), Field):
                 fields[name] = getattr(cls, name)
-        
+
         # If no explicit fields, infer from type hints
         if not fields:
             type_hints = get_type_hints(cls)
             for name, type_hint in type_hints.items():
                 if name.startswith("_"):
                     continue
-                
+
                 # Create validator from type hint
                 validator = cls._create_validator_from_type(type_hint)
                 fields[name] = Field(validator=validator, required=True)
-        
+
         return fields
-    
+
     @classmethod
     def _create_validator_from_type(cls, type_hint: Type) -> Optional[BaseValidator]:
         """
         Create validator from type hint.
-        
+
         Args:
             type_hint: Type hint
-            
+
         Returns:
             Validator instance or None
         """
@@ -123,7 +123,7 @@ class BaseModel:
             args = get_args(type_hint)
             if len(args) > 0:
                 type_hint = args[0]
-        
+
         # Map types to validators
         if type_hint == str:
             return StringValidator()
@@ -133,19 +133,19 @@ class BaseModel:
             return FloatValidator()
         elif type_hint == bool:
             return BooleanValidator()
-        
+
         return None
-    
+
     def dict(self) -> Dict[str, Any]:
         """
         Convert model to dictionary.
-        
+
         Returns:
             Dictionary representation of model
         """
         result = {}
         fields = self._get_fields()
-        
+
         for field_name in fields.keys():
             value = getattr(self, field_name, None)
             if value is not None:
@@ -158,42 +158,44 @@ class BaseModel:
                     ]
                 else:
                     result[field_name] = value
-        
+
         return result
-    
+
     def json(self) -> str:
         """
         Convert model to JSON string.
-        
+
         Returns:
             JSON string representation
         """
         import json
+
         return json.dumps(self.dict(), default=str)
-    
+
     @classmethod
     def parse_obj(cls, obj: Dict[str, Any]) -> "BaseModel":
         """
         Parse object from dictionary.
-        
+
         Args:
             obj: Dictionary to parse
-            
+
         Returns:
             Model instance
         """
         return cls(**obj)
-    
+
     @classmethod
     def parse_json(cls, json_str: str) -> "BaseModel":
         """
         Parse object from JSON string.
-        
+
         Args:
             json_str: JSON string to parse
-            
+
         Returns:
             Model instance
         """
         import json
+
         return cls.parse_obj(json.loads(json_str))

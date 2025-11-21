@@ -28,8 +28,10 @@ def mock_scope():
 @pytest.fixture
 def mock_receive():
     """Create mock ASGI receive callable."""
+
     async def receive():
         return {"type": "http.request", "body": b"", "more_body": False}
+
     return receive
 
 
@@ -84,13 +86,14 @@ async def test_request_path_params(mock_scope, mock_receive):
 @pytest.mark.asyncio
 async def test_request_json(mock_scope, mock_receive):
     """Test request JSON parsing."""
+
     async def receive_json():
         return {
             "type": "http.request",
             "body": b'{"key": "value"}',
             "more_body": False,
         }
-    
+
     request = Request(mock_scope, receive_json)
     data = await request.json()
     assert data == {"key": "value"}
@@ -99,15 +102,15 @@ async def test_request_json(mock_scope, mock_receive):
 @pytest.mark.asyncio
 async def test_request_form(mock_scope, mock_receive):
     """Test request form parsing."""
+
     async def receive_form():
         return {
             "type": "http.request",
             "body": b"field1=value1&field2=value2",
             "more_body": False,
         }
-    
+
     request = Request(mock_scope, receive_form)
     data = await request.form()
     assert data["field1"] == "value1"
     assert data["field2"] == "value2"
-

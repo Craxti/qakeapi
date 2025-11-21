@@ -10,10 +10,10 @@ from typing import Any, Dict, Optional
 class HTTPException(Exception):
     """
     Base HTTP exception class.
-    
+
     Used for raising HTTP errors with status codes and error messages.
     """
-    
+
     def __init__(
         self,
         status_code: int,
@@ -22,7 +22,7 @@ class HTTPException(Exception):
     ):
         """
         Initialize HTTP exception.
-        
+
         Args:
             status_code: HTTP status code
             detail: Error detail message or data
@@ -37,14 +37,14 @@ class HTTPException(Exception):
 class FrameworkException(Exception):
     """
     Base framework exception class.
-    
+
     Used for framework-level errors that are not HTTP-related.
     """
-    
+
     def __init__(self, message: str):
         """
         Initialize framework exception.
-        
+
         Args:
             message: Error message
         """
@@ -55,42 +55,48 @@ class FrameworkException(Exception):
 # Common HTTP exceptions
 class BadRequest(HTTPException):
     """400 Bad Request exception."""
+
     def __init__(self, detail: Any = "Bad Request"):
         super().__init__(400, detail)
 
 
 class Unauthorized(HTTPException):
     """401 Unauthorized exception."""
+
     def __init__(self, detail: Any = "Unauthorized"):
         super().__init__(401, detail)
 
 
 class Forbidden(HTTPException):
     """403 Forbidden exception."""
+
     def __init__(self, detail: Any = "Forbidden"):
         super().__init__(403, detail)
 
 
 class NotFound(HTTPException):
     """404 Not Found exception."""
+
     def __init__(self, detail: Any = "Not Found"):
         super().__init__(404, detail)
 
 
 class MethodNotAllowed(HTTPException):
     """405 Method Not Allowed exception."""
+
     def __init__(self, detail: Any = "Method Not Allowed"):
         super().__init__(405, detail)
 
 
 class Conflict(HTTPException):
     """409 Conflict exception."""
+
     def __init__(self, detail: Any = "Conflict"):
         super().__init__(409, detail)
 
 
 class InternalServerError(HTTPException):
     """500 Internal Server Error exception."""
+
     def __init__(self, detail: Any = "Internal Server Error"):
         super().__init__(500, detail)
-

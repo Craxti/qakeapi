@@ -8,7 +8,12 @@ import urllib.parse
 from typing import Any, Dict, List, Optional, Union, Callable
 from dataclasses import dataclass
 
-from pydantic import BaseModel, validator
+try:
+    from pydantic import BaseModel, validator
+except ImportError:
+    BaseModel = None  # type: ignore
+    validator = None  # type: ignore
+
 from ..core.exceptions import HTTPException
 from ..utils.status import status
 
@@ -158,16 +163,22 @@ class SecurityValidator:
             return data
 
 
-class SecureBaseModel(BaseModel):
+class SecureBaseModel:
     """Base model with built-in security validation"""
 
-    model_config = {
-        "extra": "forbid",  # Prohibit additional fields
-        "validate_assignment": True,  # Validate on assignment
-        "use_enum_values": True,  # Use enum values
-    }
+    if BaseModel is not None:
+        model_config = {
+            "extra": "forbid",  # Prohibit additional fields
+            "validate_assignment": True,  # Validate on assignment
+            "use_enum_values": True,  # Use enum values
+        }
 
     def __init__(self, **data):
+        if BaseModel is None:
+            raise ImportError(
+                "pydantic is required for SecureBaseModel. "
+                "Install it with: pip install pydantic"
+            )
         # Validate data before creating model
         validator = SecurityValidator()
         clean_data = validator.validate_data(data)

@@ -9,8 +9,14 @@ import os
 import time
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Set
-from watchdog.events import FileSystemEventHandler, FileSystemEvent
-from watchdog.observers import Observer
+
+try:
+    from watchdog.events import FileSystemEventHandler, FileSystemEvent
+    from watchdog.observers import Observer
+except ImportError:
+    FileSystemEventHandler = None  # type: ignore
+    FileSystemEvent = None  # type: ignore
+    Observer = None  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +31,11 @@ class TemplateChangeHandler(FileSystemEventHandler):
         Args:
             callback: Function to call when template changes
         """
+        if FileSystemEventHandler is None:
+            raise ImportError(
+                "watchdog is required for TemplateChangeHandler. "
+                "Install it with: pip install watchdog"
+            )
         self.callback = callback
         self.last_modified: Dict[str, float] = {}
         self.debounce_time = 0.5  # Debounce time in seconds
@@ -94,6 +105,11 @@ class LiveReloadManager:
             template_dirs: List of template directories to watch
             enabled: Whether live reload is enabled
         """
+        if Observer is None:
+            raise ImportError(
+                "watchdog is required for LiveReloadManager. "
+                "Install it with: pip install watchdog"
+            )
         self.template_dirs = [Path(d) for d in template_dirs]
         self.enabled = enabled
         self.observer: Optional[Observer] = None

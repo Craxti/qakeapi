@@ -87,7 +87,7 @@ async def root():
 async def get_users(limit: int = 10, offset: int = 0):
     """Get all users with pagination."""
     return {
-        "users": users_db[offset:offset + limit],
+        "users": users_db[offset : offset + limit],
         "total": len(users_db),
         "limit": limit,
         "offset": offset,
@@ -108,7 +108,7 @@ async def create_user(user: UserCreate):
     """Create a new user."""
     global user_counter
     user_counter += 1
-    
+
     user_data = {
         "id": user_counter,
         "name": user.name,
@@ -116,7 +116,7 @@ async def create_user(user: UserCreate):
         "age": user.age,
     }
     users_db.append(user_data)
-    
+
     return JSONResponse(user_data, status_code=201)
 
 
@@ -132,12 +132,12 @@ async def login(request: Request):
     data = await request.json()
     username = data.get("username")
     password = data.get("password")
-    
+
     # In real app, verify credentials
     if username == "admin" and password == "password":
         token = auth_manager.create_access_token({"username": username, "user_id": 1})
         return {"access_token": token, "token_type": "bearer"}
-    
+
     return JSONResponse({"detail": "Invalid credentials"}, status_code=401)
 
 
@@ -146,19 +146,23 @@ async def login(request: Request):
 async def websocket_endpoint(websocket: WebSocket):
     """WebSocket chat endpoint."""
     await websocket.accept()
-    
-    await websocket.send_json({
-        "type": "connection",
-        "message": "Connected to WebSocket!",
-    })
-    
+
+    await websocket.send_json(
+        {
+            "type": "connection",
+            "message": "Connected to WebSocket!",
+        }
+    )
+
     try:
         async for message in websocket.iter_json():
             # Echo message back
-            await websocket.send_json({
-                "type": "echo",
-                "data": message,
-            })
+            await websocket.send_json(
+                {
+                    "type": "echo",
+                    "data": message,
+                }
+            )
     except Exception as e:
         print(f"WebSocket error: {e}")
     finally:
@@ -180,5 +184,5 @@ async def shutdown():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
 
+    uvicorn.run(app, host="0.0.0.0", port=8000)

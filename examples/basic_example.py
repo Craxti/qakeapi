@@ -57,7 +57,7 @@ async def search(request: Request):
     """Search endpoint with query parameters."""
     query = request.get_query_param("q", "")
     limit = request.get_query_param("limit", "10")
-    
+
     return {
         "query": query,
         "limit": int(limit),
@@ -93,5 +93,5 @@ async def not_found_handler(scope, receive, exc):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
 
+    uvicorn.run(app, host="0.0.0.0", port=8000)

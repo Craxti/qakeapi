@@ -18,10 +18,10 @@ from http import HTTPStatus
 class Response:
     """
     Base HTTP response class.
-    
+
     This is the base class for all HTTP responses in the framework.
     """
-    
+
     def __init__(
         self,
         content: Any = None,
@@ -32,7 +32,7 @@ class Response:
     ):
         """
         Initialize response.
-        
+
         Args:
             content: Response content
             status_code: HTTP status code
@@ -45,11 +45,11 @@ class Response:
         self.headers = headers or {}
         self.media_type = media_type
         self.cookies = cookies or {}
-        
+
         # Set default Content-Type if not provided
         if media_type and "content-type" not in self.headers:
             self.headers["content-type"] = media_type
-    
+
     def set_cookie(
         self,
         key: str,
@@ -64,7 +64,7 @@ class Response:
     ):
         """
         Set a cookie in the response.
-        
+
         Args:
             key: Cookie name
             value: Cookie value
@@ -77,7 +77,7 @@ class Response:
             samesite: SameSite attribute (Strict, Lax, None)
         """
         cookie_parts = [f"{key}={value}"]
-        
+
         if path:
             cookie_parts.append(f"Path={path}")
         if domain:
@@ -92,9 +92,9 @@ class Response:
             cookie_parts.append("HttpOnly")
         if samesite:
             cookie_parts.append(f"SameSite={samesite}")
-        
+
         cookie_string = "; ".join(cookie_parts)
-        
+
         # Store in cookies dict and also set Set-Cookie header
         self.cookies[key] = cookie_string
         if "set-cookie" not in self.headers:
@@ -106,7 +106,7 @@ class Response:
                 self.headers["set-cookie"] = [existing, cookie_string]
             else:
                 self.headers["set-cookie"].append(cookie_string)
-    
+
     def delete_cookie(
         self,
         key: str,
@@ -115,43 +115,43 @@ class Response:
     ):
         """
         Delete a cookie by setting it to expire.
-        
+
         Args:
             key: Cookie name
             path: Cookie path
             domain: Cookie domain
         """
         self.set_cookie(key, "", max_age=0, path=path, domain=domain)
-    
+
     def render(self) -> bytes:
         """
         Render response content to bytes.
-        
+
         Returns:
             Response body as bytes
         """
         if self.content is None:
             return b""
-        
+
         if isinstance(self.content, bytes):
             return self.content
-        
+
         if isinstance(self.content, str):
             return self.content.encode("utf-8")
-        
+
         return str(self.content).encode("utf-8")
-    
+
     async def __call__(self, scope: Dict[str, Any], receive: Any, send: Any):
         """
         ASGI application interface.
-        
+
         Args:
             scope: ASGI scope
             receive: ASGI receive callable
             send: ASGI send callable
         """
         body = self.render()
-        
+
         # Prepare headers
         headers = []
         for key, value in self.headers.items():
@@ -160,28 +160,32 @@ class Response:
                     headers.append([key.encode(), str(v).encode()])
             else:
                 headers.append([key.encode(), str(value).encode()])
-        
+
         # Add Set-Cookie headers from cookies
         for cookie_string in self.cookies.values():
             if isinstance(cookie_string, str):
                 headers.append([b"set-cookie", cookie_string.encode()])
-        
+
         # Send response
-        await send({
-            "type": "http.response.start",
-            "status": self.status_code,
-            "headers": headers,
-        })
-        
-        await send({
-            "type": "http.response.body",
-            "body": body,
-        })
+        await send(
+            {
+                "type": "http.response.start",
+                "status": self.status_code,
+                "headers": headers,
+            }
+        )
+
+        await send(
+            {
+                "type": "http.response.body",
+                "body": body,
+            }
+        )
 
 
 class JSONResponse(Response):
     """Response class for JSON content."""
-    
+
     def __init__(
         self,
         content: Any,
@@ -191,7 +195,7 @@ class JSONResponse(Response):
     ):
         """
         Initialize JSON response.
-        
+
         Args:
             content: Data to serialize as JSON
             status_code: HTTP status code
@@ -205,12 +209,12 @@ class JSONResponse(Response):
             media_type="application/json",
             cookies=cookies,
         )
-    
+
     def render(self) -> bytes:
         """Render JSON content to bytes."""
         if self.content is None:
             return b"{}"
-        
+
         try:
             return json.dumps(self.content, ensure_ascii=False).encode("utf-8")
         except (TypeError, ValueError) as e:
@@ -219,7 +223,7 @@ class JSONResponse(Response):
 
 class HTMLResponse(Response):
     """Response class for HTML content."""
-    
+
     def __init__(
         self,
         content: str,
@@ -229,7 +233,7 @@ class HTMLResponse(Response):
     ):
         """
         Initialize HTML response.
-        
+
         Args:
             content: HTML content string
             status_code: HTTP status code
@@ -247,7 +251,7 @@ class HTMLResponse(Response):
 
 class TextResponse(Response):
     """Response class for plain text content."""
-    
+
     def __init__(
         self,
         content: str,
@@ -257,7 +261,7 @@ class TextResponse(Response):
     ):
         """
         Initialize text response.
-        
+
         Args:
             content: Text content string
             status_code: HTTP status code
@@ -275,7 +279,7 @@ class TextResponse(Response):
 
 class RedirectResponse(Response):
     """Response class for HTTP redirects."""
-    
+
     def __init__(
         self,
         url: str,
@@ -284,7 +288,7 @@ class RedirectResponse(Response):
     ):
         """
         Initialize redirect response.
-        
+
         Args:
             url: Redirect URL
             status_code: Redirect status code (301, 302, 303, 307, 308)
@@ -292,10 +296,10 @@ class RedirectResponse(Response):
         """
         if status_code not in (301, 302, 303, 307, 308):
             raise ValueError(f"Invalid redirect status code: {status_code}")
-        
+
         redirect_headers = headers or {}
         redirect_headers["location"] = url
-        
+
         super().__init__(
             content="",
             status_code=status_code,
@@ -305,7 +309,7 @@ class RedirectResponse(Response):
 
 class FileResponse(Response):
     """Response class for file downloads."""
-    
+
     def __init__(
         self,
         path: str,
@@ -316,7 +320,7 @@ class FileResponse(Response):
     ):
         """
         Initialize file response.
-        
+
         Args:
             path: File path
             filename: Optional filename for download
@@ -326,26 +330,27 @@ class FileResponse(Response):
         """
         self.file_path = path
         self.filename = filename
-        
+
         # Auto-detect media type if not provided
         if not media_type:
             import mimetypes
+
             media_type, _ = mimetypes.guess_type(path)
             if not media_type:
                 media_type = "application/octet-stream"
-        
+
         file_headers = headers or {}
-        
+
         if filename:
             file_headers["content-disposition"] = f'attachment; filename="{filename}"'
-        
+
         super().__init__(
             content=None,  # Will be loaded from file
             status_code=status_code,
             headers=file_headers,
             media_type=media_type,
         )
-    
+
     def render(self) -> bytes:
         """Read and render file content."""
         try:
@@ -355,4 +360,3 @@ class FileResponse(Response):
             raise FileNotFoundError(f"File not found: {self.file_path}")
         except IOError as e:
             raise IOError(f"Error reading file: {e}") from e
-

@@ -24,6 +24,7 @@ app = QakeAPI(title="Validation Example")
 
 class UserCreate(BaseModel):
     """User creation model."""
+
     name: str = Field(validator=StringValidator(min_length=3, max_length=50))
     email: str = Field(validator=EmailValidator())  # Use EmailValidator for email
     age: int = Field(validator=IntegerValidator(min_value=18, max_value=120))
@@ -31,6 +32,7 @@ class UserCreate(BaseModel):
 
 class UserUpdate(BaseModel):
     """User update model."""
+
     name: str = Field(
         validator=StringValidator(min_length=3, max_length=50),
         required=False,
@@ -79,5 +81,5 @@ async def validation_handler(request: Request, exc: ValidationError):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
 
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -69,4 +69,3 @@ def test_response_delete_cookie():
     assert "session" in response.cookies
     # Cookie should have max_age=0
     assert "Max-Age=0" in response.cookies["session"]
-

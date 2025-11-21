@@ -28,13 +28,13 @@ async def get_current_user(
     """Get current user from request."""
     # Extract token from header
     auth_header = request.headers.get("authorization", "")
-    
+
     if not auth_header.startswith("Bearer "):
         return None
-    
+
     token = auth_header[7:]
     user_data = auth_manager.verify_token(token)
-    
+
     return user_data
 
 
@@ -42,6 +42,7 @@ async def require_auth(current_user: dict = Depends(get_current_user)):
     """Require authentication."""
     if current_user is None:
         from qakeapi.core.exceptions import HTTPException
+
         raise HTTPException(401, "Authentication required")
     return current_user
 
@@ -69,5 +70,5 @@ async def public_endpoint():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
 
+    uvicorn.run(app, host="0.0.0.0", port=8000)
