@@ -82,8 +82,8 @@ class VersioningMiddleware:
         if query_version:
             return query_version
 
-        # Return default version
-        return self.version_manager.default_version
+        # Return default version using extract_version
+        return self.version_manager.extract_version(request)
 
     def _extract_path_version(self, request) -> Optional[str]:
         """Extract version from URL path (e.g., /v1/users)."""
@@ -91,34 +91,38 @@ class VersioningMiddleware:
         parts = path.strip("/").split("/")
 
         if len(parts) > 0 and parts[0].startswith("v"):
-            version_str = parts[0][1:]  # Remove 'v' prefix
-            if self.version_manager.is_valid_version(version_str):
+            version_str = parts[0]
+            version_info = self.version_manager.get_version_info(version_str)
+            if version_info:
                 return version_str
 
         return None
 
     def _extract_header_version(self, request) -> Optional[str]:
         """Extract version from custom header."""
-        version_header = self.version_manager.version_header
-        if version_header:
-            version_str = request.headers.get(version_header.lower())
-            if version_str and self.version_manager.is_valid_version(version_str):
-                return version_str
-
+        headers = getattr(request, "headers", {})
+        if isinstance(headers, dict):
+            # Try common version headers
+            for header_name in ["accept-version", "api-version", "version"]:
+                version_str = headers.get(header_name)
+                if version_str:
+                    version_info = self.version_manager.get_version_info(version_str)
+                    if version_info:
+                        return version_str
         return None
 
     def _extract_query_version(self, request) -> Optional[str]:
         """Extract version from query parameter."""
-        version_param = self.version_manager.version_param
-        if version_param:
-            query_params = request.query_params
-            if version_param in query_params:
-                version_str = query_params[version_param]
+        query_params = getattr(request, "query_params", {})
+        for param_name in ["version", "api_version", "v"]:
+            if param_name in query_params:
+                version_str = query_params[param_name]
                 if isinstance(version_str, list):
                     version_str = version_str[0]
-                if version_str and self.version_manager.is_valid_version(version_str):
-                    return version_str
-
+                if version_str:
+                    version_info = self.version_manager.get_version_info(version_str)
+                    if version_info:
+                        return version_str
         return None
 
     def _add_version_headers(self, response, version: str):
@@ -138,27 +142,15 @@ class VersioningMiddleware:
             response.headers = headers_list
 
         # Add API version header
-        version_header = self.version_manager.version_header or "API-Version"
-        response.headers.append(
-            (
-                version_header.encode()
-                if isinstance(version_header, str)
-                else version_header,
-                version.encode(),
-            )
-        )
+        version_header = "API-Version"
+        response.headers.append((version_header.encode(), version.encode()))
 
         # Add version status header
-        status = self.version_manager.get_version_status(version)
-        if status:
-            status_header = f"{version_header}-Status"
+        version_info = self.version_manager.get_version_info(version)
+        if version_info:
+            status_header = "API-Version-Status"
             response.headers.append(
-                (
-                    status_header.encode()
-                    if isinstance(status_header, str)
-                    else status_header,
-                    status.value.encode(),
-                )
+                (status_header.encode(), version_info.status.value.encode())
             )
 
     def _add_deprecation_headers(self, response, warning: DeprecationWarning):
@@ -229,3 +221,119 @@ class VersionRouteMiddleware:
             return f"/v{version}{path}"
 
         return None
+
+
+class VersionCompatibilityMiddleware:
+    """Middleware for checking version compatibility."""
+
+    def __init__(self, version_manager: APIVersionManager):
+        self.version_manager = version_manager
+
+    async def __call__(self, request, handler):
+        """Check version compatibility."""
+        client_version = getattr(request, "api_version", "v1")
+        all_versions = self.version_manager.get_all_versions()
+
+        if not all_versions:
+            return await handler(request)
+
+        server_version = all_versions[-1]  # Latest version
+
+        if not self.version_manager.is_compatible(client_version, server_version):
+            from qakeapi.core.responses import JSONResponse
+
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "error": "Version compatibility error",
+                    "client_version": client_version,
+                    "server_version": server_version,
+                    "message": "Client and server versions are not compatible",
+                },
+            )
+
+        return await handler(request)
+
+
+class VersionAnalyticsMiddleware:
+    """Middleware for collecting version usage analytics."""
+
+    def __init__(self, version_manager: APIVersionManager):
+        self.version_manager = version_manager
+        self.usage_stats: Dict[str, int] = {}
+
+    async def __call__(self, request, handler):
+        """Collect version usage statistics."""
+        version = getattr(request, "api_version", "v1")
+
+        # Update usage statistics
+        self.usage_stats[version] = self.usage_stats.get(version, 0) + 1
+
+        # Log version usage
+        logger.info(
+            f"API version {version} used for request to {getattr(request, 'path', '')}"
+        )
+
+        response = await handler(request)
+
+        # Add usage statistics to response headers
+        if hasattr(response, "headers"):
+            if isinstance(response.headers, dict):
+                response.headers["X-API-Usage-Count"] = str(self.usage_stats[version])
+            elif isinstance(response.headers, list):
+                response.headers.append(
+                    (b"X-API-Usage-Count", str(self.usage_stats[version]).encode())
+                )
+
+        return response
+
+    def get_usage_stats(self) -> Dict[str, int]:
+        """Get version usage statistics."""
+        return self.usage_stats.copy()
+
+    def reset_stats(self):
+        """Reset usage statistics."""
+        self.usage_stats.clear()
+
+
+# Factory for creating versioning middleware
+class VersioningMiddlewareFactory:
+    """Factory for creating versioning middleware components."""
+
+    @staticmethod
+    def create_versioning_middleware(
+        version_manager: APIVersionManager,
+    ) -> VersioningMiddleware:
+        """Create versioning middleware."""
+        return VersioningMiddleware(version_manager)
+
+    @staticmethod
+    def create_route_middleware(
+        version_manager: APIVersionManager,
+    ) -> VersionRouteMiddleware:
+        """Create version route middleware."""
+        return VersionRouteMiddleware(version_manager)
+
+    @staticmethod
+    def create_compatibility_middleware(
+        version_manager: APIVersionManager,
+    ) -> VersionCompatibilityMiddleware:
+        """Create version compatibility middleware."""
+        return VersionCompatibilityMiddleware(version_manager)
+
+    @staticmethod
+    def create_analytics_middleware(
+        version_manager: APIVersionManager,
+    ) -> VersionAnalyticsMiddleware:
+        """Create version analytics middleware."""
+        return VersionAnalyticsMiddleware(version_manager)
+
+    @staticmethod
+    def create_full_versioning_stack(version_manager: APIVersionManager) -> list:
+        """Create full versioning middleware stack."""
+        return [
+            VersioningMiddleware(version_manager),
+            VersionRouteMiddleware(version_manager),
+            VersionCompatibilityMiddleware(version_manager),
+            VersionAnalyticsMiddleware(version_manager),
+        ]
