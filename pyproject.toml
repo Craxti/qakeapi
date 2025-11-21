@@ -50,17 +50,6 @@ server = [
 [tool.black]
 line-length = 88
 target-version = ['py39']
-exclude = '''
-/(
-    qakeapi/api/versioning_middleware\.py
-  | qakeapi/core/interfaces\.py
-  | qakeapi/core/error_handling\.py
-  | qakeapi/security/headers\.py
-  | qakeapi/security/xss\.py
-  | qakeapi/testing/load_testing\.py
-  | tests/test_websocket_auth\.py
-)/
-'''
 
 [tool.isort]
 profile = "black"
