@@ -56,6 +56,7 @@ exclude = '''
     qakeapi/api/versioning_middleware.py
     | qakeapi/core/interfaces.py
     | qakeapi/core/error_handling.py
+    | qakeapi/security/headers.py
     | qakeapi/security/xss.py
     | qakeapi/testing/load_testing.py
     | tests/test_websocket_auth.py
