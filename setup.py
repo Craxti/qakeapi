@@ -14,8 +14,8 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="QakeAPI Team",
-    author_email="team@qakeapi.dev",
-    url="https://github.com/qakeapi/qakeapi",
+    author_email="fetis.dev@gmail.com",
+    url="https://github.com/craxti/qakeapi",
     packages=find_packages(exclude=["tests", "examples"]),
     python_requires=">=3.9",
     classifiers=[
