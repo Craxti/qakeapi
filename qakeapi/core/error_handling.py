@@ -11,7 +11,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from ..utils.status import status
 from .exceptions import HTTPException, QakeAPIException
 from .request import Request
-from .response import JSONResponse, PlainTextResponse, Response
+from .response import JSONResponse, Response, TextResponse
 
 
 class ErrorContext:

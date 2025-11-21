@@ -10,8 +10,15 @@ from dataclasses import dataclass, field
 from typing import Any, AsyncGenerator, Callable, Dict, List, Optional, Union
 from unittest.mock import AsyncMock, MagicMock
 
-import aiohttp
-from aiohttp import web
+try:
+    import aiohttp
+    from aiohttp import web
+
+    AIOHTTP_AVAILABLE = True
+except ImportError:
+    aiohttp = None  # type: ignore
+    web = None  # type: ignore
+    AIOHTTP_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +108,11 @@ class MockExternalAPI:
     """Mock external API for testing."""
 
     def __init__(self, base_url: str = "http://localhost:8080"):
+        if not AIOHTTP_AVAILABLE:
+            raise ImportError(
+                "aiohttp is required for MockExternalAPI. "
+                "Install it with: pip install aiohttp"
+            )
         self.base_url = base_url
         self.services: Dict[str, MockService] = {}
         self._server: Optional[web.Application] = None
@@ -191,6 +203,11 @@ class MockHTTPClient:
     """Mock HTTP client for testing."""
 
     def __init__(self, mock_api: MockExternalAPI):
+        if not AIOHTTP_AVAILABLE:
+            raise ImportError(
+                "aiohttp is required for MockHTTPClient. "
+                "Install it with: pip install aiohttp"
+            )
         self.mock_api = mock_api
         self._session: Optional[aiohttp.ClientSession] = None
 
