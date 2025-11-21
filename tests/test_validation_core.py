@@ -3,7 +3,8 @@ from typing import Optional
 import pytest
 
 try:
-    from pydantic import BaseModel as PydanticBaseModel, Field
+    from pydantic import BaseModel as PydanticBaseModel
+    from pydantic import Field
 except ImportError:
     pytest.skip("pydantic not installed", allow_module_level=True)
 
@@ -16,9 +17,7 @@ from qakeapi.validation.interfaces import (
     ResponseValidator,
     ValidationFactory,
 )
-from qakeapi.validation.models import (
-    BaseModel,
-)
+from qakeapi.validation.models import BaseModel
 
 
 # Stub functions for missing validation decorators

@@ -9,8 +9,8 @@ import pytest
 
 from qakeapi import HTTPException, JSONResponse, QakeAPI, Request
 from qakeapi.core.router import APIRouter
-from qakeapi.security.cors import CORSMiddleware
 from qakeapi.middleware.logging import LoggingMiddleware
+from qakeapi.security.cors import CORSMiddleware
 from qakeapi.utils.validation import (
     DataValidator,
     DictValidator,

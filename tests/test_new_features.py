@@ -228,9 +228,9 @@ class TestNewFeatures:
     def test_template_integration(self):
         """Тест интеграции шаблонов"""
         from qakeapi.utils.templates import (
+            SimpleTemplates,
             TemplateEngine,
             TemplateRenderer,
-            SimpleTemplates,
         )
 
         # Проверяем, что классы доступны
@@ -326,8 +326,8 @@ class TestNewFeatures:
             FileResponse,
             HTMLResponse,
             JSONResponse,
-            TextResponse,
             RedirectResponse,
+            TextResponse,
         )
 
         # JSON Response
