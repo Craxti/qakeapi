@@ -192,6 +192,8 @@ class TestRenderFunctions:
 
     def test_render_template_string(self):
         """Test render_template_string function."""
+        if FileSystemLoader is None:
+            pytest.skip("Jinja2 is not installed")
         with patch("qakeapi.templates.jinja2.JINJA2_AVAILABLE", True):
             with patch("qakeapi.templates.jinja2.FileSystemLoader", FileSystemLoader):
                 response = render_template_string(
@@ -209,6 +211,8 @@ class TestRenderFunctions:
 
     def test_render_template_string_with_headers(self):
         """Test render_template_string with custom headers."""
+        if FileSystemLoader is None:
+            pytest.skip("Jinja2 is not installed")
         with patch("qakeapi.templates.jinja2.JINJA2_AVAILABLE", True):
             with patch("qakeapi.templates.jinja2.FileSystemLoader", FileSystemLoader):
                 response = render_template_string(
@@ -226,6 +230,8 @@ class TestCreateTemplateEngine:
 
     def test_create_basic_engine(self):
         """Test creating basic template engine."""
+        if FileSystemLoader is None:
+            pytest.skip("Jinja2 is not installed")
         with patch("qakeapi.templates.jinja2.JINJA2_AVAILABLE", True):
             with patch("qakeapi.templates.jinja2.FileSystemLoader", FileSystemLoader):
                 engine = create_template_engine(enable_cache=False)
@@ -234,6 +240,8 @@ class TestCreateTemplateEngine:
 
     def test_create_cached_engine(self):
         """Test creating cached template engine."""
+        if FileSystemLoader is None:
+            pytest.skip("Jinja2 is not installed")
         with patch("qakeapi.templates.jinja2.JINJA2_AVAILABLE", True):
             with patch("qakeapi.templates.jinja2.FileSystemLoader", FileSystemLoader):
                 engine = create_template_engine(enable_cache=True)
@@ -242,6 +250,8 @@ class TestCreateTemplateEngine:
 
     def test_create_debug_engine(self):
         """Test creating debug template engine."""
+        if FileSystemLoader is None:
+            pytest.skip("Jinja2 is not installed")
         with patch("qakeapi.templates.jinja2.JINJA2_AVAILABLE", True):
             with patch("qakeapi.templates.jinja2.FileSystemLoader", FileSystemLoader):
                 engine = create_template_engine(enable_debug=True)
