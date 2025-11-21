@@ -12,7 +12,7 @@ from .router import Router, APIRouter
 from .request import Request
 from .response import Response, JSONResponse, HTMLResponse
 from .exceptions import HTTPException, NotFound, MethodNotAllowed, BadRequest
-from .middleware import BaseMiddleware, MiddlewareStack
+from .middleware_core import BaseMiddleware, MiddlewareStack
 from .dependencies import resolve_dependencies, Dependency
 from .websocket import WebSocket
 from .openapi import OpenAPIGenerator, generate_swagger_ui_html, generate_redoc_html

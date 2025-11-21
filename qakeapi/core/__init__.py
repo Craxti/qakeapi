@@ -23,7 +23,7 @@ from .exceptions import (
     InternalServerError,
 )
 from .router import Router, APIRouter
-from .middleware import BaseMiddleware, MiddlewareStack
+from .middleware_core import BaseMiddleware, MiddlewareStack
 from .application import QakeAPI
 from .dependencies import Depends, Dependency, resolve_dependencies
 from .websocket import WebSocket, WebSocketState
