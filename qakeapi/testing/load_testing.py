@@ -11,7 +11,10 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Union
 
-import aiohttp
+try:
+    import aiohttp
+except ImportError:
+    aiohttp = None  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -72,11 +75,21 @@ class LoadTester:
     """Load testing framework."""
 
     def __init__(self):
+        if aiohttp is None:
+            raise ImportError(
+                "aiohttp is required for LoadTester. "
+                "Install it with: pip install aiohttp"
+            )
         self.results: List[LoadTestResult] = []
         self._session: Optional[aiohttp.ClientSession] = None
 
     async def __aenter__(self):
         """Async context manager entry."""
+        if aiohttp is None:
+            raise ImportError(
+                "aiohttp is required for LoadTester. "
+                "Install it with: pip install aiohttp"
+            )
         connector = aiohttp.TCPConnector(limit=1000, limit_per_host=100)
         self._session = aiohttp.ClientSession(connector=connector)
         return self
@@ -142,9 +155,9 @@ class LoadTester:
             max_response_time = max(response_times)
             median_response_time = statistics.median(response_times)
         else:
-            avg_response_time = min_response_time = max_response_time = (
-                median_response_time
-            ) = 0
+            avg_response_time = (
+                min_response_time
+            ) = max_response_time = median_response_time = 0
 
         requests_per_second = total_requests / total_time if total_time > 0 else 0
         error_rate = failed_requests / total_requests if total_requests > 0 else 0

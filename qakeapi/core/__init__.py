@@ -5,6 +5,8 @@ Core framework components - main application components.
 from .application import QakeAPI
 from .dependencies import Dependency, Depends, resolve_dependencies
 from .exceptions import (
+    AuthenticationException,
+    AuthorizationException,
     BadRequest,
     Conflict,
     Forbidden,
@@ -13,7 +15,9 @@ from .exceptions import (
     InternalServerError,
     MethodNotAllowed,
     NotFound,
+    QakeAPIException,
     Unauthorized,
+    ValidationException,
 )
 from .middleware_core import BaseMiddleware, MiddlewareStack
 from .request import Request
@@ -47,6 +51,10 @@ __all__ = [
     "MethodNotAllowed",
     "Conflict",
     "InternalServerError",
+    "ValidationException",
+    "QakeAPIException",
+    "AuthenticationException",
+    "AuthorizationException",
     # Router
     "Router",
     "APIRouter",

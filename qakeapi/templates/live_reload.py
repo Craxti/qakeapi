@@ -21,22 +21,38 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class TemplateChangeHandler(FileSystemEventHandler):
-    """Handler for template file changes."""
+if FileSystemEventHandler is not None:
 
-    def __init__(self, callback: Callable[[str], None]):
-        """
-        Initialize template change handler.
+    class TemplateChangeHandler(FileSystemEventHandler):
+        """Handler for template file changes."""
 
-        Args:
-            callback: Function to call when template changes
-        """
-        if FileSystemEventHandler is None:
+        def __init__(self, callback: Callable[[str], None]):
+            """
+            Initialize template change handler.
+
+            Args:
+                callback: Function to call when template changes
+            """
+            super().__init__()
+            self.callback = callback
+
+else:
+
+    class TemplateChangeHandler:
+        """Handler for template file changes (without watchdog)."""
+
+        def __init__(self, callback: Callable[[str], None]):
+            """
+            Initialize template change handler.
+
+            Args:
+                callback: Function to call when template changes
+            """
             raise ImportError(
                 "watchdog is required for TemplateChangeHandler. "
                 "Install it with: pip install watchdog"
             )
-        self.callback = callback
+
         self.last_modified: Dict[str, float] = {}
         self.debounce_time = 0.5  # Debounce time in seconds
 

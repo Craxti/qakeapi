@@ -4,7 +4,7 @@ Exception classes for the framework.
 This module provides custom exception classes for HTTP errors and framework errors.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 
 class HTTPException(Exception):
@@ -100,3 +100,34 @@ class InternalServerError(HTTPException):
 
     def __init__(self, detail: Any = "Internal Server Error"):
         super().__init__(500, detail)
+
+
+# Additional exceptions for compatibility
+class ValidationException(HTTPException):
+    """422 Unprocessable Entity exception for validation errors."""
+
+    def __init__(
+        self, detail: Any = "Validation Error", errors: Optional[List[str]] = None
+    ):
+        super().__init__(422, detail)
+        self.errors = errors or []
+
+
+class QakeAPIException(FrameworkException):
+    """Alias for FrameworkException for backward compatibility."""
+
+    pass
+
+
+class AuthenticationException(HTTPException):
+    """401 Unauthorized exception for authentication errors."""
+
+    def __init__(self, detail: Any = "Authentication required"):
+        super().__init__(401, detail)
+
+
+class AuthorizationException(HTTPException):
+    """403 Forbidden exception for authorization errors."""
+
+    def __init__(self, detail: Any = "Authorization required"):
+        super().__init__(403, detail)

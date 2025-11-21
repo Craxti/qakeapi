@@ -12,8 +12,11 @@ except ImportError:
 
 try:
     from pydantic import BaseModel
+
+    PYDANTIC_AVAILABLE = True
 except ImportError:
     BaseModel = None  # type: ignore
+    PYDANTIC_AVAILABLE = False
 
 from qakeapi.core.interfaces import UserProtocol
 from qakeapi.core.responses import Response
@@ -27,11 +30,27 @@ class AuthenticationError(Exception):
     pass
 
 
-class Credentials(BaseModel):
-    """Base credentials model"""
+if PYDANTIC_AVAILABLE and BaseModel is not None:
 
-    username: str
-    password: str
+    class Credentials(BaseModel):
+        """Base credentials model"""
+
+        username: str
+        password: str
+
+else:
+
+    class Credentials:
+        """Base credentials model (without pydantic)"""
+
+        def __init__(self, username: str, password: str):
+            if not PYDANTIC_AVAILABLE:
+                raise ImportError(
+                    "pydantic is required for Credentials. "
+                    "Install it with: pip install pydantic"
+                )
+            self.username = username
+            self.password = password
 
 
 class User(UserProtocol):
