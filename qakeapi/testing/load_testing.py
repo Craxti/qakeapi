@@ -155,9 +155,9 @@ class LoadTester:
             max_response_time = max(response_times)
             median_response_time = statistics.median(response_times)
         else:
-            avg_response_time = min_response_time = max_response_time = (
-                median_response_time
-            ) = 0
+            avg_response_time = (
+                min_response_time
+            ) = max_response_time = median_response_time = 0
 
         requests_per_second = total_requests / total_time if total_time > 0 else 0
         error_rate = failed_requests / total_requests if total_requests > 0 else 0
