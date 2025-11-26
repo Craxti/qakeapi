@@ -153,7 +153,7 @@ if __name__ == "__main__":
     print("=" * 60)
     print("QakeAPI 1.2.0 - Complete Example")
     print("=" * 60)
-    print("\n✨ Features demonstrated:")
+    print("\nFeatures demonstrated:")
     print("  Hybrid sync/async support")
     print("  Automatic body parameter extraction")
     print("  Middleware system (Logging, CORS)")

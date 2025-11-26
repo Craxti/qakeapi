@@ -68,6 +68,18 @@ from .core import (
     DOCUMENT_TYPES,
     IMAGE_MIME_TYPES,
     DOCUMENT_MIME_TYPES,
+    init_auth,
+    require_auth,
+    require_role,
+    create_token,
+    decode_token,
+    create_session,
+    get_session,
+    delete_session,
+    get_jwt_manager,
+    get_session_manager,
+    JWTManager,
+    SessionManager,
 )
 
 __all__ = [
@@ -133,4 +145,17 @@ __all__ = [
     "DOCUMENT_TYPES",
     "IMAGE_MIME_TYPES",
     "DOCUMENT_MIME_TYPES",
+    # Authentication & Authorization
+    "init_auth",
+    "require_auth",
+    "require_role",
+    "create_token",
+    "decode_token",
+    "create_session",
+    "get_session",
+    "delete_session",
+    "get_jwt_manager",
+    "get_session_manager",
+    "JWTManager",
+    "SessionManager",
 ]

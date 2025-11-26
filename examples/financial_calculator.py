@@ -568,7 +568,7 @@ if __name__ == "__main__":
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
         sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
     
-    print("\n🚀 Starting financial calculator...\n")
+    print("\nStarting financial calculator...\n")
     
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
