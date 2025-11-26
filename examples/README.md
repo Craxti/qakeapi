@@ -1,171 +1,125 @@
-# QakeAPI Examples
+# QakeAPI 1.2.0 Application Examples
 
-This directory contains comprehensive examples demonstrating various features of QakeAPI.
+## Basic Examples
 
-## 📚 Available Examples
+### `basic_example.py`
+Simple example demonstrating core features:
+- Hybrid sync/async support
+- Smart routing
+- Reactive events
+- Query parameters
+- Lifecycle events
 
-### Basic Examples
-
-1. **`basic_app.py`** - Basic QakeAPI application
-   - Simple routes (GET, POST, PUT, DELETE)
-   - Path parameters
-   - Query parameters
-   - Lifecycle events
-
-2. **`simple_demo.py`** - Minimal example
-   - Simplest possible QakeAPI app
-   - Good starting point for beginners
-
-### Advanced Examples
-
-3. **`advanced_app.py`** - Advanced features
-   - Authentication (JWT, API keys)
-   - Data validation with Pydantic
-   - WebSocket support
-   - Dependency injection
-
-4. **`complete_api_example.py`** - Complete API example
-   - All features working together
-   - Users and products CRUD
-   - Authentication
-   - Caching
-   - Rate limiting
-   - Monitoring
-   - WebSocket
-
-### Feature-Specific Examples
-
-5. **`monitoring_example.py`** - Monitoring and metrics
-   - Metrics collection
-   - Health checks
-   - Performance monitoring
-
-6. **`caching_example.py`** - Caching
-   - In-memory caching
-   - Cache middleware
-   - Cache invalidation
-   - Cache statistics
-
-7. **`rate_limiting_example.py`** - Rate limiting
-   - Rate limit rules
-   - Different limits for different endpoints
-   - Rate limit statistics
-
-8. **`database_example.py`** - Database connection pooling
-   - Connection pool initialization
-   - Transaction handling
-   - Pool statistics
-
-9. **`error_handling_example.py`** - Error handling
-   - Custom exception handlers
-   - Validation errors
-   - HTTP errors
-   - Error chaining
-
-10. **`compression_example.py`** - Response compression
-    - Automatic compression
-    - Gzip and deflate
-    - Compression thresholds
-
-### Other Examples
-
-11. **`validation_example.py`** - Data validation
-    - Input validation
-    - Custom validators
-    - Validation errors
-
-12. **`web_app.py`** - Web application
-    - HTML templates
-    - Static files
-    - Forms handling
-
-13. **`enhanced_app.py`** - Enhanced features
-    - Multiple middleware
-    - Error handling
-    - Advanced routing
-
-## 🚀 Running Examples
-
-### Basic Example
-
+**Run:**
 ```bash
-python examples/basic_app.py
+py examples/basic_example.py
 ```
 
-Then visit: http://localhost:8000
+## Complete Examples
 
-### Advanced Example
+### `complete_example.py`
+Complete example with all framework features:
+- Hybrid sync/async
+- Automatic parameter extraction from body
+- Middleware system
+- WebSocket support
+- Background tasks
+- Reactive events
+- OpenAPI documentation
 
+**Run:**
 ```bash
-python examples/advanced_app.py
+py examples/complete_example.py
 ```
 
-### Complete API Example
+### `financial_calculator.py` 🆕
+**Full-featured Web Application - Financial Calculator**
 
+Comprehensive mini-application with real calculations:
+
+#### Features:
+- 📊 **Loan Calculations** - annuity payments, payment schedule
+- 💰 **Investment Calculations** - portfolio with inflation, compound interest
+- 🏦 **Pension Calculations** - future pension, replacement rate
+- 📈 **Compound Interest** - savings calculation
+- 📝 **Report Generation** - background tasks for report creation
+- 📊 **Statistics** - analysis of all calculations
+- 🔄 **WebSocket** - real-time updates
+- 💾 **Caching** - optimization of repeated calculations
+- 📚 **Calculation History** - saving all operations
+
+#### API Endpoints:
+
+**Loans:**
 ```bash
-python examples/complete_api_example.py
+POST /loans/calculate
+Body: {
+  "principal": 1000000,  # Loan amount
+  "rate": 10.0,          # Annual interest rate
+  "months": 60           # Term in months
+}
 ```
 
-### Feature-Specific Examples
-
+**Investments:**
 ```bash
-# Monitoring
-python examples/monitoring_example.py
-
-# Caching
-python examples/caching_example.py
-
-# Rate Limiting
-python examples/rate_limiting_example.py
-
-# Database
-python examples/database_example.py
-
-# Error Handling
-python examples/error_handling_example.py
-
-# Compression
-python examples/compression_example.py
+POST /investments/calculate
+Body: {
+  "initial_investment": 100000,     # Initial investment
+  "monthly_contribution": 10000,    # Monthly contribution
+  "years": 10,                      # Investment period
+  "expected_return": 7.0,           # Expected return %
+  "inflation": 3.0                  # Inflation %
+}
 ```
 
-## 📖 Documentation
+**Pension:**
+```bash
+POST /pension/calculate
+Body: {
+  "salary": 100000,       # Current salary
+  "years": 30,            # Years of service
+  "contribution_rate": 22 # Contribution rate
+}
+```
 
-After running any example, you can access:
+**Compound Interest:**
+```bash
+POST /interest/compound?principal=100000&rate=7.0&time=10&n=12
+```
 
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **OpenAPI Schema**: http://localhost:8000/openapi.json
+**Other endpoints:**
+- `GET /statistics` - Statistics of all calculations
+- `GET /history?limit=10` - Calculation history
+- `GET /cache/stats` - Cache statistics
+- `DELETE /cache/clear` - Clear cache
+- `POST /reports/generate` - Report generation (background task)
+- `WS /ws/calculations` - WebSocket for updates
 
-## 💡 Tips
+**Run:**
+```bash
+py examples/financial_calculator.py
+```
 
-1. **Start with `basic_app.py`** if you're new to QakeAPI
-2. **Check `complete_api_example.py`** to see all features together
-3. **Use feature-specific examples** to learn about specific functionality
-4. **Read the code comments** - they explain what each part does
+**Documentation:**
+- Swagger UI: http://127.0.0.1:8000/docs
+- OpenAPI JSON: http://127.0.0.1:8000/openapi.json
 
-## 🔧 Customization
+## Financial Calculator Features
 
-All examples are fully functional and can be customized:
+### Real Calculations
+- Uses real financial formulas
+- Accounts for inflation and compound interest
+- Detailed payment schedules
 
-- Change ports in `uvicorn.run()`
-- Modify routes and endpoints
-- Add your own middleware
-- Integrate with real databases
-- Add authentication logic
+### Performance Optimization
+- Caching of calculation results
+- Background tasks for heavy operations
+- Asynchronous processing
 
-## 📝 Notes
+### Advanced Features
+- WebSocket for real-time updates
+- History of all calculations
+- Statistics and analytics
+- Automatic report generation
 
-- Examples use in-memory storage (not production-ready)
-- Authentication tokens are simplified (use real JWT in production)
-- Database examples require database setup
-- Some examples require additional dependencies
-
-## 🤝 Contributing
-
-If you create a new example, please:
-
-1. Add it to this README
-2. Include docstrings explaining the example
-3. Add comments for complex parts
-4. Test that it runs correctly
-
+This is a full-featured web application demonstrating all capabilities of QakeAPI 1.2.0!
