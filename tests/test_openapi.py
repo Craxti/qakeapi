@@ -13,12 +13,12 @@ class TestOpenAPIGenerator:
         """Test OpenAPI generator creation."""
         generator = OpenAPIGenerator(
             title="Test API",
-            version="1.0.0",
+            version="1.2.0",
             description="Test API description",
         )
         
         assert generator.title == "Test API"
-        assert generator.version == "1.0.0"
+        assert generator.version == "1.2.0"
         assert generator.description == "Test API description"
     
     def test_add_route(self):
@@ -37,7 +37,7 @@ class TestOpenAPIGenerator:
         """Test generating OpenAPI specification."""
         generator = OpenAPIGenerator(
             title="Test API",
-            version="1.0.0",
+            version="1.2.0",
         )
         
         def get_user(id: int):
@@ -55,7 +55,7 @@ class TestOpenAPIGenerator:
         
         assert spec["openapi"] == "3.0.0"
         assert spec["info"]["title"] == "Test API"
-        assert spec["info"]["version"] == "1.0.0"
+        assert spec["info"]["version"] == "1.2.0"
         assert "paths" in spec
         assert "/users/{id}" in spec["paths"]
         assert "/users" in spec["paths"]

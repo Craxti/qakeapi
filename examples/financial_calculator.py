@@ -23,7 +23,7 @@ from typing import Dict, List, Optional
 
 app = QakeAPI(
     title="Financial Calculator API",
-    version="1.0.0",
+    version="1.2.0",
     description="Comprehensive web application for financial calculations",
     debug=True,
 )
@@ -166,7 +166,7 @@ def root():
     """Main page with API description."""
     return {
         "name": "Financial Calculator API",
-        "version": "1.0.0",
+        "version": "1.2.0",
         "endpoints": {
             "loans": "/loans/calculate - Loan calculation",
             "investments": "/investments/calculate - Investment calculation",

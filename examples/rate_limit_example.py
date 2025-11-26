@@ -16,7 +16,7 @@ if sys.platform == "win32":
 
 app = QakeAPI(
     title="Rate Limit Example API",
-    version="1.0.0",
+    version="1.2.0",
     description="Example demonstrating rate limiting",
     debug=True,
 )

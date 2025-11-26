@@ -11,7 +11,7 @@ from qakeapi import QakeAPI
 
 app = QakeAPI(
     title="My API",
-    version="1.0.0",
+    version="1.2.0",
     description="My awesome API documentation"
 )
 
@@ -119,7 +119,7 @@ Customize OpenAPI information:
 ```python
 app = QakeAPI(
     title="My API",
-    version="1.0.0",
+    version="1.2.0",
     description="Detailed API description",
     terms_of_service="https://example.com/terms",
     contact={

@@ -17,7 +17,7 @@ if sys.platform == "win32":
 
 app = QakeAPI(
     title="Caching Example API",
-    version="1.0.0",
+    version="1.2.0",
     description="Example demonstrating response caching",
     debug=True,
 )
@@ -82,7 +82,7 @@ def get_config():
     print("⚠️  Loading config...")
     return {
         "app_name": "MyApp",
-        "version": "1.0.0",
+        "version": "1.2.0",
         "features": ["feature1", "feature2"]
     }
 

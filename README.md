@@ -60,7 +60,7 @@ from qakeapi import QakeAPI, CORSMiddleware
 
 app = QakeAPI(
     title="My API",
-    version="1.0.0",
+    version="1.2.0",
     description="My awesome API"
 )
 
@@ -181,7 +181,7 @@ OpenAPI/Swagger documentation is automatically generated:
 ```python
 app = QakeAPI(
     title="My API",
-    version="1.0.0",
+    version="1.2.0",
     description="API documentation"
 )
 

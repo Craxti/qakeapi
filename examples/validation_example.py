@@ -19,7 +19,7 @@ from qakeapi import QakeAPI, CORSMiddleware
 
 app = QakeAPI(
     title="Validation Example API",
-    version="1.0.0",
+    version="1.2.0",
     description="Example demonstrating request validation",
     debug=True,
 )

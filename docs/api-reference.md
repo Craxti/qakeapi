@@ -11,7 +11,7 @@ Main application class.
 ```python
 app = QakeAPI(
     title: str = "QakeAPI",
-    version: str = "1.0.0",
+    version: str = "1.2.0",
     description: str = None,
     debug: bool = False
 )

@@ -27,7 +27,7 @@ logger = configure_logging(
 
 app = QakeAPI(
     title="Logging Example API",
-    version="1.0.0",
+    version="1.2.0",
     description="Example demonstrating logging",
     debug=True,
 )

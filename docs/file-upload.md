@@ -293,7 +293,7 @@ async def upload_file(file: FileUpload):
 ```python
 from qakeapi import QakeAPI, CORSMiddleware, FileUpload, IMAGE_TYPES
 
-app = QakeAPI(title="File Upload API", version="1.0.0")
+app = QakeAPI(title="File Upload API", version="1.2.0")
 app.add_middleware(CORSMiddleware(allow_origins=["*"]))
 
 @app.post("/upload")

@@ -25,7 +25,7 @@ from qakeapi import QakeAPI, CORSMiddleware
 
 app = QakeAPI(
     title="My First API",
-    version="1.0.0",
+    version="1.2.0",
     description="My first QakeAPI application"
 )
 
