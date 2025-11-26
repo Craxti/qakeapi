@@ -1,165 +1,202 @@
-import time
+"""
+Tests for rate limiting system.
+"""
 
 import pytest
-
-from qakeapi.core.request import Request
-from qakeapi.core.responses import Response
-from qakeapi.security.rate_limit import (
-    InMemoryRateLimiter,
-    RateLimitInfo,
-    RateLimitMiddleware,
-)
+import time
+from qakeapi.core.rate_limit import RateLimiter, rate_limit, get_rate_limiter
 
 
-@pytest.fixture
-def rate_limiter():
-    return InMemoryRateLimiter(requests_per_minute=2)
-
-
-@pytest.mark.asyncio
-async def test_rate_limiter_allowed(rate_limiter):
-    # Первый запрос должен быть разрешен
-    allowed, info = await rate_limiter.is_allowed("test_key")
-    assert allowed is True
-    assert info.remaining == 1  # Учитываем текущий запрос
-    assert info.limit == 2
-
-    # Обновляем состояние после запроса
-    await rate_limiter.update("test_key")
-
-    # Второй запрос тоже должен быть разрешен
-    allowed, info = await rate_limiter.is_allowed("test_key")
-    assert allowed is True
-    assert info.remaining == 0  # После первого запроса и учитывая текущий
-
-    # Обновляем состояние после запроса
-    await rate_limiter.update("test_key")
-
-    # Третий запрос должен быть отклонен
-    allowed, info = await rate_limiter.is_allowed("test_key")
-    assert allowed is False
-    assert info.remaining == 0
-
-
-@pytest.mark.asyncio
-async def test_rate_limit_reset(rate_limiter):
-    # Делаем два запроса
-    await rate_limiter.is_allowed("test_key")
-    await rate_limiter.update("test_key")
-    await rate_limiter.is_allowed("test_key")
-    await rate_limiter.update("test_key")
-
-    # Изменяем время для симуляции прошедшей минуты
-    rate_limiter.requests["test_key"] = [time.time() - 61]
-
-    # После сброса лимита запрос должен быть разрешен
-    allowed, info = await rate_limiter.is_allowed("test_key")
-    assert allowed is True
-    assert info.remaining == 1  # Учитываем текущий запрос
-
-
-async def mock_receive():
-    return {"type": "http.request", "body": b"", "more_body": False}
-
-
-@pytest.mark.asyncio
-async def test_rate_limit_middleware():
-    rate_limiter = InMemoryRateLimiter(requests_per_minute=2)
-    middleware = RateLimitMiddleware(rate_limiter)
-
-    # Создаем тестовый запрос
-    request = Request(
-        {
-            "type": "http",
-            "method": "GET",
-            "path": "/test",
-            "client": ("127.0.0.1", 8000),
-        },
-        mock_receive,
-    )
-
-    # Тестовый обработчик
-    async def handler(request):
-        return Response.text("OK", headers={})
-
-    # Первый запрос должен пройти
-    response = await middleware(request, handler)
-    assert response.status_code == 200
-    headers_dict = dict((k.decode(), v.decode()) for k, v in response.headers)
-    assert headers_dict["X-RateLimit-Remaining"] == "1"
-
-    # Второй запрос должен пройти
-    response = await middleware(request, handler)
-    assert response.status_code == 200
-    headers_dict = dict((k.decode(), v.decode()) for k, v in response.headers)
-    assert headers_dict["X-RateLimit-Remaining"] == "0"
-
-    # Третий запрос должен быть отклонен
-    response = await middleware(request, handler)
-    assert response.status_code == 429
-    headers_dict = dict((k.decode(), v.decode()) for k, v in response.headers)
-    assert headers_dict["X-RateLimit-Remaining"] == "0"
-
-
-@pytest.mark.asyncio
-async def test_custom_key_function():
-    rate_limiter = InMemoryRateLimiter(requests_per_minute=2)
-
-    # Используем пользовательскую функцию для ключа
-    def key_func(request):
-        # Получаем заголовок x-api-key из request
-        api_key = request.get_header("x-api-key", "default")
-        return (
-            api_key
-            if isinstance(api_key, str)
-            else api_key.decode()
-            if isinstance(api_key, bytes)
-            else "default"
+class TestRateLimiter:
+    """Tests for RateLimiter class."""
+    
+    def test_rate_limiter_creation(self):
+        """Test creating a rate limiter."""
+        limiter = RateLimiter()
+        assert limiter._requests == {}
+    
+    def test_check_rate_limit_allowed(self):
+        """Test rate limit check when allowed."""
+        limiter = RateLimiter()
+        
+        is_allowed, info = limiter.check_rate_limit(
+            route_key="test:route",
+            client_ip="127.0.0.1",
+            requests_per_minute=10,
+            window_seconds=60
         )
+        
+        assert is_allowed is True
+        assert info["limit"] == 10
+        assert info["remaining"] == 9
+        assert "reset_at" in info
+    
+    def test_check_rate_limit_exceeded(self):
+        """Test rate limit check when exceeded."""
+        limiter = RateLimiter()
+        
+        # Make requests up to limit
+        for i in range(10):
+            is_allowed, _ = limiter.check_rate_limit(
+                route_key="test:route",
+                client_ip="127.0.0.1",
+                requests_per_minute=10,
+                window_seconds=60
+            )
+            assert is_allowed is True
+        
+        # Next request should be blocked
+        is_allowed, info = limiter.check_rate_limit(
+            route_key="test:route",
+            client_ip="127.0.0.1",
+            requests_per_minute=10,
+            window_seconds=60
+        )
+        
+        assert is_allowed is False
+        assert info["limit"] == 10
+        assert info["remaining"] == 0
+        assert "retry_after" in info
+    
+    def test_check_rate_limit_per_ip(self):
+        """Test rate limiting per IP address."""
+        limiter = RateLimiter()
+        
+        # IP 1 makes requests
+        for i in range(5):
+            is_allowed, _ = limiter.check_rate_limit(
+                route_key="test:route",
+                client_ip="127.0.0.1",
+                requests_per_minute=10,
+                window_seconds=60
+            )
+            assert is_allowed is True
+        
+        # IP 2 should still have full limit
+        is_allowed, info = limiter.check_rate_limit(
+            route_key="test:route",
+            client_ip="127.0.0.2",
+            requests_per_minute=10,
+            window_seconds=60
+        )
+        
+        assert is_allowed is True
+        assert info["remaining"] == 9
+    
+    def test_check_rate_limit_cleanup_old_requests(self):
+        """Test that old requests are cleaned up."""
+        limiter = RateLimiter()
+        
+        # Make requests
+        for i in range(5):
+            limiter.check_rate_limit(
+                route_key="test:route",
+                client_ip="127.0.0.1",
+                requests_per_minute=10,
+                window_seconds=1  # 1 second window
+            )
+        
+        # Wait for window to expire
+        time.sleep(1.1)
+        
+        # Should be able to make more requests
+        is_allowed, info = limiter.check_rate_limit(
+            route_key="test:route",
+            client_ip="127.0.0.1",
+            requests_per_minute=10,
+            window_seconds=1
+        )
+        
+        assert is_allowed is True
+        assert info["remaining"] >= 9
+    
+    def test_get_rate_limit_info(self):
+        """Test getting rate limit info without recording request."""
+        limiter = RateLimiter()
+        
+        # Make some requests
+        for i in range(3):
+            limiter.check_rate_limit(
+                route_key="test:route",
+                client_ip="127.0.0.1",
+                requests_per_minute=10,
+                window_seconds=60
+            )
+        
+        # Get info without recording
+        info = limiter.get_rate_limit_info(
+            route_key="test:route",
+            client_ip="127.0.0.1",
+            requests_per_minute=10,
+            window_seconds=60
+        )
+        
+        assert info["limit"] == 10
+        assert info["remaining"] == 7
+        assert "reset_at" in info
+        
+        # Make another request
+        limiter.check_rate_limit(
+            route_key="test:route",
+            client_ip="127.0.0.1",
+            requests_per_minute=10,
+            window_seconds=60
+        )
+        
+        # Info should reflect new count
+        info2 = limiter.get_rate_limit_info(
+            route_key="test:route",
+            client_ip="127.0.0.1",
+            requests_per_minute=10,
+            window_seconds=60
+        )
+        
+        assert info2["remaining"] == 6
 
-    middleware = RateLimitMiddleware(rate_limiter, key_func=key_func)
 
-    # Создаем два запроса с разными API ключами
-    request1 = Request(
-        {
-            "type": "http",
-            "method": "GET",
-            "path": "/test",
-            "client": ("127.0.0.1", 8000),
-            "headers": [(b"x-api-key", b"key1")],
-        },
-        mock_receive,
-    )
+class TestRateLimitDecorator:
+    """Tests for rate_limit decorator."""
+    
+    def test_rate_limit_decorator(self):
+        """Test rate_limit decorator."""
+        @rate_limit(requests_per_minute=5, window_seconds=30)
+        def handler():
+            return {"data": "test"}
+        
+        assert hasattr(handler, "_rate_limit")
+        assert handler._rate_limit["requests_per_minute"] == 5
+        assert handler._rate_limit["window_seconds"] == 30
+        assert handler._rate_limit["per_ip"] is True
+    
+    def test_rate_limit_with_custom_key(self):
+        """Test rate_limit with custom key function."""
+        def key_func(request):
+            return f"custom:{request.path}"
+        
+        @rate_limit(requests_per_minute=10, key_func=key_func)
+        def handler():
+            return {"data": "test"}
+        
+        assert handler._rate_limit["key_func"] == key_func
+    
+    def test_rate_limit_global(self):
+        """Test rate_limit with per_ip=False."""
+        @rate_limit(requests_per_minute=10, per_ip=False)
+        def handler():
+            return {"data": "test"}
+        
+        assert handler._rate_limit["per_ip"] is False
 
-    request2 = Request(
-        {
-            "type": "http",
-            "method": "GET",
-            "path": "/test",
-            "client": ("127.0.0.1", 8000),
-            "headers": [(b"x-api-key", b"key2")],
-        },
-        mock_receive,
-    )
 
-    async def handler(request):
-        return Response.text("OK", headers={})
+class TestGetRateLimiter:
+    """Tests for get_rate_limiter function."""
+    
+    def test_get_rate_limiter(self):
+        """Test getting global rate limiter."""
+        limiter = get_rate_limiter()
+        assert isinstance(limiter, RateLimiter)
+        
+        # Should return same instance
+        limiter2 = get_rate_limiter()
+        assert limiter is limiter2
 
-    # Запросы с разными ключами должны иметь отдельные лимиты
-    response1 = await middleware(request1, handler)
-    assert response1.status_code == 200
-
-    response2 = await middleware(request2, handler)
-    assert response2.status_code == 200
-
-    # Второй запрос для первого ключа
-    response1 = await middleware(request1, handler)
-    assert response1.status_code == 200
-
-    # Третий запрос для первого ключа должен быть отклонен
-    response1 = await middleware(request1, handler)
-    assert response1.status_code == 429
-
-    # Второй запрос для второго ключа должен пройти
-    response2 = await middleware(request2, handler)
-    assert response2.status_code == 200
