@@ -1,187 +1,160 @@
 """
-Dependency Injection system for the framework.
+Dependency Injection system for QakeAPI.
 
-This module provides the Depends decorator and dependency resolution system.
+This module provides dependency injection functionality to simplify
+testing and dependency management.
 """
 
-import asyncio
 import inspect
-from typing import Any, Callable, Dict, Optional, Type
+from typing import Any, Callable, Dict, Optional, TypeVar, get_type_hints
+
+from .hybrid import run_hybrid
+
+T = TypeVar("T")
 
 
 class Dependency:
-    """Represents a dependency with its resolver."""
-
-    def __init__(
-        self,
-        dependency: Callable,
-        use_cache: bool = True,
-    ):
+    """
+    Dependency wrapper for dependency injection.
+    
+    Allows functions to be used as dependencies that are automatically
+    resolved when needed.
+    """
+    
+    def __init__(self, func: Callable[..., Any], cache: bool = False):
         """
         Initialize dependency.
-
+        
         Args:
-            dependency: Dependency function or class
-            use_cache: Whether to cache dependency instances
+            func: Dependency function
+            cache: Whether to cache the result (default: False)
         """
-        self.dependency = dependency
-        self.use_cache = use_cache
-        self._cache: Optional[Any] = None
-
-    def _convert_type(self, value: Any, target_type: Type) -> Any:
-        """
-        Convert value to target type if possible.
-
-        Args:
-            value: Value to convert
-            target_type: Target type
-
-        Returns:
-            Converted value
-        """
-        if target_type == inspect.Parameter.empty:
-            return value
-
-        # If already correct type, return as is
-        if isinstance(value, target_type):
-            return value
-
-        # Try to convert
-        try:
-            if target_type == int:
-                return int(value)
-            elif target_type == float:
-                return float(value)
-            elif target_type == bool:
-                if isinstance(value, str):
-                    return value.lower() in ("true", "1", "yes", "on")
-                return bool(value)
-            elif target_type == str:
-                return str(value)
-        except (ValueError, TypeError):
-            # If conversion fails, return original value
-            pass
-
-        return value
-
-    async def resolve(
-        self,
-        request: Any,
-        path_params: Dict[str, Any],
-        query_params: Dict[str, Any],
-        **kwargs: Any,
-    ) -> Any:
+        self.func = func
+        self.cache = cache
+        self._cached_value: Optional[Any] = None
+        self._cached = False
+    
+    async def resolve(self, **kwargs: Any) -> Any:
         """
         Resolve dependency.
-
+        
         Args:
-            request: Request object
-            path_params: Path parameters
-            query_params: Query parameters
-            **kwargs: Additional arguments
-
+            **kwargs: Arguments to pass to dependency function
+            
         Returns:
             Resolved dependency value
         """
-        # Use cache if available
-        if self.use_cache and self._cache is not None:
-            return self._cache
-
-        # Get dependency signature
-        sig = inspect.signature(self.dependency)
-        params = {}
-
-        # Resolve parameters
-        for param_name, param in sig.parameters.items():
-            param_type = param.annotation
-
-            # Try to get from kwargs first
-            if param_name in kwargs:
-                params[param_name] = kwargs[param_name]
-            # Try to get from path params
-            elif param_name in path_params:
-                value = path_params[param_name]
-                # Try to convert type if needed
-                params[param_name] = self._convert_type(value, param_type)
-            # Try to get from query params
-            elif param_name in query_params:
-                value = query_params[param_name]
-                # Try to convert type if needed
-                params[param_name] = self._convert_type(value, param_type)
-            # Try to inject Request
-            elif param_type != inspect.Parameter.empty and inspect.isclass(param_type):
-                # Check if it's a type hint for Request
-                if hasattr(param_type, "__name__") and param_type.__name__ == "Request":
-                    params[param_name] = request
-                elif param.default != inspect.Parameter.empty:
-                    params[param_name] = param.default
-            # Use default if available
-            elif param.default != inspect.Parameter.empty:
-                params[param_name] = param.default
-
-        # Call dependency
-        if asyncio.iscoroutinefunction(self.dependency):
-            result = await self.dependency(**params)
-        else:
-            result = self.dependency(**params)
-
-        # Cache result if needed
-        if self.use_cache:
-            self._cache = result
-
+        if self.cache and self._cached:
+            return self._cached_value
+        
+        result = await run_hybrid(self.func, **kwargs)
+        
+        if self.cache:
+            self._cached_value = result
+            self._cached = True
+        
         return result
+    
+    def __call__(self, **kwargs: Any) -> Any:
+        """Make dependency callable."""
+        return self.resolve(**kwargs)
 
 
-def Depends(dependency: Callable, use_cache: bool = True) -> Dependency:
+def Depends(dependency: Callable[..., Any], cache: bool = False) -> Dependency:
     """
-    Mark a parameter as a dependency.
-
+    Dependency injection decorator.
+    
     Args:
-        dependency: Dependency function or class
-        use_cache: Whether to cache dependency instances
-
+        dependency: Dependency function
+        cache: Whether to cache the result (default: False)
+        
     Returns:
-        Dependency instance
+        Dependency object
+        
+    Example:
+        ```python
+        def get_db():
+            return Database()
+        
+        @app.get("/users")
+        async def get_users(db = Depends(get_db)):
+            return await db.get_users()
+        ```
     """
-    return Dependency(dependency, use_cache)
+    if isinstance(dependency, Dependency):
+        return dependency
+    
+    return Dependency(dependency, cache=cache)
 
 
-async def resolve_dependencies(
-    handler: Callable,
-    request: Any,
+def resolve_dependencies(
+    handler: Callable[..., Any],
     path_params: Dict[str, Any],
     query_params: Dict[str, Any],
+    request: Any,
+    body_data: Any = None,
 ) -> Dict[str, Any]:
     """
-    Resolve all dependencies for a handler.
-
+    Resolve dependencies for a handler function.
+    
     Args:
         handler: Handler function
-        request: Request object
         path_params: Path parameters
         query_params: Query parameters
-
+        request: Request object
+        body_data: Request body data
+        
     Returns:
         Dictionary of resolved dependencies
     """
     sig = inspect.signature(handler)
-    resolved = {}
-
+    dependencies: Dict[str, Any] = {}
+    
+    # Get type hints
+    type_hints = get_type_hints(handler)
+    
     for param_name, param in sig.parameters.items():
-        # Skip if already in path_params or query_params
+        # Skip if already provided
         if param_name in path_params or param_name in query_params:
             continue
-
-        # Check if it's a dependency
+        
+        # Check if parameter is a Dependency
         if isinstance(param.default, Dependency):
-            dependency = param.default
-            resolved[param_name] = await dependency.resolve(
-                request, path_params, query_params
-            )
-        # Try to inject Request
-        elif param.annotation != inspect.Parameter.empty:
-            param_type = param.annotation
-            if hasattr(param_type, "__name__") and param_type.__name__ == "Request":
-                resolved[param_name] = request
+            # Will be resolved later in async context
+            dependencies[param_name] = param.default
+        elif param_name == "request":
+            dependencies[param_name] = request
+        elif param_name == "body" and body_data is not None:
+            dependencies[param_name] = body_data
+        elif param.annotation == type(request) or param.annotation == Any:
+            # Type hint suggests it's a request
+            if param_name not in dependencies:
+                dependencies[param_name] = request
+    
+    return dependencies
 
+
+async def resolve_dependency_values(
+    dependencies: Dict[str, Any],
+    **context: Any,
+) -> Dict[str, Any]:
+    """
+    Resolve dependency values asynchronously.
+    
+    Args:
+        dependencies: Dictionary of dependencies
+        **context: Context variables to pass to dependencies
+        
+    Returns:
+        Dictionary of resolved dependency values
+    """
+    resolved: Dict[str, Any] = {}
+    
+    for name, dep in dependencies.items():
+        if isinstance(dep, Dependency):
+            resolved[name] = await dep.resolve(**context)
+        else:
+            resolved[name] = dep
+    
     return resolved
+

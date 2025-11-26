@@ -1,194 +1,244 @@
 """
-Модуль логирования для QakeAPI.
+Logging system for QakeAPI.
+
+Provides centralized logging functionality with configurable levels,
+formatters, and handlers.
 """
 
-import json
 import logging
 import sys
-from datetime import datetime
 from typing import Any, Dict, Optional
+from datetime import datetime
+import json as json_module
 
 
-class JsonFormatter(logging.Formatter):
-    """Форматтер для логов в JSON формате."""
-
+class JSONFormatter(logging.Formatter):
+    """JSON formatter for structured logging."""
+    
     def format(self, record: logging.LogRecord) -> str:
-        """Форматирование записи лога в JSON."""
+        """Format log record as JSON."""
         log_data = {
             "timestamp": datetime.utcnow().isoformat(),
             "level": record.levelname,
+            "logger": record.name,
             "message": record.getMessage(),
             "module": record.module,
             "function": record.funcName,
             "line": record.lineno,
         }
-
-        if hasattr(record, "request_id"):
-            log_data["request_id"] = record.request_id
-
+        
+        # Add extra fields
+        if hasattr(record, "extra"):
+            log_data.update(record.extra)
+        
+        # Add exception info if present
         if record.exc_info:
             log_data["exception"] = self.formatException(record.exc_info)
+        
+        return json_module.dumps(log_data, ensure_ascii=False)
 
-        return json.dumps(log_data)
+
+class TextFormatter(logging.Formatter):
+    """Text formatter for human-readable logs."""
+    
+    def __init__(self, include_timestamp: bool = True):
+        """
+        Initialize text formatter.
+        
+        Args:
+            include_timestamp: Whether to include timestamp in log messages
+        """
+        if include_timestamp:
+            fmt = "[%(asctime)s] %(levelname)-8s %(name)s: %(message)s"
+            datefmt = "%Y-%m-%d %H:%M:%S"
+        else:
+            fmt = "%(levelname)-8s %(name)s: %(message)s"
+            datefmt = None
+        
+        super().__init__(fmt=fmt, datefmt=datefmt)
 
 
-def setup_logging(
-    level: str = "INFO", json_output: bool = False, log_file: Optional[str] = None
-) -> logging.Logger:
+class QakeAPILogger:
     """
-    Настройка логирования.
-
-    Args:
-        level: Уровень логирования
-        json_output: Использовать JSON формат
-        log_file: Путь к файлу логов
+    Centralized logger for QakeAPI.
+    
+    Provides structured logging with configurable format and levels.
     """
-    logger = logging.getLogger("qakeapi")
-    logger.setLevel(level.upper())
-
-    # Очищаем существующие обработчики
-    logger.handlers = []
-
-    # Создаем форматтер
-    formatter = (
-        JsonFormatter()
-        if json_output
-        else logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    )
-
-    # Добавляем обработчик для консоли
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-
-    # Добавляем обработчик для файла, если указан
-    if log_file:
-        file_handler = logging.FileHandler(log_file)
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-
-    return logger
-
-
-class RequestLogger:
-    """Логгер для HTTP запросов."""
-
-    def __init__(self, logger: logging.Logger):
-        self.logger = logger
-
-    def log_request(
+    
+    def __init__(
         self,
-        method: str,
-        path: str,
-        params: Dict[str, Any] = None,
-        headers: Dict[str, str] = None,
-        body: Any = None,
-    ) -> None:
-        """Логирование входящего запроса."""
-        self.logger.info(
-            "Incoming request",
-            extra={
-                "method": method,
-                "path": path,
-                "params": params,
-                "headers": headers,
-                "body": body,
-            },
-        )
-
-    def log_response(
-        self, status_code: int, body: Any = None, duration_ms: Optional[float] = None
-    ) -> None:
-        """Логирование ответа."""
-        self.logger.info(
-            "Outgoing response",
-            extra={
-                "status_code": status_code,
-                "body": body,
-                "duration_ms": duration_ms,
-            },
-        )
-
-
-class StructuredLogger:
-    """Logger with structured logging capabilities."""
-
-    def __init__(self, name: str):
-        self.logger = logging.getLogger(name)
-
-    def _log(self, level: int, message: str, extra: Optional[Dict[str, Any]] = None):
-        """Log message with extra fields."""
-        self.logger.log(
-            level, message, extra={"extra_fields": extra} if extra else None
-        )
-
-    def info(self, message: str, extra: Optional[Dict[str, Any]] = None):
-        """Log info message."""
-        self._log(logging.INFO, message, extra)
-
-    def error(
-        self,
-        message: str,
-        error: Optional[Exception] = None,
-        extra: Optional[Dict[str, Any]] = None,
+        name: str = "qakeapi",
+        level: str = "INFO",
+        format_type: str = "text",
+        include_timestamp: bool = True,
     ):
-        """Log error message."""
-        if error:
-            if not extra:
-                extra = {}
-            extra["error"] = {"type": type(error).__name__, "message": str(error)}
-        self._log(logging.ERROR, message, extra)
-
-    def warning(self, message: str, extra: Optional[Dict[str, Any]] = None):
-        """Log warning message."""
-        self._log(logging.WARNING, message, extra)
-
-    def debug(self, message: str, extra: Optional[Dict[str, Any]] = None):
+        """
+        Initialize QakeAPI logger.
+        
+        Args:
+            name: Logger name
+            level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+            format_type: Format type ("text" or "json")
+            include_timestamp: Whether to include timestamp (for text format)
+        """
+        self.logger = logging.getLogger(name)
+        self.logger.setLevel(getattr(logging, level.upper(), logging.INFO))
+        self.logger.propagate = False  # Prevent duplicate logs
+        
+        # Clear existing handlers
+        self.logger.handlers = []
+        
+        # Create console handler
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setLevel(getattr(logging, level.upper(), logging.INFO))
+        
+        # Set formatter
+        if format_type == "json":
+            formatter = JSONFormatter()
+        else:
+            formatter = TextFormatter(include_timestamp=include_timestamp)
+        
+        console_handler.setFormatter(formatter)
+        self.logger.addHandler(console_handler)
+        
+        self._handlers: list = [console_handler]
+    
+    def add_file_handler(
+        self,
+        filepath: str,
+        level: Optional[str] = None,
+        format_type: str = "text",
+    ) -> None:
+        """
+        Add file handler to logger.
+        
+        Args:
+            filepath: Path to log file
+            level: Logging level for file handler (default: same as logger)
+            format_type: Format type ("text" or "json")
+        """
+        from logging.handlers import RotatingFileHandler
+        
+        file_handler = RotatingFileHandler(
+            filepath,
+            maxBytes=10 * 1024 * 1024,  # 10MB
+            backupCount=5,
+            encoding="utf-8",
+        )
+        
+        if level:
+            file_handler.setLevel(getattr(logging, level.upper(), logging.INFO))
+        else:
+            file_handler.setLevel(self.logger.level)
+        
+        # Set formatter
+        if format_type == "json":
+            formatter = JSONFormatter()
+        else:
+            formatter = TextFormatter(include_timestamp=True)
+        
+        file_handler.setFormatter(formatter)
+        self.logger.addHandler(file_handler)
+        self._handlers.append(file_handler)
+    
+    def debug(self, message: str, **kwargs: Any) -> None:
         """Log debug message."""
-        self._log(logging.DEBUG, message, extra)
+        self.logger.debug(message, extra=kwargs)
+    
+    def info(self, message: str, **kwargs: Any) -> None:
+        """Log info message."""
+        self.logger.info(message, extra=kwargs)
+    
+    def warning(self, message: str, **kwargs: Any) -> None:
+        """Log warning message."""
+        self.logger.warning(message, extra=kwargs)
+    
+    def error(self, message: str, exc_info: bool = False, **kwargs: Any) -> None:
+        """Log error message."""
+        self.logger.error(message, exc_info=exc_info, extra=kwargs)
+    
+    def critical(self, message: str, exc_info: bool = False, **kwargs: Any) -> None:
+        """Log critical message."""
+        self.logger.critical(message, exc_info=exc_info, extra=kwargs)
+    
+    def exception(self, message: str, **kwargs: Any) -> None:
+        """Log exception with traceback."""
+        self.logger.exception(message, extra=kwargs)
+    
+    def set_level(self, level: str) -> None:
+        """Set logging level."""
+        self.logger.setLevel(getattr(logging, level.upper(), logging.INFO))
+        for handler in self._handlers:
+            handler.setLevel(getattr(logging, level.upper(), logging.INFO))
 
 
-# Example usage:
-"""
+# Global logger instance
+_logger: Optional[QakeAPILogger] = None
 
-# Setup logging
-logger = setup_logging(
-    level="DEBUG",
-    json_output=True,
-    log_file="logs/app.log"
-)
 
-# Create structured logger
-log = StructuredLogger("myapp")
+def get_logger(
+    name: str = "qakeapi",
+    level: str = "INFO",
+    format_type: str = "text",
+) -> QakeAPILogger:
+    """
+    Get or create global logger instance.
+    
+    Args:
+        name: Logger name
+        level: Logging level
+        format_type: Format type ("text" or "json")
+        
+    Returns:
+        QakeAPILogger instance
+    """
+    global _logger
+    
+    if _logger is None:
+        _logger = QakeAPILogger(name=name, level=level, format_type=format_type)
+    
+    return _logger
 
-# Log messages
-log.info(
-    "User logged in",
-    extra={
-        "user_id": "123",
-        "ip_address": "127.0.0.1"
-    }
-)
 
-log.error(
-    "Database connection failed",
-    error=db_error,
-    extra={
-        "database": "users",
-        "retry_count": 3
-    }
-)
+def configure_logging(
+    level: str = "INFO",
+    format_type: str = "text",
+    filepath: Optional[str] = None,
+    file_level: Optional[str] = None,
+) -> QakeAPILogger:
+    """
+    Configure global logging.
+    
+    Args:
+        level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+        format_type: Format type ("text" or "json")
+        filepath: Optional path to log file
+        file_level: Optional logging level for file handler
+        
+    Returns:
+        Configured QakeAPILogger instance
+        
+    Example:
+        ```python
+        from qakeapi.core.logging import configure_logging
+        
+        logger = configure_logging(
+            level="DEBUG",
+            format_type="json",
+            filepath="app.log"
+        )
+        ```
+    """
+    global _logger
+    
+    _logger = QakeAPILogger(
+        name="qakeapi",
+        level=level,
+        format_type=format_type,
+    )
+    
+    if filepath:
+        _logger.add_file_handler(filepath, level=file_level, format_type=format_type)
+    
+    return _logger
 
-# Log requests
-request_logger = RequestLogger(logger)
-request_logger.log_request(
-    method="POST",
-    path="/api/users",
-    status_code=201,
-    duration=0.123,
-    extra={
-        "user_id": "123",
-        "content_length": 1024
-    }
-)
-"""

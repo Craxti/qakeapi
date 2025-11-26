@@ -1,153 +1,201 @@
-import asyncio
-import logging
-from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional, Set
+"""
+Background tasks system for QakeAPI.
 
-logger = logging.getLogger(__name__)
+This module provides functionality for running tasks in the background,
+independent of the request/response cycle.
+"""
+
+import asyncio
+import inspect
+from datetime import datetime
+from functools import wraps
+from typing import Any, Callable, Dict, List, Optional
+from uuid import uuid4
+
+from .hybrid import run_hybrid
 
 
 class BackgroundTask:
-    """Класс для представления фоновой задачи"""
-
+    """Represents a background task."""
+    
     def __init__(
         self,
-        func: Callable,
+        func: Callable[..., Any],
         *args: Any,
         task_id: Optional[str] = None,
-        timeout: Optional[float] = None,
-        retry_count: int = 0,
         **kwargs: Any,
     ):
+        """
+        Initialize background task.
+        
+        Args:
+            func: Task function
+            *args: Positional arguments
+            task_id: Optional task ID
+            **kwargs: Keyword arguments
+        """
         self.func = func
         self.args = args
         self.kwargs = kwargs
-        self.task_id = task_id or str(id(self))
-        self.timeout = timeout
-        self.retry_count = retry_count
-        self.retries = 0
+        self.task_id = task_id or str(uuid4())
         self.created_at = datetime.utcnow()
         self.started_at: Optional[datetime] = None
         self.completed_at: Optional[datetime] = None
+        self.result: Any = None
         self.error: Optional[Exception] = None
         self._task: Optional[asyncio.Task] = None
-
+    
     async def run(self) -> Any:
-        """Запуск задачи"""
+        """Run task."""
         self.started_at = datetime.utcnow()
         try:
-            if self.timeout:
-                return await asyncio.wait_for(
-                    self.func(*self.args, **self.kwargs), timeout=self.timeout
-                )
-            return await self.func(*self.args, **self.kwargs)
+            result = await run_hybrid(self.func, *self.args, **self.kwargs)
+            self.result = result
+            self.completed_at = datetime.utcnow()
+            return result
         except Exception as e:
             self.error = e
-            if self.retries < self.retry_count:
-                self.retries += 1
-                logger.warning(
-                    f"Задача {self.task_id} завершилась с ошибкой, попытка {self.retries} из {self.retry_count}"
-                )
-                return await self.run()
-            raise
-        finally:
             self.completed_at = datetime.utcnow()
+            raise
 
 
 class BackgroundTaskManager:
-    """Менеджер фоновых задач"""
-
+    """Manager for background tasks."""
+    
     def __init__(self):
+        """Initialize background task manager."""
         self.tasks: Dict[str, BackgroundTask] = {}
-        self.running_tasks: Set[str] = set()
-        self._cleanup_task: Optional[asyncio.Task] = None
-
-    async def add_task(self, task: BackgroundTask) -> str:
-        """Добавление новой задачи"""
+        self._running_tasks: Dict[str, asyncio.Task] = {}
+    
+    async def add_task(
+        self,
+        func: Callable[..., Any],
+        *args: Any,
+        task_id: Optional[str] = None,
+        wait: bool = False,
+        **kwargs: Any,
+    ) -> str:
+        """
+        Add background task.
+        
+        Args:
+            func: Task function
+            *args: Positional arguments
+            task_id: Optional task ID
+            wait: Whether to wait for task completion
+            **kwargs: Keyword arguments
+            
+        Returns:
+            Task ID
+            
+        Example:
+            ```python
+            async def send_email(user_id):
+                # Send email logic
+                pass
+            
+            task_id = await background_manager.add_task(send_email, user_id=1)
+            ```
+        """
+        task = BackgroundTask(func, *args, task_id=task_id, **kwargs)
         self.tasks[task.task_id] = task
-        asyncio.create_task(self._run_task(task))
+        
+        # Create and run task
+        async def run_task():
+            try:
+                await task.run()
+            except Exception as e:
+                # Error already stored in task
+                pass
+            finally:
+                if task.task_id in self._running_tasks:
+                    del self._running_tasks[task.task_id]
+        
+        coro = run_task()
+        asyncio_task = asyncio.create_task(coro)
+        self._running_tasks[task.task_id] = asyncio_task
+        
+        if wait:
+            await asyncio_task
+        
         return task.task_id
-
-    async def _run_task(self, task: BackgroundTask) -> None:
-        """Запуск задачи"""
-        self.running_tasks.add(task.task_id)
-        try:
-            task._task = asyncio.create_task(task.run())
-            await task._task
-        except asyncio.CancelledError:
-            task.error = asyncio.CancelledError("Task was cancelled")
-            task.completed_at = datetime.utcnow()
-            logger.info(f"Задача {task.task_id} была отменена")
-        except Exception as e:
-            task.error = e
-            logger.error(f"Ошибка в задаче {task.task_id}: {str(e)}")
-        finally:
-            self.running_tasks.remove(task.task_id)
-
+    
     def get_task(self, task_id: str) -> Optional[BackgroundTask]:
-        """Получение задачи по ID"""
+        """Get task by ID."""
         return self.tasks.get(task_id)
-
+    
     def get_task_status(self, task_id: str) -> Dict[str, Any]:
-        """Получение статуса задачи"""
+        """Get task status."""
         task = self.get_task(task_id)
-        if not task:
+        if task is None:
             return {"status": "not_found"}
-
+        
+        status = "running"
         if task.completed_at:
-            status = "completed" if not task.error else "failed"
-        elif task.started_at:
-            status = "running"
-        else:
-            status = "pending"
-
+            status = "completed" if task.error is None else "failed"
+        
         return {
+            "task_id": task.task_id,
             "status": status,
             "created_at": task.created_at.isoformat(),
             "started_at": task.started_at.isoformat() if task.started_at else None,
-            "completed_at": (
-                task.completed_at.isoformat() if task.completed_at else None
-            ),
+            "completed_at": task.completed_at.isoformat() if task.completed_at else None,
             "error": str(task.error) if task.error else None,
-            "retries": task.retries,
         }
 
-    async def cancel_task(self, task_id: str) -> bool:
-        """Отмена задачи"""
-        task = self.get_task(task_id)
-        if task and task._task and not task._task.done():
-            task._task.cancel()
-            try:
-                await task._task
-            except asyncio.CancelledError:
-                pass
-            return True
-        return False
 
-    async def cleanup_old_tasks(self, max_age: timedelta = timedelta(hours=1)) -> None:
-        """Очистка старых завершенных задач"""
-        while True:
-            now = datetime.utcnow()
-            to_remove = [
-                task_id
-                for task_id, task in self.tasks.items()
-                if task.completed_at and (now - task.completed_at) > max_age
-            ]
-            for task_id in to_remove:
-                del self.tasks[task_id]
-            await asyncio.sleep(300)  # Проверка каждые 5 минут
+# Global background task manager
+_background_manager = BackgroundTaskManager()
 
-    async def start(self) -> None:
-        """Запуск менеджера задач"""
-        self._cleanup_task = asyncio.create_task(self.cleanup_old_tasks())
 
-    async def stop(self) -> None:
-        """Остановка менеджера задач"""
-        if self._cleanup_task:
-            self._cleanup_task.cancel()
-            try:
-                await self._cleanup_task
-            except asyncio.CancelledError:
-                pass
-        # Отмена всех запущенных задач
-        for task_id in list(self.running_tasks):
-            await self.cancel_task(task_id)
+def background_task(func: Callable[..., Any]):
+    """
+    Decorator for background task function.
+    
+    Example:
+        ```python
+        @background_task
+        async def send_notification(user_id: int):
+            # Background task logic
+            pass
+        
+        # Run in background
+        await send_notification(user_id=1)
+        ```
+    """
+    from functools import wraps
+    
+    @wraps(func)
+    async def wrapper(*args: Any, **kwargs: Any) -> str:
+        """Wrapper that runs function in background."""
+        return await _background_manager.add_task(func, *args, **kwargs)
+    
+    return wrapper
+
+
+async def add_background_task(
+    func: Callable[..., Any], *args: Any, task_id: Optional[str] = None, **kwargs: Any
+) -> str:
+    """
+    Add background task.
+    
+    Args:
+        func: Task function
+        *args: Positional arguments
+        task_id: Optional task ID
+        **kwargs: Keyword arguments
+        
+    Returns:
+        Task ID
+        
+    Example:
+        ```python
+        async def send_email(email: str):
+            # Send email logic
+            pass
+        
+        task_id = await add_background_task(send_email, "user@example.com")
+        ```
+    """
+    return await _background_manager.add_task(func, *args, task_id=task_id, **kwargs)
+
