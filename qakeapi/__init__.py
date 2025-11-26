@@ -1,138 +1,136 @@
 """
-QakeAPI - Modern asynchronous web framework for Python
+QakeAPI - Revolutionary Hybrid Async/Sync Web Framework for Python.
 
-All methods are implemented independently, using only Python standard library.
+QakeAPI is a unique web framework that seamlessly supports both
+asynchronous and synchronous code, with automatic parallel processing
+and reactive routing capabilities.
+
+Key Features:
+- Hybrid sync/async execution
+- Parallel dependency resolution
+- Reactive routing
+- Pipeline composition
+- Smart conditional routing
+- Zero dependencies (core framework)
 """
 
-__version__ = "1.1.2"
+__version__ = "1.2.0"
 __author__ = "QakeAPI Team"
-__description__ = "Modern asynchronous web framework for Python"
-
-# Caching imports
-from .caching import CacheManager, CacheMiddleware, MemoryCache
+__description__ = "Revolutionary Hybrid Async/Sync Web Framework"
 
 # Core imports
 from .core import (
-    APIRouter,
-    BadRequest,
-    BaseMiddleware,
-    Conflict,
-    Depends,
-    FileResponse,
-    Forbidden,
-    FrameworkException,
-    HTMLResponse,
-    HTTPException,
-    InternalServerError,
-    JSONResponse,
-    MethodNotAllowed,
-    NotFound,
     QakeAPI,
-    RedirectResponse,
+    hybrid_executor,
+    sync_to_async,
+    run_hybrid,
+    react,
+    Event,
+    EventBus,
+    emit,
+    pipeline,
+    Pipeline,
+    pipeline_decorator,
+    parallel,
+    ParallelResolver,
+    resolve_parallel,
+    when,
+    route,
+    Router,
+    Route,
     Request,
     Response,
-    Router,
+    JSONResponse,
+    HTMLResponse,
     TextResponse,
-    Unauthorized,
+    BaseMiddleware,
+    MiddlewareStack,
+    CORSMiddleware,
+    LoggingMiddleware,
+    RequestSizeLimitMiddleware,
     WebSocket,
-)
-
-# Error handling imports
-from .core.error_handling import ErrorHandler, create_error_handler
-
-# Middleware imports
-from .middleware.logging import LoggingMiddleware
-
-# Monitoring imports
-from .monitoring.health import HealthChecker
-from .monitoring.metrics import MetricsCollector
-
-# Security imports
-from .security import CORSMiddleware, JWTManager
-
-# Testing imports
-from .testing import TestClient, TestResponse, WebSocketTestClient
-
-# Utils imports
-from .utils import StaticFiles, TemplateEngine, TemplateRenderer, mount_static
-
-# Validation imports
-from .validation import (
-    BaseModel,
-    BooleanValidator,
-    DateTimeValidator,
-    EmailValidator,
-    Field,
-    FloatValidator,
-    IntegerValidator,
-    StringValidator,
-    URLValidator,
-    ValidationError,
+    WebSocketRoute,
+    BackgroundTask,
+    BackgroundTaskManager,
+    add_background_task,
+    background_task,
+    rate_limit,
+    get_rate_limiter,
+    RateLimiter,
+    cache,
+    get_cache,
+    Cache,
+    generate_cache_key,
+    Depends,
+    Dependency,
+    FileUpload,
+    IMAGE_TYPES,
+    DOCUMENT_TYPES,
+    IMAGE_MIME_TYPES,
+    DOCUMENT_MIME_TYPES,
 )
 
 __all__ = [
     # Application
     "QakeAPI",
+    # Hybrid
+    "hybrid_executor",
+    "sync_to_async",
+    "run_hybrid",
+    # Reactive
+    "react",
+    "Event",
+    "EventBus",
+    "emit",
+    # Pipeline
+    "pipeline",
+    "Pipeline",
+    "pipeline_decorator",
+    # Parallel
+    "parallel",
+    "ParallelResolver",
+    "resolve_parallel",
+    # Router
+    "when",
+    "route",
+    "Router",
+    "Route",
     # Request/Response
     "Request",
     "Response",
     "JSONResponse",
     "HTMLResponse",
     "TextResponse",
-    "RedirectResponse",
-    "FileResponse",
-    # Exceptions
-    "HTTPException",
-    "FrameworkException",
-    "BadRequest",
-    "Unauthorized",
-    "Forbidden",
-    "NotFound",
-    "MethodNotAllowed",
-    "Conflict",
-    "InternalServerError",
-    # Router
-    "Router",
-    "APIRouter",
     # Middleware
     "BaseMiddleware",
-    # Dependencies
-    "Depends",
+    "MiddlewareStack",
+    "CORSMiddleware",
+    "LoggingMiddleware",
+    "RequestSizeLimitMiddleware",
     # WebSocket
     "WebSocket",
-    # Validation
-    "BaseModel",
-    "Field",
-    "ValidationError",
-    "StringValidator",
-    "IntegerValidator",
-    "FloatValidator",
-    "BooleanValidator",
-    "EmailValidator",
-    "URLValidator",
-    "DateTimeValidator",
+    "WebSocketRoute",
+    # Background Tasks
+    "BackgroundTask",
+    "BackgroundTaskManager",
+    "add_background_task",
+    "background_task",
+    # Rate Limiting
+    "rate_limit",
+    "get_rate_limiter",
+    "RateLimiter",
     # Caching
-    "MemoryCache",
-    "CacheManager",
-    "CacheMiddleware",
-    # Utils
-    "StaticFiles",
-    "mount_static",
-    "TemplateEngine",
-    "TemplateRenderer",
-    # Testing
-    "TestClient",
-    "TestResponse",
-    "WebSocketTestClient",
-    # Security
-    "CORSMiddleware",
-    "JWTManager",
-    # Middleware
-    "LoggingMiddleware",
-    # Monitoring
-    "HealthChecker",
-    "MetricsCollector",
-    # Error handling
-    "ErrorHandler",
-    "create_error_handler",
+    "cache",
+    "get_cache",
+    "Cache",
+    "generate_cache_key",
+    # Dependency Injection
+    "Depends",
+    "Dependency",
+    # File Upload
+    "FileUpload",
+    "IMAGE_TYPES",
+    "DOCUMENT_TYPES",
+    "IMAGE_MIME_TYPES",
+    "DOCUMENT_MIME_TYPES",
 ]
