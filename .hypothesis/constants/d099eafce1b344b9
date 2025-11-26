@@ -1,4 +1,0 @@
-# file: /Users/aleksandr/Documents/GitHub/qakeapi/qakeapi/core/validation.py
-# hypothesis_version: 6.135.22
-
-[500, 'Data cannot be None', 'T', 'data', 'detail', 'errors', 'pydantic']
