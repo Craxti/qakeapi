@@ -4,15 +4,13 @@ on:
   release:
     types: [created]
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release (e.g., 1.2.0)'
-        required: true
 
 jobs:
   publish:
     name: Publish to PyPI
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
     - uses: actions/checkout@v4
@@ -30,20 +28,27 @@ jobs:
     - name: Build package
       run: |
         python -m build
+        ls -la dist/
     
     - name: Check package
       run: |
         twine check dist/*
+    
+    - name: Check PyPI token
+      run: |
+        if [ -z "${{ secrets.PYPI_API_TOKEN }}" ]; then
+          echo "::error::PYPI_API_TOKEN secret is not set in repository settings!"
+          echo "Please add it at: https://github.com/${{ github.repository }}/settings/secrets/actions"
+          exit 1
+        else
+          echo "✓ PyPI token is configured"
+        fi
     
     - name: Publish to PyPI
       env:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
       run: |
-        if [ -z "$TWINE_PASSWORD" ]; then
-          echo "Error: PYPI_API_TOKEN secret is not set!"
-          exit 1
-        fi
         echo "Publishing to PyPI..."
-        twine upload dist/*
+        twine upload dist/* --verbose
 
