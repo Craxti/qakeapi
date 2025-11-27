@@ -40,5 +40,10 @@ jobs:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
       run: |
+        if [ -z "$TWINE_PASSWORD" ]; then
+          echo "Error: PYPI_API_TOKEN secret is not set!"
+          exit 1
+        fi
+        echo "Publishing to PyPI..."
         twine upload dist/*
 
