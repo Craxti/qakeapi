@@ -1,5 +1,5 @@
 """
-Setup script for QakeAPI 1.2.0
+Setup script for QakeAPI 1.3.0
 """
 
 from setuptools import setup, find_packages
@@ -9,10 +9,11 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="qakeapi",
-    version="1.2.0",
+    version="1.3.0",
     author="QakeAPI Team",
     author_email="",
     description="Revolutionary Hybrid Async/Sync Web Framework for Python",
+    keywords="web framework api asgi async python rest openapi swagger websocket",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/craxti/qakeapi",
@@ -41,6 +42,7 @@ setup(
             "black>=23.0.0",
             "flake8>=6.0.0",
             "mypy>=1.0.0",
+            "pre-commit>=3.0.0",
         ],
         "test": [
             "pytest>=7.0.0",
@@ -50,10 +52,9 @@ setup(
         "server": [
             "uvicorn[standard]>=0.23.0",
         ],
-    },
-    entry_points={
-        "console_scripts": [
-            "qakeapi=qakeapi.cli:main",
+        "docs": [
+            "mkdocs>=1.5.0",
+            "mkdocs-material>=9.0.0",
         ],
     },
 )

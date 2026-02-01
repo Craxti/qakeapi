@@ -1,0 +1,51 @@
+# MkDocs configuration for QakeAPI documentation
+# Deploy to GitHub Pages: mkdocs gh-deploy
+
+site_name: QakeAPI
+site_description: Revolutionary Hybrid Async/Sync Web Framework for Python
+site_url: https://craxti.github.io/qakeapi
+repo_url: https://github.com/craxti/qakeapi
+repo_name: craxti/qakeapi
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Tutorial: tutorial.md
+  - Guides:
+    - Routing: routing.md
+    - Dependency Injection: dependency-injection.md
+    - Parallel Dependencies: parallel.md
+    - Reactive System: reactive.md
+    - Pipelines: pipelines.md
+    - Middleware: middleware.md
+    - WebSocket: websocket.md
+    - Background Tasks: background-tasks.md
+    - File Upload: file-upload.md
+    - OpenAPI: openapi.md
+  - Reference:
+    - API Reference: api-reference.md
+    - Benchmarks: benchmarks.md
+    - Migration from FastAPI: migration-from-fastapi.md
+  - Ecosystem:
+    - Community: COMMUNITY.md
+    - Integrations: ecosystem.md
+    - Discoverability: DISCOVERABILITY.md
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - admonition
+  - tables

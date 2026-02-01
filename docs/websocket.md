@@ -2,6 +2,8 @@
 
 QakeAPI includes built-in WebSocket support for real-time communication.
 
+**Why QakeAPI WebSockets:** Native ASGI — no `websockets` or `python-socketio` package. `iter_json()` helper for clean message loops. Benchmarks: ~1.2K connections/sec vs Flask-SocketIO ~450. See [benchmarks](benchmarks.md).
+
 ## Basic WebSocket
 
 Create a WebSocket endpoint:

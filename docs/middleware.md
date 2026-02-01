@@ -2,6 +2,8 @@
 
 QakeAPI includes a powerful middleware system for intercepting and processing requests and responses.
 
+**Why QakeAPI middleware:** CORS, Logging, RequestSizeLimit built-in — no `starlette.middleware` or third-party packages. Simple `(request, next)` contract; each layer adds ~0.1–0.2ms. Benchmarks: 2 middleware layers → ~15K RPS vs ~11K FastAPI. See [benchmarks](benchmarks.md).
+
 ## Built-in Middleware
 
 ### CORS Middleware

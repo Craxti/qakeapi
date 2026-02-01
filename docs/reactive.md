@@ -2,6 +2,8 @@
 
 QakeAPI includes a reactive event system that allows you to build event-driven applications.
 
+**Why QakeAPI events:** Built-in `emit`/`react` — no Celery, Redis, or Kafka for simple flows. In-process event bus; zero network latency. Decouple handlers (email, analytics, inventory) from request handlers. For high-scale pub/sub, add Redis later; for most APIs, in-process is enough and faster.
+
 ## Event Emitting
 
 Emit events from anywhere in your application:

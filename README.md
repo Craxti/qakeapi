@@ -1,16 +1,42 @@
-# 🚀 QakeAPI 1.2.0
+# 🚀 QakeAPI 1.3.0
 
 <div align="center">
+
+![QakeAPI Logo](docs/images/qakeapi-logo.png)
 
 **Revolutionary Hybrid Async/Sync Web Framework for Python**
 
 > ⚡ The first framework with seamless sync/async support and reactive architecture
 
-[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/craxti/qakeapi)
+[![PyPI version](https://badge.fury.io/py/qakeapi.svg)](https://pypi.org/project/qakeapi/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/craxti/qakeapi/actions/workflows/ci.yml/badge.svg)](https://github.com/craxti/qakeapi/actions)
+[![Codecov](https://codecov.io/gh/craxti/qakeapi/graph/badge.svg)](https://codecov.io/gh/craxti/qakeapi)
 
 </div>
+
+---
+
+## Why QakeAPI?
+
+QakeAPI is the **only** Python web framework with true hybrid sync/async and **zero dependencies** in core. Write regular functions — the framework automatically converts them to async. Perfect for Flask migration and projects where minimal external dependencies matter.
+
+---
+
+## Framework Comparison
+
+| Feature | QakeAPI | FastAPI | Flask |
+|---------|:-------:|:-------:|:-----:|
+| Zero deps (core) | ✅ | ❌ | ❌ |
+| Sync + Async hybrid | ✅ | ❌ | ❌ |
+| OpenAPI / Swagger | ✅ | ✅ | ❌ |
+| WebSocket | ✅ | ✅ | ❌ |
+| Dependency Injection | ✅ | ✅ | ❌ |
+| Rate Limiting (built-in) | ✅ | ❌ | ❌ |
+| Response Caching | ✅ | ❌ | ❌ |
+| Reactive Events | ✅ | ❌ | ❌ |
+| Pipeline Composition | ✅ | ❌ | ❌ |
 
 ---
 
@@ -60,7 +86,7 @@ from qakeapi import QakeAPI, CORSMiddleware
 
 app = QakeAPI(
     title="My API",
-    version="1.2.0",
+    version="1.3.0",
     description="My awesome API"
 )
 
@@ -91,6 +117,16 @@ if __name__ == "__main__":
 **Access the API documentation:**
 - Swagger UI: `http://localhost:8000/docs`
 - OpenAPI JSON: `http://localhost:8000/openapi.json`
+
+### Demo
+
+![QakeAPI Swagger Demo](docs/images/qakeapi-demo-swagger.png)
+
+*Automatic OpenAPI documentation — works out of the box*
+
+### Architecture
+
+![QakeAPI Architecture](docs/images/qakeapi-architecture.png)
 
 ---
 
@@ -181,7 +217,7 @@ OpenAPI/Swagger documentation is automatically generated:
 ```python
 app = QakeAPI(
     title="My API",
-    version="1.2.0",
+    version="1.3.0",
     description="API documentation"
 )
 
@@ -336,6 +372,9 @@ qakeapi/
 Full documentation is available in the `docs/` directory:
 
 - [Getting Started](docs/getting-started.md) - Quick start guide
+- [Tutorial](docs/tutorial.md) - Step-by-step from zero to deploy
+- [Migration from FastAPI](docs/migration-from-fastapi.md) - Migrate your FastAPI app to QakeAPI
+- [Benchmarks](docs/benchmarks.md) - Performance comparison with other frameworks
 - [File Upload](docs/file-upload.md) - File upload handling
 - [Routing Guide](docs/routing.md) - Routing, handlers, and performance optimizations
 - [Dependency Injection](docs/dependency-injection.md) - DI system for clean architecture
@@ -347,6 +386,22 @@ Full documentation is available in the `docs/` directory:
 - [Background Tasks](docs/background-tasks.md) - Background processing
 - [OpenAPI](docs/openapi.md) - API documentation
 - [API Reference](docs/api-reference.md) - Complete API reference
+- [Community & Ecosystem](docs/COMMUNITY.md) - Discussions, integrations, awesome list
+- [Ecosystem & Integrations](docs/ecosystem.md) - SQLite, Redis, Docker, Celery
+
+---
+
+## 👥 Community
+
+- **[GitHub Discussions](https://github.com/craxti/qakeapi/discussions)** — Q&A, ideas, show & tell
+- **[Contributing](CONTRIBUTING.md)** — Code, docs, examples
+- **[Ecosystem](docs/ecosystem.md)** — Integrations with SQLAlchemy, Redis, Docker
+
+---
+
+## 🏢 Used by
+
+*Using QakeAPI in production? [Add your project](https://github.com/craxti/qakeapi/discussions/categories/show-and-tell)!*
 
 ---
 
@@ -367,6 +422,14 @@ Check out the `examples/` directory for complete examples:
 - uvicorn (optional, for running the server)
 
 ---
+
+## 🤝 Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## 🔒 Security
+
+Please report security vulnerabilities responsibly. See [SECURITY.md](SECURITY.md) for details.
 
 ## 📝 License
 

@@ -2,6 +2,8 @@
 
 QakeAPI supports running tasks in the background, independent of the request/response cycle.
 
+**Why QakeAPI background tasks:** `add_background_task()` — no Celery or Redis for fire-and-forget jobs. Response returns immediately; task runs after. Same pattern as FastAPI's `BackgroundTasks`, but built into core. Use for emails, reports, webhooks; for queues, add Redis later.
+
 ## Basic Usage
 
 Run a task in the background:

@@ -14,7 +14,7 @@ Key Features:
 - Zero dependencies (core framework)
 """
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 __author__ = "QakeAPI Team"
 __description__ = "Revolutionary Hybrid Async/Sync Web Framework"
 

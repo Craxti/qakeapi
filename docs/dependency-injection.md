@@ -2,6 +2,8 @@
 
 QakeAPI includes a powerful dependency injection system that simplifies testing, code organization, and resource management.
 
+**Why QakeAPI DI is better:** No Pydantic — dependencies are plain functions/coroutines. Independent deps resolve in parallel via `asyncio.gather()` (3×10ms calls → 10ms total). Built-in `cache=True` for expensive deps (config, DB connection). Benchmarks: ~8.4K RPS for 3 parallel deps vs ~6.2K FastAPI. See [benchmarks](benchmarks.md).
+
 ## Basic Usage
 
 Use the `Depends()` decorator to inject dependencies:

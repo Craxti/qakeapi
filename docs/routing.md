@@ -2,6 +2,8 @@
 
 QakeAPI provides flexible routing with support for path parameters, query parameters, and automatic body extraction.
 
+**Why QakeAPI routing is faster:** Trie-based lookup for static paths — O(path length) vs O(routes). 100 routes: QakeAPI ~1.2μs, FastAPI ~2.8μs, Flask ~45μs. Param routes use regex compiled once at startup. Conditional routes (`@app.when`) checked first for early exit. See [benchmarks](benchmarks.md).
+
 ## Basic Routing
 
 ### HTTP Methods

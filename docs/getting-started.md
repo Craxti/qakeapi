@@ -2,6 +2,8 @@
 
 This guide will help you get started with QakeAPI 1.2.0.
 
+**Why QakeAPI?** Zero dependencies in core, hybrid sync/async (write regular functions — they run automatically), Trie-based routing (~18K RPS vs ~3K for Flask), built-in caching and rate limiting. See [benchmarks](benchmarks.md) for detailed numbers.
+
 ## Installation
 
 ```bash
@@ -68,7 +70,7 @@ Visit:
 
 ### 1. Hybrid Sync/Async
 
-QakeAPI automatically handles both synchronous and asynchronous functions:
+QakeAPI automatically handles both synchronous and asynchronous functions. **Why better:** No need to wrap sync code in `run_in_executor` manually. Sync handlers run in a dedicated thread pool; the event loop stays non-blocking. FastAPI does the same, but QakeAPI has less overhead (no Pydantic layer). Benchmarks: sync handlers ~15K RPS vs Flask ~3K RPS.
 
 ```python
 # Sync function - automatically converted to async
@@ -123,7 +125,7 @@ def error_response():
 
 ### 4. Dependency Injection
 
-Use dependency injection for cleaner code:
+Use dependency injection for cleaner code. **Why better:** Dependencies without cross-dependencies are resolved in parallel via `asyncio.gather()`. Three 10ms DB calls → 10ms total, not 30ms. No Pydantic overhead — simple coroutine resolution. See [parallel.md](parallel.md).
 
 ```python
 from qakeapi import QakeAPI, Depends
@@ -142,7 +144,7 @@ See the [Dependency Injection Guide](dependency-injection.md) for more details.
 
 ### 5. Request Size Validation
 
-Protect your API from large requests:
+Protect your API from large requests. **Why better:** Single middleware, no external deps. Rejects oversized bodies before parsing — saves memory and CPU. FastAPI/Starlette require manual setup or third-party middleware.
 
 ```python
 from qakeapi import QakeAPI, RequestSizeLimitMiddleware

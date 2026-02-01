@@ -2,6 +2,8 @@
 
 QakeAPI automatically resolves dependencies in parallel, improving performance for independent operations.
 
+**Why QakeAPI parallel deps win:** Independent dependencies (no cross-deps) run via `asyncio.gather()`. Three 10ms DB/API calls → 10ms total, not 30ms. FastAPI does the same, but QakeAPI has less overhead (no Pydantic model injection). Benchmarks: ~8.4K RPS vs ~6.2K FastAPI for 3-dependency endpoints. See [benchmarks](benchmarks.md).
+
 ## Basic Usage
 
 Dependencies are automatically resolved in parallel:
