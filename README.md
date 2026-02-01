@@ -12,6 +12,7 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/craxti/qakeapi/actions/workflows/ci.yml/badge.svg)](https://github.com/craxti/qakeapi/actions)
+[![Benchmarks](https://github.com/craxti/qakeapi/actions/workflows/benchmarks.yml/badge.svg)](https://github.com/craxti/qakeapi/actions/workflows/benchmarks.yml)
 [![Codecov](https://codecov.io/gh/craxti/qakeapi/graph/badge.svg)](https://codecov.io/gh/craxti/qakeapi)
 
 </div>
@@ -127,6 +128,14 @@ if __name__ == "__main__":
 ### Architecture
 
 ![QakeAPI Architecture](docs/images/qakeapi-architecture.png)
+
+### Benchmark Results
+
+Benchmarks run on every push to `main`. [View latest results](https://github.com/craxti/qakeapi/actions/workflows/benchmarks.yml) → select latest run → **Artifacts** → download `benchmark-results`.
+
+Run locally: `python benchmarks/run_benchmarks.py`
+
+See [docs/benchmarks.md](docs/benchmarks.md) for detailed numbers and comparisons with FastAPI, Flask.
 
 ---
 
@@ -375,6 +384,7 @@ Full documentation is available in the `docs/` directory:
 - [Tutorial](docs/tutorial.md) - Step-by-step from zero to deploy
 - [Migration from FastAPI](docs/migration-from-fastapi.md) - Migrate your FastAPI app to QakeAPI
 - [Benchmarks](docs/benchmarks.md) - Performance comparison with other frameworks
+- [Benchmark Results (CI)](docs/benchmarks-results.md) - Latest CI benchmark results
 - [File Upload](docs/file-upload.md) - File upload handling
 - [Routing Guide](docs/routing.md) - Routing, handlers, and performance optimizations
 - [Dependency Injection](docs/dependency-injection.md) - DI system for clean architecture

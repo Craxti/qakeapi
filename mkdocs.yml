@@ -37,6 +37,7 @@ nav:
   - Reference:
     - API Reference: api-reference.md
     - Benchmarks: benchmarks.md
+    - Benchmark Results (CI): benchmarks-results.md
     - Migration from FastAPI: migration-from-fastapi.md
   - Ecosystem:
     - Community: COMMUNITY.md

@@ -9,10 +9,11 @@ Requires: pip install httpx uvicorn
 """
 
 import asyncio
+import os
 import subprocess
 import sys
 import time
-from typing import List, Tuple
+from typing import List
 
 try:
     import httpx
@@ -141,7 +142,7 @@ uvicorn.run(app, host='127.0.0.1', port=8000, log_level='error')
     )
 
     # Wait for server to start
-    time.sleep(2)
+    time.sleep(3)
 
     try:
         results = asyncio.run(run_all_benchmarks())
@@ -185,5 +186,4 @@ def print_results(results: List[dict]):
 
 
 if __name__ == "__main__":
-    import os
     main()

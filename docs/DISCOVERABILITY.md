@@ -21,6 +21,24 @@ QakeAPI is published on [PyPI](https://pypi.org/project/qakeapi/). Keywords and 
 
 ## GitHub Topics
 
-Add topics to the repo: `Settings → General → Topics`
+**Add these topics** to improve discoverability in GitHub search:
 
-Suggested topics: `python`, `web-framework`, `asgi`, `api`, `rest`, `openapi`, `websocket`, `async`, `zero-dependencies`
+1. Go to your repo: https://github.com/craxti/qakeapi
+2. Click the **⚙️ gear icon** next to "About" (or "Add topics")
+3. In the Topics field, add (comma-separated or one by one):
+
+```
+python
+web-framework
+asgi
+api
+rest
+openapi
+websocket
+async
+zero-dependencies
+```
+
+4. Click **Save changes**
+
+*Topics are keywords that help others find your project when searching GitHub.*
