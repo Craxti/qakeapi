@@ -1,0 +1,4 @@
+# Docker / examples extras
+qakeapi
+uvicorn[standard]>=0.23.0
+redis>=5.0.0

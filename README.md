@@ -1,4 +1,4 @@
-# 🚀 QakeAPI 1.3.0
+# 🚀 QakeAPI 1.3.1
 
 <div align="center">
 
@@ -87,7 +87,7 @@ from qakeapi import QakeAPI, CORSMiddleware
 
 app = QakeAPI(
     title="My API",
-    version="1.3.0",
+    version="1.3.1",
     description="My awesome API"
 )
 
@@ -226,7 +226,7 @@ OpenAPI/Swagger documentation is automatically generated:
 ```python
 app = QakeAPI(
     title="My API",
-    version="1.3.0",
+    version="1.3.1",
     description="API documentation"
 )
 
@@ -381,6 +381,7 @@ qakeapi/
 Full documentation is available in the `docs/` directory:
 
 - [Getting Started](docs/getting-started.md) - Quick start guide
+- [Cookbook](docs/cookbook.md) - Typical scenarios and recipes
 - [Tutorial](docs/tutorial.md) - Step-by-step from zero to deploy
 - [Migration from FastAPI](docs/migration-from-fastapi.md) - Migrate your FastAPI app to QakeAPI
 - [Benchmarks](docs/benchmarks.md) - Performance comparison with other frameworks

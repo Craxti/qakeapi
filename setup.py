@@ -1,5 +1,5 @@
 """
-Setup script for QakeAPI 1.3.0
+Setup script for QakeAPI 1.3.1
 """
 
 from setuptools import setup, find_packages
@@ -9,7 +9,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="qakeapi",
-    version="1.3.0",
+    version="1.3.1",
     author="QakeAPI Team",
     author_email="",
     description="Zero-dependency hybrid sync/async web framework for Python with OpenAPI, WebSocket, DI, rate limiting, and caching",

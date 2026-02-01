@@ -13,7 +13,7 @@ pip install qakeapi
 ```python
 from qakeapi import QakeAPI, CORSMiddleware
 
-app = QakeAPI(title="My API", version="1.3.0")
+app = QakeAPI(title="My API", version="1.3.1")
 app.add_middleware(CORSMiddleware(allow_origins=["*"]))
 
 @app.get("/users/{id}")

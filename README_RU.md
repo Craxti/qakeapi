@@ -1,4 +1,4 @@
-# 🚀 QakeAPI 1.3.0
+# 🚀 QakeAPI 1.3.1
 
 **Революционный гибридный Async/Sync веб-фреймворк для Python**
 
@@ -15,7 +15,7 @@ pip install qakeapi
 ```python
 from qakeapi import QakeAPI, CORSMiddleware
 
-app = QakeAPI(title="Мой API", version="1.3.0")
+app = QakeAPI(title="Мой API", version="1.3.1")
 app.add_middleware(CORSMiddleware(allow_origins=["*"]))
 
 @app.get("/users/{id}")

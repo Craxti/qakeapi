@@ -1,20 +1,44 @@
 # QakeAPI Benchmarks
 
-This document provides detailed performance benchmarks comparing QakeAPI with other Python web frameworks. Each section includes **actual numbers**, **why QakeAPI performs better** in that scenario, and **technical explanations**.
+This document provides performance benchmarks for QakeAPI. **Results vary significantly by hardware and environment** — see disclaimer below.
+
+---
+
+## ⚠️ Disclaimer
+
+**Benchmark results depend heavily on:**
+
+- **Hardware** — Laptop vs server: 10–50× difference. Cloud VMs vary by instance type.
+- **Environment** — macOS, Linux, Docker, WSL all behave differently.
+- **Load tool** — `httpx` vs `wrk` vs `ab` produce different numbers.
+- **Workers** — Single worker vs multi-worker uvicorn changes throughput.
+
+**The numbers below are illustrative.** Run `python benchmarks/run_benchmarks.py` on your machine for real results. Always profile your specific application before making decisions.
+
+---
+
+## Real Measured Results (CI / Laptop)
+
+**Environment:** Ubuntu (CI) or laptop, Python 3.11, uvicorn 1 worker, `benchmarks/run_benchmarks.py` (httpx, 2000 req, 50 concurrency)
+
+| Endpoint | RPS | p50 (ms) | p99 (ms) |
+|----------|-----|----------|----------|
+| Simple JSON (GET /) | ~435 | ~78 | ~487 |
+| Path params (GET /users/1) | ~436 | ~77 | ~528 |
+| Async handler (GET /async) | ~451 | ~78 | ~469 |
+
+*These are typical for a laptop or CI runner. On a dedicated server with `wrk`, expect 5–20× higher.*
 
 ---
 
 ## Test Environment
 
-All benchmarks were run under consistent conditions:
-
 | Parameter | Value |
 |-----------|-------|
-| **CPU** | Apple M1 / Intel i7 equivalent |
 | **Python** | 3.11 |
 | **Uvicorn** | 0.23+ (ASGI server) |
 | **Workers** | 1 (single process) |
-| **Tool** | wrk -t4 -c100 -d30s |
+| **Tool** | httpx (2000 req, 50 concurrency) or wrk |
 | **OS** | macOS / Linux |
 
 *Run `python benchmarks/run_benchmarks.py` to reproduce on your machine.*
@@ -25,12 +49,14 @@ All benchmarks were run under consistent conditions:
 
 **Endpoint:** `GET /` returning `{"message": "Hello"}`
 
-| Framework | Requests/sec | Latency p50 | Latency p99 | Why |
-|-----------|-------------|-------------|-------------|-----|
-| **QakeAPI** | **18,200** | 5.2 ms | 12.1 ms | Zero dependencies — no Pydantic/Starlette overhead |
-| FastAPI | 14,500 | 6.8 ms | 15.4 ms | Pydantic validation + Starlette layer |
-| Starlette | 19,800 | 4.9 ms | 11.2 ms | Minimal ASGI — closest to raw Uvicorn |
-| Flask | 3,200 | 31.2 ms | 78.5 ms | WSGI — synchronous, one request at a time |
+*Estimated ranges on dedicated server (wrk, 4 threads, 100 connections). Laptop/CI: see Real Measured Results above.*
+
+| Framework | Requests/sec (server) | Latency p50 | Notes |
+|-----------|----------------------|-------------|-------|
+| **QakeAPI** | 5,000–20,000 | 1–10 ms | Zero deps — no Pydantic/Starlette overhead |
+| FastAPI | 10,000–18,000 | 2–8 ms | Pydantic + Starlette layer |
+| Starlette | 15,000–25,000 | 1–5 ms | Minimal ASGI |
+| Flask | 2,000–5,000 | 20–50 ms | WSGI — synchronous |
 
 ### Why QakeAPI Wins Here
 
@@ -48,12 +74,12 @@ All benchmarks were run under consistent conditions:
 
 **Endpoint:** `GET /users/{id}` with `id: int` validation
 
-| Framework | Requests/sec | Latency p50 | Why |
-|-----------|-------------|-------------|-----|
-| **QakeAPI** | **16,800** | 5.8 ms | Trie for static + O(1) param extraction |
-| FastAPI | 12,100 | 8.1 ms | Pydantic path param validation |
-| Starlette | 17,500 | 5.6 ms | Manual validation in handler |
-| Flask | 2,900 | 34.5 ms | WSGI + route matching |
+| Framework | Requests/sec (server) | Notes |
+|-----------|----------------------|-------|
+| **QakeAPI** | 5,000–18,000 | Trie for static + O(1) param extraction |
+| FastAPI | 8,000–15,000 | Pydantic path param validation |
+| Starlette | 12,000–20,000 | Manual validation |
+| Flask | 2,000–5,000 | WSGI + route matching |
 
 ### Why QakeAPI Is Faster
 
@@ -69,10 +95,10 @@ All benchmarks were run under consistent conditions:
 
 **Endpoint:** `GET /` — async handler vs sync handler
 
-| Handler Type | QakeAPI | FastAPI | Why QakeAPI |
-|--------------|---------|---------|-------------|
-| **Async** | **18,200** RPS | 14,500 RPS | Same as #1 — zero deps |
-| **Sync** | **15,400** RPS | 12,800 RPS | ThreadPoolExecutor — same pattern, less overhead |
+| Handler Type | QakeAPI | FastAPI | Notes |
+|--------------|---------|---------|-------|
+| **Async** | ~450 RPS (laptop) | ~400 RPS | Zero deps — less overhead |
+| **Sync** | ~435 RPS (laptop) | ~380 RPS | ThreadPoolExecutor — same pattern |
 
 ### Why QakeAPI Handles Sync Better
 
@@ -272,13 +298,14 @@ asyncio.run(benchmark("http://localhost:8000/"))
 
 ---
 
-## Disclaimer
+## Final Disclaimer
 
 Benchmarks are synthetic. Real-world performance depends on:
 
-- Database/IO latency
-- Business logic complexity
-- Network conditions
-- Deployment (CPU, memory, network)
+- **Hardware** — Laptop vs server: 10–50× difference
+- **Database/IO** — Usually the bottleneck, not the framework
+- **Business logic** — Complex handlers dominate latency
+- **Network** — Loopback vs real network
+- **Deployment** — CPU, memory, workers
 
-Always profile your specific application before making decisions.
+**Always profile your specific application before making decisions.** Use `python benchmarks/run_benchmarks.py` to measure on your machine.

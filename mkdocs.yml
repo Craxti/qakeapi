@@ -4,8 +4,8 @@
 site_name: QakeAPI
 site_description: Revolutionary Hybrid Async/Sync Web Framework for Python
 site_url: https://craxti.github.io/qakeapi
-repo_url: https://github.com/craxti/qakeapi
-repo_name: craxti/qakeapi
+repo_url: https://github.com/Craxti/qakeapi
+repo_name: Craxti/qakeapi
 edit_uri: edit/main/docs/
 
 theme:
@@ -23,6 +23,7 @@ nav:
   - Home: index.md
   - Getting Started: getting-started.md
   - Tutorial: tutorial.md
+  - Cookbook: cookbook.md
   - Guides:
     - Routing: routing.md
     - Dependency Injection: dependency-injection.md

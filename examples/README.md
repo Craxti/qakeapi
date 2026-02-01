@@ -34,6 +34,22 @@ Complete example with all framework features. **Why QakeAPI:**
 py examples/complete_example.py
 ```
 
+### `jwt_sqlite_example.py`
+JWT authentication with SQLite database:
+- User registration and login
+- Protected routes with `@require_auth`
+- CRUD with SQLite
+
+**Run:** `python examples/jwt_sqlite_example.py`
+
+### `redis_example.py`
+Redis caching and session storage:
+- Redis for response caching
+- `Depends(get_redis)` for connection
+- Requires: `pip install redis`, Redis server
+
+**Run:** `python examples/redis_example.py` (with Redis on localhost:6379)
+
 ### `financial_calculator.py` 🆕
 **Full-featured Web Application - Financial Calculator**
 
