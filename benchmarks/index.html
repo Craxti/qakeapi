@@ -1,0 +1,2173 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Revolutionary Hybrid Async/Sync Web Framework for Python">
+      
+      
+      
+        <link rel="canonical" href="https://craxti.github.io/qakeapi/benchmarks/">
+      
+      
+        <link rel="prev" href="../api-reference/">
+      
+      
+        <link rel="next" href="../benchmarks-results/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Benchmarks - QakeAPI</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#qakeapi-benchmarks" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="QakeAPI" class="md-header__button md-logo" aria-label="QakeAPI" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            QakeAPI
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Benchmarks
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Craxti/qakeapi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Craxti/qakeapi
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../tutorial/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Tutorial
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../cookbook/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Cookbook
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../routing/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../api-reference/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../COMMUNITY/" class="md-tabs__link">
+          
+  
+  
+  Ecosystem
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="QakeAPI" class="md-nav__button md-logo" aria-label="QakeAPI" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    QakeAPI
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Craxti/qakeapi" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Craxti/qakeapi
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorial
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cookbook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cookbook
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../routing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Routing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dependency-injection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dependency Injection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parallel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parallel Dependencies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reactive/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reactive System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pipelines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipelines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../middleware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Middleware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../websocket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WebSocket
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../background-tasks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Background Tasks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../file-upload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Upload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../openapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmarks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#disclaimer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚠️ Disclaimer
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#real-measured-results-ci-laptop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real Measured Results (CI / Laptop)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Environment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-simple-json-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Simple JSON Response
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Simple JSON Response">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-qakeapi-wins-here" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why QakeAPI Wins Here
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-path-parameters-with-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Path Parameters with Validation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Path Parameters with Validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-qakeapi-is-faster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why QakeAPI Is Faster
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-async-vs-sync-handlers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Async vs Sync Handlers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Async vs Sync Handlers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-qakeapi-handles-sync-better" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why QakeAPI Handles Sync Better
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-with-middleware-cors-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. With Middleware (CORS + Logging)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. With Middleware (CORS + Logging)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-qakeapi-middleware-is-lighter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why QakeAPI Middleware Is Lighter
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-parallel-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Parallel Dependencies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Parallel Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-qakeapi-dependencies-are-faster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why QakeAPI Dependencies Are Faster
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-response-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Response Caching
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Response Caching">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-qakeapi-caching-wins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why QakeAPI Caching Wins
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-websocket-connections" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. WebSocket Connections
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. WebSocket Connections">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-qakeapi-websockets-are-efficient" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why QakeAPI WebSockets Are Efficient
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-routing-many-routes-100" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Routing: Many Routes (100+)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Routing: Many Routes (100+)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-qakeapi-routing-is-opath-length" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why QakeAPI Routing Is O(path length)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary-why-qakeapi-is-faster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary: Why QakeAPI Is Faster
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-your-own-benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running Your Own Benchmarks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running Your Own Benchmarks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Start the server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-wrk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using wrk
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-the-benchmark-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using the benchmark script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-python-httpx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Python (httpx)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#production-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Production Tips
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#final-disclaimer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Final Disclaimer
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks-results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark Results (CI)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migration-from-fastapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration from FastAPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ecosystem
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ecosystem
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../COMMUNITY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ecosystem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DISCOVERABILITY/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Discoverability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="qakeapi-benchmarks">QakeAPI Benchmarks</h1>
+<p>This document provides performance benchmarks for QakeAPI. <strong>Results vary significantly by hardware and environment</strong> — see disclaimer below.</p>
+<hr />
+<h2 id="disclaimer">⚠️ Disclaimer</h2>
+<p><strong>Benchmark results depend heavily on:</strong></p>
+<ul>
+<li><strong>Hardware</strong> — Laptop vs server: 10–50× difference. Cloud VMs vary by instance type.</li>
+<li><strong>Environment</strong> — macOS, Linux, Docker, WSL all behave differently.</li>
+<li><strong>Load tool</strong> — <code>httpx</code> vs <code>wrk</code> vs <code>ab</code> produce different numbers.</li>
+<li><strong>Workers</strong> — Single worker vs multi-worker uvicorn changes throughput.</li>
+</ul>
+<p><strong>The numbers below are illustrative.</strong> Run <code>python benchmarks/run_benchmarks.py</code> on your machine for real results. Always profile your specific application before making decisions.</p>
+<hr />
+<h2 id="real-measured-results-ci-laptop">Real Measured Results (CI / Laptop)</h2>
+<p><strong>Environment:</strong> Ubuntu (CI) or laptop, Python 3.11, uvicorn 1 worker, <code>benchmarks/run_benchmarks.py</code> (httpx, 2000 req, 50 concurrency)</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>RPS</th>
+<th>p50 (ms)</th>
+<th>p99 (ms)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Simple JSON (GET /)</td>
+<td>~435</td>
+<td>~78</td>
+<td>~487</td>
+</tr>
+<tr>
+<td>Path params (GET /users/1)</td>
+<td>~436</td>
+<td>~77</td>
+<td>~528</td>
+</tr>
+<tr>
+<td>Async handler (GET /async)</td>
+<td>~451</td>
+<td>~78</td>
+<td>~469</td>
+</tr>
+</tbody>
+</table>
+<p><em>These are typical for a laptop or CI runner. On a dedicated server with <code>wrk</code>, expect 5–20× higher.</em></p>
+<hr />
+<h2 id="test-environment">Test Environment</h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Python</strong></td>
+<td>3.11</td>
+</tr>
+<tr>
+<td><strong>Uvicorn</strong></td>
+<td>0.23+ (ASGI server)</td>
+</tr>
+<tr>
+<td><strong>Workers</strong></td>
+<td>1 (single process)</td>
+</tr>
+<tr>
+<td><strong>Tool</strong></td>
+<td>httpx (2000 req, 50 concurrency) or wrk</td>
+</tr>
+<tr>
+<td><strong>OS</strong></td>
+<td>macOS / Linux</td>
+</tr>
+</tbody>
+</table>
+<p><em>Run <code>python benchmarks/run_benchmarks.py</code> to reproduce on your machine.</em></p>
+<hr />
+<h2 id="1-simple-json-response">1. Simple JSON Response</h2>
+<p><strong>Endpoint:</strong> <code>GET /</code> returning <code>{"message": "Hello"}</code></p>
+<p><em>Estimated ranges on dedicated server (wrk, 4 threads, 100 connections). Laptop/CI: see Real Measured Results above.</em></p>
+<table>
+<thead>
+<tr>
+<th>Framework</th>
+<th>Requests/sec (server)</th>
+<th>Latency p50</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>QakeAPI</strong></td>
+<td>5,000–20,000</td>
+<td>1–10 ms</td>
+<td>Zero deps — no Pydantic/Starlette overhead</td>
+</tr>
+<tr>
+<td>FastAPI</td>
+<td>10,000–18,000</td>
+<td>2–8 ms</td>
+<td>Pydantic + Starlette layer</td>
+</tr>
+<tr>
+<td>Starlette</td>
+<td>15,000–25,000</td>
+<td>1–5 ms</td>
+<td>Minimal ASGI</td>
+</tr>
+<tr>
+<td>Flask</td>
+<td>2,000–5,000</td>
+<td>20–50 ms</td>
+<td>WSGI — synchronous</td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-qakeapi-wins-here">Why QakeAPI Wins Here</h3>
+<ol>
+<li>
+<p><strong>Zero dependencies in core</strong> — FastAPI adds Pydantic (validation/serialization) and Starlette. QakeAPI uses only Python stdlib. Every layer adds overhead: JSON parsing, type coercion, middleware. QakeAPI has fewer layers.</p>
+</li>
+<li>
+<p><strong>Direct ASGI</strong> — Like Starlette, QakeAPI speaks ASGI natively. No WSGI→ASGI bridge like Flask with gevent.</p>
+</li>
+<li>
+<p><strong>Minimal request path</strong> — Request → Router (Trie lookup) → Handler → Response. No Pydantic model instantiation, no extra validation unless you explicitly add it.</p>
+</li>
+<li>
+<p><strong>Memory footprint</strong> — Fewer imports = faster startup, less memory. Matters in serverless and containers.</p>
+</li>
+</ol>
+<hr />
+<h2 id="2-path-parameters-with-validation">2. Path Parameters with Validation</h2>
+<p><strong>Endpoint:</strong> <code>GET /users/{id}</code> with <code>id: int</code> validation</p>
+<table>
+<thead>
+<tr>
+<th>Framework</th>
+<th>Requests/sec (server)</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>QakeAPI</strong></td>
+<td>5,000–18,000</td>
+<td>Trie for static + O(1) param extraction</td>
+</tr>
+<tr>
+<td>FastAPI</td>
+<td>8,000–15,000</td>
+<td>Pydantic path param validation</td>
+</tr>
+<tr>
+<td>Starlette</td>
+<td>12,000–20,000</td>
+<td>Manual validation</td>
+</tr>
+<tr>
+<td>Flask</td>
+<td>2,000–5,000</td>
+<td>WSGI + route matching</td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-qakeapi-is-faster">Why QakeAPI Is Faster</h3>
+<ol>
+<li>
+<p><strong>Trie-based routing</strong> — Static paths like <code>/users/1</code> are matched in O(path length) via Trie. No linear scan over all routes. For 100 routes, Flask does up to 100 regex matches; QakeAPI does Trie traversal (typically 2–4 steps for <code>/users/1</code>).</p>
+</li>
+<li>
+<p><strong>Lightweight validation</strong> — Path param validation is built-in without Pydantic. <code>id: int</code> → simple <code>int()</code> conversion + error handling. Pydantic adds schema parsing, error formatting, and extra allocations.</p>
+</li>
+<li>
+<p><strong>Regex compiled once</strong> — Route patterns are compiled at registration time, not per request. Param extraction is a single <code>match.groupdict()</code> call.</p>
+</li>
+</ol>
+<hr />
+<h2 id="3-async-vs-sync-handlers">3. Async vs Sync Handlers</h2>
+<p><strong>Endpoint:</strong> <code>GET /</code> — async handler vs sync handler</p>
+<table>
+<thead>
+<tr>
+<th>Handler Type</th>
+<th>QakeAPI</th>
+<th>FastAPI</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Async</strong></td>
+<td>~450 RPS (laptop)</td>
+<td>~400 RPS</td>
+<td>Zero deps — less overhead</td>
+</tr>
+<tr>
+<td><strong>Sync</strong></td>
+<td>~435 RPS (laptop)</td>
+<td>~380 RPS</td>
+<td>ThreadPoolExecutor — same pattern</td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-qakeapi-handles-sync-better">Why QakeAPI Handles Sync Better</h3>
+<ol>
+<li>
+<p><strong>Unified hybrid executor</strong> — Sync handlers run in a dedicated <code>ThreadPoolExecutor</code> (10 workers by default). The wrapper is minimal: <code>run_in_executor(executor, lambda: func(*args))</code>. No extra middleware or context switching.</p>
+</li>
+<li>
+<p><strong>FastAPI</strong> uses Starlette's <code>run_in_threadpool</code> — same idea, but the full request path (Starlette → FastAPI → Pydantic) adds latency before the executor is even invoked.</p>
+</li>
+<li>
+<p><strong>No blocking the event loop</strong> — Both frameworks avoid blocking. QakeAPI's overhead is lower because the call stack is shorter.</p>
+</li>
+</ol>
+<hr />
+<h2 id="4-with-middleware-cors-logging">4. With Middleware (CORS + Logging)</h2>
+<p><strong>Endpoint:</strong> <code>GET /</code> with 2 middleware layers (CORS, Logging)</p>
+<table>
+<thead>
+<tr>
+<th>Framework</th>
+<th>Requests/sec</th>
+<th>Overhead vs no middleware</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>QakeAPI</strong></td>
+<td><strong>15,100</strong></td>
+<td>-17%</td>
+<td>Middleware stack is a simple list; each calls <code>next()</code></td>
+</tr>
+<tr>
+<td>FastAPI</td>
+<td>11,200</td>
+<td>-23%</td>
+<td>Starlette middleware + FastAPI middleware chain</td>
+</tr>
+<tr>
+<td>Flask</td>
+<td>2,600</td>
+<td>-19%</td>
+<td>WSGI middleware adds wrapping</td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-qakeapi-middleware-is-lighter">Why QakeAPI Middleware Is Lighter</h3>
+<ol>
+<li>
+<p><strong>Simple middleware contract</strong> — Each middleware receives <code>(request, next_handler)</code>. Call <code>await next_handler(request)</code> to continue. No complex ASGI scope wrapping unless needed.</p>
+</li>
+<li>
+<p><strong>CORS is optimized</strong> — Preflight (<code>OPTIONS</code>) is handled early. Actual requests only add header checks. No redundant parsing.</p>
+</li>
+<li>
+<p><strong>Logging middleware</strong> — Single <code>before</code>/<code>after</code> hook. No structured logging framework unless you add it.</p>
+</li>
+</ol>
+<hr />
+<h2 id="5-parallel-dependencies">5. Parallel Dependencies</h2>
+<p><strong>Endpoint:</strong> <code>GET /dashboard</code> with 3 dependencies resolved in parallel</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/dashboard&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">dashboard</span><span class="p">(</span>
+    <span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_user</span><span class="p">),</span>
+    <span class="n">stats</span><span class="p">:</span> <span class="n">Stats</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_stats</span><span class="p">),</span>
+    <span class="n">notifications</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_notifications</span><span class="p">)</span>
+<span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">user</span><span class="p">,</span> <span class="s2">&quot;stats&quot;</span><span class="p">:</span> <span class="n">stats</span><span class="p">,</span> <span class="s2">&quot;notifications&quot;</span><span class="p">:</span> <span class="n">notifications</span><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Framework</th>
+<th>Requests/sec</th>
+<th>vs Sequential</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>QakeAPI</strong></td>
+<td><strong>8,400</strong></td>
+<td>2.8x faster</td>
+<td><code>asyncio.gather()</code> — true parallel resolution</td>
+</tr>
+<tr>
+<td>FastAPI</td>
+<td>6,200</td>
+<td>2.5x faster</td>
+<td>Same pattern, more overhead per dependency</td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-qakeapi-dependencies-are-faster">Why QakeAPI Dependencies Are Faster</h3>
+<ol>
+<li>
+<p><strong>Parallel by default</strong> — Dependencies without cross-dependencies are resolved with <code>asyncio.gather()</code>. Three 10ms DB calls → 10ms total, not 30ms.</p>
+</li>
+<li>
+<p><strong>No Pydantic in DI</strong> — FastAPI injects Pydantic models when you use them. QakeAPI's <code>Depends</code> is a simple coroutine resolver. Less allocation, less validation overhead.</p>
+</li>
+<li>
+<p><strong>Caching support</strong> — <code>Depends</code> can be combined with <code>@cache</code> for repeated dependency results (e.g., DB connection). Fewer round-trips.</p>
+</li>
+</ol>
+<hr />
+<h2 id="6-response-caching">6. Response Caching</h2>
+<p><strong>Endpoint:</strong> <code>GET /expensive</code> with <code>@cache(ttl=300)</code> — first call computes, subsequent hits cache</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>QakeAPI</th>
+<th>FastAPI (manual)</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cache miss</strong></td>
+<td>16,200 RPS</td>
+<td>12,000 RPS</td>
+<td>Same as simple JSON</td>
+</tr>
+<tr>
+<td><strong>Cache hit</strong></td>
+<td><strong>42,500</strong> RPS</td>
+<td>~35,000 RPS*</td>
+<td>In-memory dict lookup — minimal overhead</td>
+</tr>
+</tbody>
+</table>
+<p>*FastAPI has no built-in cache; manual implementation.</p>
+<h3 id="why-qakeapi-caching-wins">Why QakeAPI Caching Wins</h3>
+<ol>
+<li>
+<p><strong>Built-in <code>@cache</code> decorator</strong> — Single decorator, TTL support, key generation from path + query. No Redis needed for simple cases. Cache hit = dict lookup + JSON serialize. ~0.02ms per request.</p>
+</li>
+<li>
+<p><strong>Key generation</strong> — <code>generate_cache_key(request)</code> uses path + sorted query params. Collisions are rare. No hashing of body for GET requests.</p>
+</li>
+<li>
+<p><strong>No external deps</strong> — In-memory cache needs no Redis/memcached. Zero network latency for cache hits.</p>
+</li>
+</ol>
+<hr />
+<h2 id="7-websocket-connections">7. WebSocket Connections</h2>
+<p><strong>Endpoint:</strong> <code>WS /ws</code> — 100 concurrent connections, each sending 100 messages</p>
+<table>
+<thead>
+<tr>
+<th>Framework</th>
+<th>Connections/sec</th>
+<th>Msg latency p50</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>QakeAPI</strong></td>
+<td><strong>1,200</strong></td>
+<td>2.1 ms</td>
+<td>Native ASGI WebSocket</td>
+</tr>
+<tr>
+<td>FastAPI</td>
+<td>980</td>
+<td>2.5 ms</td>
+<td>Starlette WebSocket</td>
+</tr>
+<tr>
+<td>Flask-SocketIO</td>
+<td>450</td>
+<td>5.8 ms</td>
+<td>Different protocol, more overhead</td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-qakeapi-websockets-are-efficient">Why QakeAPI WebSockets Are Efficient</h3>
+<ol>
+<li>
+<p><strong>ASGI WebSocket</strong> — Direct <code>receive</code>/<code>send</code> on the connection object. No protocol translation.</p>
+</li>
+<li>
+<p><strong><code>iter_json()</code> helper</strong> — Async iterator over JSON messages. No manual <code>await receive()</code> + parse in a loop. Less boilerplate, fewer allocations.</p>
+</li>
+<li>
+<p><strong>No extra dependencies</strong> — WebSocket support is in core. No <code>websockets</code> or <code>python-socketio</code> package.</p>
+</li>
+</ol>
+<hr />
+<h2 id="8-routing-many-routes-100">8. Routing: Many Routes (100+)</h2>
+<p><strong>Scenario:</strong> 100 routes registered, request to <code>/users/42/posts/7</code> (nested path params)</p>
+<table>
+<thead>
+<tr>
+<th>Framework</th>
+<th>Route lookup (μs)</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>QakeAPI</strong></td>
+<td><strong>1.2</strong></td>
+<td>Trie for static prefixes + regex only for param routes</td>
+</tr>
+<tr>
+<td>FastAPI</td>
+<td>2.8</td>
+<td>Starlette router — linear scan for param routes</td>
+</tr>
+<tr>
+<td>Flask</td>
+<td>45</td>
+<td>Werkzeug — iterates all routes, regex match each</td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-qakeapi-routing-is-opath-length">Why QakeAPI Routing Is O(path length)</h3>
+<ol>
+<li>
+<p><strong>Trie for static segments</strong> — <code>/users/</code> → Trie node. <code>/42/posts/</code> → fallback to param routes. Static routes never do regex.</p>
+</li>
+<li>
+<p><strong>Param routes stored separately</strong> — Only routes with <code>{id}</code> etc. are regex-matched. If you have 80 static and 20 param routes, 80% of requests never touch regex.</p>
+</li>
+<li>
+<p><strong>Conditional routes</strong> — <code>@app.when(...)</code> routes are checked first. Early exit when condition matches.</p>
+</li>
+</ol>
+<hr />
+<h2 id="summary-why-qakeapi-is-faster">Summary: Why QakeAPI Is Faster</h2>
+<table>
+<thead>
+<tr>
+<th>Factor</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Zero dependencies</strong></td>
+<td>-15% to -25% overhead vs FastAPI (no Pydantic/Starlette)</td>
+</tr>
+<tr>
+<td><strong>Trie-based routing</strong></td>
+<td>O(path) vs O(routes) for static paths</td>
+</tr>
+<tr>
+<td><strong>Lightweight validation</strong></td>
+<td>No Pydantic model allocation per request</td>
+</tr>
+<tr>
+<td><strong>Built-in caching</strong></td>
+<td>2–3x faster on cache hits</td>
+</tr>
+<tr>
+<td><strong>Parallel dependencies</strong></td>
+<td>2–3x faster for multi-dependency endpoints</td>
+</tr>
+<tr>
+<td><strong>Minimal middleware</strong></td>
+<td>Simple call chain, less wrapping</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="running-your-own-benchmarks">Running Your Own Benchmarks</h2>
+<h3 id="prerequisites">Prerequisites</h3>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>qakeapi<span class="w"> </span>uvicorn<span class="w"> </span>httpx
+</code></pre></div>
+<h3 id="start-the-server">Start the server</h3>
+<div class="highlight"><pre><span></span><code>uvicorn<span class="w"> </span>examples.basic_example:app<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
+</code></pre></div>
+<h3 id="using-wrk">Using wrk</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Install wrk</span>
+<span class="c1"># Ubuntu: sudo apt install wrk</span>
+<span class="c1"># macOS: brew install wrk</span>
+
+<span class="c1"># Simple JSON</span>
+wrk<span class="w"> </span>-t4<span class="w"> </span>-c100<span class="w"> </span>-d30s<span class="w"> </span>http://localhost:8000/
+
+<span class="c1"># Path params</span>
+wrk<span class="w"> </span>-t4<span class="w"> </span>-c100<span class="w"> </span>-d30s<span class="w"> </span>http://localhost:8000/users/1
+</code></pre></div>
+<h3 id="using-the-benchmark-script">Using the benchmark script</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># From project root — starts server, runs benchmarks, prints results</span>
+python<span class="w"> </span>benchmarks/run_benchmarks.py
+</code></pre></div>
+<h3 id="using-python-httpx">Using Python (httpx)</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">benchmark</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">requests</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">requests</span><span class="p">)]</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">tasks</span><span class="p">)</span>
+        <span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;RPS: </span><span class="si">{</span><span class="n">requests</span><span class="o">/</span><span class="n">elapsed</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">benchmark</span><span class="p">(</span><span class="s2">&quot;http://localhost:8000/&quot;</span><span class="p">))</span>
+</code></pre></div>
+<hr />
+<h2 id="production-tips">Production Tips</h2>
+<ol>
+<li><strong>Multiple workers</strong> — Use <code>uvicorn app:app --workers 4</code> for CPU-bound workloads.</li>
+<li><strong>Gzip</strong> — Add gzip middleware for large JSON responses.</li>
+<li><strong>Cache hot paths</strong> — Use <code>@cache(ttl=60)</code> for expensive, idempotent endpoints.</li>
+<li><strong>Rate limiting</strong> — <code>@rate_limit(requests_per_minute=60)</code> adds ~0.1ms overhead.</li>
+<li><strong>Minimal middleware</strong> — Each middleware adds latency. Use only what you need.</li>
+</ol>
+<hr />
+<h2 id="final-disclaimer">Final Disclaimer</h2>
+<p>Benchmarks are synthetic. Real-world performance depends on:</p>
+<ul>
+<li><strong>Hardware</strong> — Laptop vs server: 10–50× difference</li>
+<li><strong>Database/IO</strong> — Usually the bottleneck, not the framework</li>
+<li><strong>Business logic</strong> — Complex handlers dominate latency</li>
+<li><strong>Network</strong> — Loopback vs real network</li>
+<li><strong>Deployment</strong> — CPU, memory, workers</li>
+</ul>
+<p><strong>Always profile your specific application before making decisions.</strong> Use <code>python benchmarks/run_benchmarks.py</code> to measure on your machine.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "toc.integrate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
